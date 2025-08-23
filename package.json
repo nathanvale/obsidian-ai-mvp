@@ -1,0 +1,45 @@
+{
+  "name": "obsidian-ai-mvp",
+  "version": "0.1.0",
+  "description": "Local-first AI-powered Obsidian knowledge assistant",
+  "main": "src/server.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun --watch src/server.ts",
+    "build": "bun build src/server.ts --outdir=dist --target=bun",
+    "start": "bun dist/server.js",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "dependencies": {
+    "fastify": "^4.24.3",
+    "@fastify/cors": "^8.4.0",
+    "@fastify/helmet": "^11.1.1",
+    "@fastify/env": "^4.2.0",
+    "@fastify/static": "^6.12.0",
+    "chromadb": "^1.7.3",
+    "zod": "^3.22.4",
+    "pino": "^8.16.2",
+    "pino-pretty": "^10.2.3"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^20.8.7",
+    "typescript": "^5.2.2",
+    "eslint": "^8.52.0",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "prettier": "^3.0.3",
+    "vitest": "^0.34.6",
+    "supertest": "^6.3.3"
+  }
+}
