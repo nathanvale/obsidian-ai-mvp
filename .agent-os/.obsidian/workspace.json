@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "product/roadmap.md",
+                "file": "specs/2025-08-24-ollama-service-enhancement/spec.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "roadmap"
+              "title": "spec"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "product/roadmap.md",
+                "file": "specs/2025-08-24-ollama-service-enhancement/spec.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for roadmap"
+              "title": "Backlinks for spec"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "product/roadmap.md",
+                "file": "specs/2025-08-24-ollama-service-enhancement/spec.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from roadmap"
+              "title": "Outgoing links from spec"
             }
           },
           {
@@ -157,6 +157,14 @@
   },
   "active": "c36087b0287230bf",
   "lastOpenFiles": [
+    "product/roadmap.md",
+    "specs/2025-01-24-file-system-service/tasks.md",
+    "specs/2025-01-24-file-system-service/sub-specs/tests.md",
+    "specs/2025-01-24-file-system-service/sub-specs/api-spec.md",
+    "specs/2025-01-24-file-system-service/sub-specs/technical-spec.md",
+    "specs/2025-01-24-file-system-service/sub-specs",
+    "specs/2025-01-24-file-system-service/spec.md",
+    "specs/2025-01-24-file-system-service",
     "specs/2025-01-24-fastify-production-api/sub-specs/technical-spec.md",
     "specs/2025-08-24-ollama-service-enhancement/spec.md.tmp.21444.1756033878538",
     "specs/2025-08-24-ollama-service-enhancement/tasks.md",
@@ -168,7 +176,6 @@
     "specs/2025-08-24-ollama-service-enhancement",
     "specs/2025-01-24-fastify-production-api/sub-specs/tests.md",
     "specs/2025-01-24-fastify-production-api/spec.md",
-    "product/roadmap.md",
     "product/tech-stack.md",
     "product/architecture.md",
     "specs/2025-08-24-chromadb-semantic-search/tasks.md",
@@ -185,12 +192,6 @@
     "specs/2025-01-24-fastify-production-api/sub-specs",
     "specs/2025-01-24-fastify-production-api",
     "specs/2025-08-24-bun-typescript-runtime/sub-specs/tests.md",
-    "specs/2025-08-24-bun-typescript-runtime/sub-specs",
-    "specs/2025-08-24-bun-typescript-runtime",
-    "specs",
-    "product/decisions.md",
-    "product/mission.md",
-    "specs/2025-08-23-obsidian-api-core/tasks.md",
-    "specs/2025-08-24-core-api-infrastructure/tasks.md"
+    "specs/2025-08-24-bun-typescript-runtime/sub-specs"
   ]
 }
