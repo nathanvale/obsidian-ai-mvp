@@ -16,7 +16,7 @@ As an ADHD parent professional juggling work and family responsibilities, I want
 
 **Detailed Workflow:** During a medication wear-off period, I attempt to capture a voice memo about an important school deadline. If the system is misconfigured (vault path doesn't exist, Ollama not running), I need crystal-clear error messages like "Obsidian vault not found at /path/to/vault - check your OBSIDIAN_VAULT_PATH setting" rather than generic validation errors.
 
-### Developer Reliability and Maintenance  
+### Developer Reliability and Maintenance
 
 As a developer maintaining the ADHD support tool, I want comprehensive environment validation and hot reload capabilities, so that I can quickly diagnose configuration issues and update settings without disrupting the user's workflow during critical cognitive support periods.
 
@@ -26,7 +26,7 @@ As a developer maintaining the ADHD support tool, I want comprehensive environme
 
 1. **Schema Validation Enhancement** - Complete Zod schema with custom validators for paths, URLs, and service availability
 2. **ADHD-Friendly Error Messages** - Transform technical validation errors into clear, actionable guidance
-3. **Configuration Hot Reload** - Runtime configuration updates without service interruption  
+3. **Configuration Hot Reload** - Runtime configuration updates without service interruption
 4. **Environment Profiles** - Preset configurations for development, testing, and production environments
 5. **Configuration Health Monitoring** - Real-time validation status and health check integration
 6. **Comprehensive Documentation** - Complete .env.example with descriptions and constraints
@@ -50,6 +50,6 @@ As a developer maintaining the ADHD support tool, I want comprehensive environme
 ## Spec Documentation
 
 - Tasks: @.agent-os/specs/2025-08-24-environment-config-enhancement/tasks.md
-- Technical Specification: @.agent-os/specs/2025-08-24-environment-config-enhancement/sub-specs/technical-spec.md  
+- Technical Specification: @.agent-os/specs/2025-08-24-environment-config-enhancement/sub-specs/technical-spec.md
 - API Specification: @.agent-os/specs/2025-08-24-environment-config-enhancement/sub-specs/api-spec.md
 - Tests Specification: @.agent-os/specs/2025-08-24-environment-config-enhancement/sub-specs/tests.md

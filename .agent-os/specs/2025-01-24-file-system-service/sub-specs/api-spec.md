@@ -12,6 +12,7 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-01-
 **Purpose:** Check current vault indexing status and progress
 **Parameters:** None
 **Response:**
+
 ```json
 {
   "status": "idle | indexing | completed | error",
@@ -21,7 +22,9 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-01-
   "lastUpdated": "2025-01-24T10:30:00Z"
 }
 ```
-**Errors:** 
+
+**Errors:**
+
 - 500: Internal server error during status retrieval
 
 ### POST /api/index/start
@@ -29,13 +32,16 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-01-
 **Purpose:** Trigger full vault indexing process
 **Parameters:** None
 **Response:**
+
 ```json
 {
   "message": "Indexing started",
   "status": "indexing"
 }
 ```
+
 **Errors:**
+
 - 400: Indexing already in progress
 - 500: Failed to start indexing process
 
@@ -44,13 +50,16 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-01-
 **Purpose:** Cancel ongoing indexing operation
 **Parameters:** None
 **Response:**
+
 ```json
 {
   "message": "Indexing stopped",
   "status": "idle"
 }
 ```
+
 **Errors:**
+
 - 400: No indexing operation to stop
 - 500: Failed to stop indexing process
 
@@ -58,6 +67,7 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-01-
 
 **Purpose:** Perform semantic search across indexed vault contents
 **Request Body:**
+
 ```json
 {
   "query": "ADHD medication management strategies",
@@ -65,7 +75,9 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-01-
   "threshold": 0.3
 }
 ```
+
 **Response:**
+
 ```json
 {
   "results": [
@@ -79,22 +91,26 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-01-
       "score": 0.85
     }
   ],
-  "query": "ADHD medication management strategies", 
+  "query": "ADHD medication management strategies",
   "total": 3
 }
 ```
+
 **Errors:**
+
 - 400: Invalid query parameters
 - 503: Search service temporarily unavailable
 
 ## Controllers
 
 ### IndexController
+
 - **Actions:** status, start, stop
 - **Business Logic:** Coordinate with IndexingService for status updates and control
 - **Error Handling:** Graceful degradation when services unavailable
 
-### SearchController  
+### SearchController
+
 - **Actions:** semantic search
 - **Business Logic:** Generate query embeddings, query ChromaDB, format results
 - **Error Handling:** Return empty results on service failures with proper error codes

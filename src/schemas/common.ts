@@ -5,7 +5,7 @@
 export const CorrelationIdSchema = {
   type: 'string',
   pattern: '^[a-zA-Z0-9-_]{8,64}$',
-  description: 'Correlation ID for request tracing'
+  description: 'Correlation ID for request tracing',
 } as const;
 
 export const CommonHeadersSchema = {
@@ -14,14 +14,14 @@ export const CommonHeadersSchema = {
     'x-correlation-id': CorrelationIdSchema,
     'user-agent': {
       type: 'string',
-      description: 'Client user agent'
+      description: 'Client user agent',
     },
     'content-type': {
       type: 'string',
       enum: ['application/json', 'text/plain'],
-      description: 'Request content type'
-    }
-  }
+      description: 'Request content type',
+    },
+  },
 } as const;
 
 export const SuccessResponseSchema = {
@@ -31,21 +31,21 @@ export const SuccessResponseSchema = {
     success: {
       type: 'boolean',
       const: true,
-      description: 'Always true for success responses'
+      description: 'Always true for success responses',
     },
     data: {
-      description: 'Response data - varies by endpoint'
+      description: 'Response data - varies by endpoint',
     },
     correlationId: {
       type: 'string',
-      description: 'Correlation ID for tracing requests'
+      description: 'Correlation ID for tracing requests',
     },
     timestamp: {
       type: 'string',
       format: 'date-time',
-      description: 'ISO timestamp when response was generated'
-    }
-  }
+      description: 'ISO timestamp when response was generated',
+    },
+  },
 } as const;
 
 export const PaginationQuerySchema = {
@@ -55,21 +55,21 @@ export const PaginationQuerySchema = {
       type: 'integer',
       minimum: 1,
       default: 1,
-      description: 'Page number (1-based)'
+      description: 'Page number (1-based)',
     },
     limit: {
       type: 'integer',
       minimum: 1,
       maximum: 100,
       default: 20,
-      description: 'Number of items per page'
+      description: 'Number of items per page',
     },
     sort: {
       type: 'string',
       pattern: '^[a-zA-Z_][a-zA-Z0-9_]*(:asc|:desc)?$',
-      description: 'Sort field and direction (e.g., "createdAt:desc")'
-    }
-  }
+      description: 'Sort field and direction (e.g., "createdAt:desc")',
+    },
+  },
 } as const;
 
 export const PaginatedResponseSchema = {
@@ -78,11 +78,11 @@ export const PaginatedResponseSchema = {
   properties: {
     success: {
       type: 'boolean',
-      const: true
+      const: true,
     },
     data: {
       type: 'array',
-      description: 'Array of items for current page'
+      description: 'Array of items for current page',
     },
     pagination: {
       type: 'object',
@@ -91,33 +91,33 @@ export const PaginatedResponseSchema = {
         page: {
           type: 'integer',
           minimum: 1,
-          description: 'Current page number'
+          description: 'Current page number',
         },
         limit: {
           type: 'integer',
           minimum: 1,
-          description: 'Items per page'
+          description: 'Items per page',
         },
         total: {
           type: 'integer',
           minimum: 0,
-          description: 'Total number of items'
+          description: 'Total number of items',
         },
         pages: {
           type: 'integer',
           minimum: 0,
-          description: 'Total number of pages'
-        }
-      }
+          description: 'Total number of pages',
+        },
+      },
     },
     correlationId: {
-      type: 'string'
+      type: 'string',
     },
     timestamp: {
       type: 'string',
-      format: 'date-time'
-    }
-  }
+      format: 'date-time',
+    },
+  },
 } as const;
 
 /**

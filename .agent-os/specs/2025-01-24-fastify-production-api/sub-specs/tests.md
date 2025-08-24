@@ -12,20 +12,24 @@ Following the project's "speed over perfection" principle, this spec will implem
 ### Smoke Tests (5 Maximum)
 
 **API Server Integration**
+
 - Server starts successfully with all plugins registered
 - Health endpoint returns valid response with status metrics
 - Rate limiting properly blocks excessive requests
 
 **Error Handling**
+
 - Validation errors return consistent error format
 - Server errors include correlation IDs in response
 
 **Security & Performance**
+
 - Compression activates for large JSON responses
 
 ### Integration Tests
 
 **Plugin Integration**
+
 - All security plugins load without conflicts
 - Logging middleware captures request/response data with correlation IDs
 - Back-pressure detection triggers appropriate responses
@@ -33,14 +37,17 @@ Following the project's "speed over perfection" principle, this spec will implem
 ### Manual Testing Scenarios
 
 **Rate Limiting Verification**
+
 - Use curl/Postman to exceed rate limits and verify 429 responses
 - Confirm rate limit headers appear in responses
 
 **Performance Testing**
+
 - Measure response times before/after compression
 - Verify graceful shutdown doesn't drop active connections
 
 **Error Response Validation**
+
 - Send malformed requests and verify consistent error format
 - Check correlation IDs match between logs and error responses
 
@@ -56,16 +63,19 @@ Given the minimal testing approach and focus on real-world usage:
 ## Testing Strategy
 
 ### Primary Approach
+
 - **Smoke tests only** for critical failure scenarios
 - **Manual verification** for performance and security features
 - **Real-world usage** for comprehensive validation
 
 ### Observability Focus
+
 - Rely heavily on @orchestr8/logger structured logging (with pino adapter)
 - Use correlation IDs for debugging and issue tracking
 - Monitor actual API performance metrics
 
 ### Validation Criteria
+
 - All plugins register without errors
 - Health endpoint shows green status
 - Rate limiting prevents abuse

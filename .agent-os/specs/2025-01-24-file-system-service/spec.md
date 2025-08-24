@@ -15,6 +15,7 @@ Implement a robust File System Service for automatic Obsidian vault indexing and
 As an ADHD professional, I want my Obsidian vault to be automatically indexed and searchable, so that I can quickly find my thoughts without getting lost in file organization.
 
 **Workflow:**
+
 - Create a markdown note in Obsidian
 - Have the note automatically processed and indexed
 - Be able to search semantically across all notes instantly
@@ -24,6 +25,7 @@ As an ADHD professional, I want my Obsidian vault to be automatically indexed an
 As an ADHD student, I want to search my notes using natural language and context, so that I can retrieve relevant information even when I can't remember exact keywords.
 
 **Workflow:**
+
 - Think of a vague concept related to a past note
 - Use semantic search to find relevant information
 - Quickly access the right context without mental friction

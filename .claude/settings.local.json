@@ -36,7 +36,10 @@
       "Bash(find:*)",
       "Bash(timeout 30s bun run test)",
       "Bash(timeout 15s bun run test)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm run lint:*)",
+      "Bash(pnpm check:*)"
     ],
     "deny": [],
     "ask": []

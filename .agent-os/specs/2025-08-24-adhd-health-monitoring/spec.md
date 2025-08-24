@@ -31,7 +31,7 @@ As someone responsible for system reliability, I want ADHD-aware health monitori
 ## Spec Scope
 
 1. **Cognitive Load Aware Monitoring** - Dynamic threshold adjustment based on medication cycles and cognitive load detection
-2. **Predictive Health Analysis** - Machine learning-based pattern recognition for proactive issue prevention  
+2. **Predictive Health Analysis** - Machine learning-based pattern recognition for proactive issue prevention
 3. **Adaptive Service Prioritization** - Intelligent resource allocation during degraded states
 4. **Enhanced Service Monitoring** - Comprehensive tracking of Ollama, ChromaDB, filesystem, and voice processing pipeline
 5. **ADHD-Friendly Health APIs** - Clear, actionable health information designed for cognitive variability
@@ -57,5 +57,5 @@ As someone responsible for system reliability, I want ADHD-aware health monitori
 
 - Tasks: @.agent-os/specs/2025-08-24-adhd-health-monitoring/tasks.md
 - Technical Specification: @.agent-os/specs/2025-08-24-adhd-health-monitoring/sub-specs/technical-spec.md
-- API Specification: @.agent-os/specs/2025-08-24-adhd-health-monitoring/sub-specs/api-spec.md  
+- API Specification: @.agent-os/specs/2025-08-24-adhd-health-monitoring/sub-specs/api-spec.md
 - Tests Specification: @.agent-os/specs/2025-08-24-adhd-health-monitoring/sub-specs/tests.md

@@ -28,14 +28,12 @@ export async function healthRoutes(server: FastifyInstance) {
     }
 
     const overallHealthy = Object.values(health.services).every(
-      (status) => status === 'connected'
+      status => status === 'connected'
     );
 
-    return reply
-      .status(overallHealthy ? 200 : 503)
-      .send({
-        ...health,
-        status: overallHealthy ? 'healthy' : 'degraded',
-      });
+    return reply.status(overallHealthy ? 200 : 503).send({
+      ...health,
+      status: overallHealthy ? 'healthy' : 'degraded',
+    });
   });
 }

@@ -20,7 +20,7 @@ const defaultOptions: SecurityOptions = {
   rateLimit: config.security.rateLimit,
   requestTimeout: config.security.requestTimeout,
   enhancedHeaders: true,
-  trustProxy: true
+  trustProxy: true,
 };
 
 /**
@@ -28,7 +28,7 @@ const defaultOptions: SecurityOptions = {
  * Integrates with @orchestr8/logger for security event logging
  */
 async function securityPlugin(
-  fastify: FastifyInstance, 
+  fastify: FastifyInstance,
   options: SecurityOptions = {}
 ) {
   const securityConfig = { ...defaultOptions, ...options };
@@ -39,11 +39,14 @@ async function securityPlugin(
       max: securityConfig.rateLimit.max,
       timeWindow: securityConfig.rateLimit.windowMs,
       allowList: securityConfig.rateLimit.whitelist,
-      
+
       // Custom error response with correlation ID
-      errorResponseBuilder: (request: FastifyRequest, context: { max: number; after: string; ttl: number }) => {
+      errorResponseBuilder: (
+        request: FastifyRequest,
+        context: { max: number; after: string; ttl: number }
+      ) => {
         const correlationId = getCurrentCorrelationId() || 'rate-limit-error';
-        
+
         // Log rate limit violation
         logWithContext.warn('Rate limit exceeded', {
           ip: request.ip,
@@ -51,7 +54,7 @@ async function securityPlugin(
           method: request.method,
           url: request.url,
           limit: context.max,
-          window: context.after
+          window: context.after,
         });
 
         return {
@@ -63,11 +66,11 @@ async function securityPlugin(
             details: {
               limit: context.max,
               window: `${context.after}ms`,
-              retryAfter: context.ttl
-            }
+              retryAfter: context.ttl,
+            },
           },
           correlationId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
       },
 
@@ -81,68 +84,87 @@ async function securityPlugin(
         'x-ratelimit-limit': true,
         'x-ratelimit-remaining': true,
         'x-ratelimit-reset': true,
-        'retry-after': true
-      }
+        'retry-after': true,
+      },
     });
   }
 
   // Add enhanced security headers
   if (securityConfig.enhancedHeaders) {
-    fastify.addHook('onSend', async (request: FastifyRequest, reply: FastifyReply, payload: unknown) => {
-      // Additional security headers beyond basic Helmet
-      reply.header('X-Frame-Options', 'DENY');
-      reply.header('X-Content-Type-Options', 'nosniff');
-      reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
-      reply.header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-      
-      // Strict Transport Security for production
-      if (config.isProduction) {
-        reply.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
-      }
+    fastify.addHook(
+      'onSend',
+      async (
+        request: FastifyRequest,
+        reply: FastifyReply,
+        payload: unknown
+      ) => {
+        // Additional security headers beyond basic Helmet
+        reply.header('X-Frame-Options', 'DENY');
+        reply.header('X-Content-Type-Options', 'nosniff');
+        reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+        reply.header(
+          'Permissions-Policy',
+          'geolocation=(), microphone=(), camera=()'
+        );
 
-      // Cache control for API responses
-      if (request.url.startsWith('/api/')) {
-        reply.header('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-        reply.header('Pragma', 'no-cache');
-        reply.header('Expires', '0');
-      }
+        // Strict Transport Security for production
+        if (config.isProduction) {
+          reply.header(
+            'Strict-Transport-Security',
+            'max-age=31536000; includeSubDomains; preload'
+          );
+        }
 
-      return payload;
-    });
+        // Cache control for API responses
+        if (request.url.startsWith('/api/')) {
+          reply.header(
+            'Cache-Control',
+            'no-store, no-cache, must-revalidate, private'
+          );
+          reply.header('Pragma', 'no-cache');
+          reply.header('Expires', '0');
+        }
+
+        return payload;
+      }
+    );
   }
 
   // Request timeout protection
   if (securityConfig.requestTimeout) {
-    fastify.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
-      const timeout = setTimeout(() => {
-        const correlationId = getCurrentCorrelationId() || 'timeout-error';
-        
-        logWithContext.warn('Request timeout exceeded', {
-          method: request.method,
-          url: request.url,
-          userAgent: request.headers['user-agent'],
-          ip: request.ip,
-          timeout: securityConfig.requestTimeout
-        });
+    fastify.addHook(
+      'onRequest',
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        const timeout = setTimeout(() => {
+          const correlationId = getCurrentCorrelationId() || 'timeout-error';
 
-        if (!reply.sent) {
-          reply.status(408).send({
-            success: false,
-            error: {
-              message: 'Request timeout',
-              statusCode: 408,
-              code: 'REQUEST_TIMEOUT'
-            },
-            correlationId,
-            timestamp: new Date().toISOString()
+          logWithContext.warn('Request timeout exceeded', {
+            method: request.method,
+            url: request.url,
+            userAgent: request.headers['user-agent'],
+            ip: request.ip,
+            timeout: securityConfig.requestTimeout,
           });
-        }
-      }, securityConfig.requestTimeout);
 
-      // Clear timeout when request completes
-      reply.raw.on('finish', () => clearTimeout(timeout));
-      reply.raw.on('close', () => clearTimeout(timeout));
-    });
+          if (!reply.sent) {
+            reply.status(408).send({
+              success: false,
+              error: {
+                message: 'Request timeout',
+                statusCode: 408,
+                code: 'REQUEST_TIMEOUT',
+              },
+              correlationId,
+              timestamp: new Date().toISOString(),
+            });
+          }
+        }, securityConfig.requestTimeout);
+
+        // Clear timeout when request completes
+        reply.raw.on('finish', () => clearTimeout(timeout));
+        reply.raw.on('close', () => clearTimeout(timeout));
+      }
+    );
   }
 
   // Trust proxy settings for proper IP detection
@@ -166,11 +188,11 @@ async function securityPlugin(
     }
 
     // Log suspicious requests
-    const userAgent = request.headers['user-agent'] as string || '';
+    const userAgent = (request.headers['user-agent'] as string) || '';
     const forwardedFor = request.headers['x-forwarded-for'];
-    const isSuspicious = 
-      !userAgent || 
-      userAgent.length < 10 || 
+    const isSuspicious =
+      !userAgent ||
+      userAgent.length < 10 ||
       /bot|crawler|spider|scraper/i.test(userAgent) ||
       (forwardedFor && forwardedFor.toString().split(',').length > 3);
 
@@ -184,8 +206,8 @@ async function securityPlugin(
           'x-forwarded-for': request.headers['x-forwarded-for'],
           'x-real-ip': request.headers['x-real-ip'],
           origin: request.headers.origin,
-          referer: request.headers.referer
-        }
+          referer: request.headers.referer,
+        },
       });
     }
   });
@@ -193,16 +215,27 @@ async function securityPlugin(
   // Add security helper methods to request using getter
   fastify.decorateRequest('security', null);
   fastify.addHook('onRequest', async (request: FastifyRequest) => {
-    (request as FastifyRequest & { security: { isRateLimited: boolean; isTimedOut: boolean; clientIp(): string; isSuspicious(): boolean } }).security = {
+    (
+      request as FastifyRequest & {
+        security: {
+          isRateLimited: boolean;
+          isTimedOut: boolean;
+          clientIp(): string;
+          isSuspicious(): boolean;
+        };
+      }
+    ).security = {
       isRateLimited: false,
       isTimedOut: false,
       clientIp: () => request.ip,
       isSuspicious: () => {
-        const userAgent = request.headers['user-agent'] as string || '';
-        return !userAgent || 
-               userAgent.length < 10 || 
-               /bot|crawler|spider|scraper/i.test(userAgent);
-      }
+        const userAgent = (request.headers['user-agent'] as string) || '';
+        return (
+          !userAgent ||
+          userAgent.length < 10 ||
+          /bot|crawler|spider|scraper/i.test(userAgent)
+        );
+      },
     };
   });
 }
@@ -221,5 +254,5 @@ declare module 'fastify' {
 
 export default fp(securityPlugin, {
   name: 'security',
-  fastify: '4.x'
+  fastify: '4.x',
 });

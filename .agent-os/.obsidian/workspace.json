@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "specs/2025-08-24-ollama-service-enhancement/spec.md",
+                "file": "specs/2025-08-24-deployment-preparation/tasks.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "spec"
+              "title": "tasks"
             }
           }
         ]
@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 353.5
+    "width": 200
   },
   "right": {
     "id": "7f782c6eb63d8490",
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "specs/2025-08-24-ollama-service-enhancement/spec.md",
+                "file": "specs/2025-08-24-deployment-preparation/tasks.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for spec"
+              "title": "Backlinks for tasks"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "specs/2025-08-24-ollama-service-enhancement/spec.md",
+                "file": "specs/2025-08-24-deployment-preparation/tasks.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from spec"
+              "title": "Outgoing links from tasks"
             }
           },
           {
@@ -157,41 +157,41 @@
   },
   "active": "c36087b0287230bf",
   "lastOpenFiles": [
+    "specs/2025-08-24-deployment-preparation/tasks.md.tmp.49145.1756046330881",
+    "specs/2025-08-24-deployment-preparation/sub-specs/technical-spec.md",
+    "specs/2025-08-24-deployment-preparation/tasks.md",
+    "specs/2025-08-24-deployment-preparation/spec.md",
     "product/roadmap.md",
-    "specs/2025-01-24-file-system-service/tasks.md",
-    "specs/2025-01-24-file-system-service/sub-specs/tests.md",
-    "specs/2025-01-24-file-system-service/sub-specs/api-spec.md",
-    "specs/2025-01-24-file-system-service/sub-specs/technical-spec.md",
-    "specs/2025-01-24-file-system-service/sub-specs",
-    "specs/2025-01-24-file-system-service/spec.md",
-    "specs/2025-01-24-file-system-service",
-    "specs/2025-01-24-fastify-production-api/sub-specs/technical-spec.md",
-    "specs/2025-08-24-ollama-service-enhancement/spec.md.tmp.21444.1756033878538",
-    "specs/2025-08-24-ollama-service-enhancement/tasks.md",
-    "specs/2025-08-24-ollama-service-enhancement/sub-specs/tests.md",
-    "specs/2025-08-24-ollama-service-enhancement/sub-specs/api-spec.md",
-    "specs/2025-08-24-ollama-service-enhancement/sub-specs/technical-spec.md",
-    "specs/2025-08-24-ollama-service-enhancement/spec.md",
-    "specs/2025-08-24-ollama-service-enhancement/sub-specs",
-    "specs/2025-08-24-ollama-service-enhancement",
-    "specs/2025-01-24-fastify-production-api/sub-specs/tests.md",
-    "specs/2025-01-24-fastify-production-api/spec.md",
-    "product/tech-stack.md",
+    "product/mission.md",
     "product/architecture.md",
-    "specs/2025-08-24-chromadb-semantic-search/tasks.md",
-    "specs/2025-01-24-fastify-production-api/tasks.md",
+    "specs/2025-01-24-file-system-service/tasks.md",
+    "specs/2025-08-24-adhd-health-monitoring/tasks.md",
     "specs/2025-08-24-bun-typescript-runtime/tasks.md",
-    "specs/2025-08-24-bun-typescript-runtime/spec.md",
-    "specs/2025-08-24-chromadb-semantic-search/sub-specs/tests.md",
-    "specs/2025-08-24-chromadb-semantic-search/sub-specs/api-spec.md",
-    "specs/2025-08-24-chromadb-semantic-search/sub-specs/technical-spec.md",
-    "specs/2025-08-24-chromadb-semantic-search/sub-specs",
-    "specs/2025-08-24-chromadb-semantic-search/spec.md",
-    "specs/2025-08-24-chromadb-semantic-search",
-    "specs/2025-08-24-bun-typescript-runtime/sub-specs/technical-spec.md",
-    "specs/2025-01-24-fastify-production-api/sub-specs",
-    "specs/2025-01-24-fastify-production-api",
-    "specs/2025-08-24-bun-typescript-runtime/sub-specs/tests.md",
-    "specs/2025-08-24-bun-typescript-runtime/sub-specs"
+    "specs/2025-08-24-chromadb-semantic-search/tasks.md",
+    "specs/2025-08-24-environment-config-enhancement/tasks.md",
+    "specs/2025-08-24-filesystem-orchestr8-integration/tasks.md",
+    "specs/2025-08-24-ollama-service-enhancement/tasks.md",
+    "specs/2025-08-24-orchestr8-integration-completion/tasks.md",
+    "specs/2025-08-24-orchestr8-integration-completion/spec.md",
+    "specs/2025-01-24-fastify-production-api/tasks.md",
+    "specs/2025-01-24-fastify-production-api/spec.md",
+    "specs/2025-08-24-deployment-preparation/sub-specs/tests.md",
+    "specs/2025-08-24-deployment-preparation/sub-specs",
+    "specs/2025-08-24-deployment-preparation",
+    "specs/2025-08-24-adhd-health-monitoring/sub-specs/technical-spec.md",
+    "specs/2025-08-24-adhd-health-monitoring/sub-specs/api-spec.md",
+    "specs/2025-08-24-adhd-health-monitoring/spec.md",
+    "specs/2025-08-24-adhd-health-monitoring/sub-specs/tests.md",
+    "specs/2025-08-24-adhd-health-monitoring/sub-specs",
+    "specs/2025-08-24-adhd-health-monitoring",
+    "specs/2025-08-24-environment-config-enhancement/spec.md",
+    "specs/2025-08-24-environment-config-enhancement/sub-specs/api-spec.md",
+    "specs/2025-08-24-environment-config-enhancement/sub-specs/tests.md",
+    "specs/2025-08-24-environment-config-enhancement/sub-specs",
+    "specs/2025-08-24-environment-config-enhancement",
+    "specs/2025-08-24-orchestr8-integration-completion/sub-specs",
+    "specs/2025-08-24-orchestr8-integration-completion",
+    "specs/2025-08-24-filesystem-orchestr8-integration/sub-specs",
+    "specs/2025-08-24-filesystem-orchestr8-integration"
   ]
 }

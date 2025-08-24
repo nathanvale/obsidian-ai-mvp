@@ -14,7 +14,7 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [ ] 1.4 Integrate with existing ChromaDB and Ollama services using @orchestr8 patterns
   - [ ] 1.5 Verify all tests pass and service handles errors gracefully
 
-- [ ] 2. Complete Search Route Implementation  
+- [ ] 2. Complete Search Route Implementation
   - [ ] 2.1 Write tests for enhanced search route with embedding generation and ChromaDB queries
   - [ ] 2.2 Update src/routes/search.ts to process natural language queries through Ollama embeddings
   - [ ] 2.3 Implement semantic search with ChromaDB integration and ADHD-optimized result filtering

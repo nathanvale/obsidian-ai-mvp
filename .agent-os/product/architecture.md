@@ -79,53 +79,53 @@ import { ChromaClient } from 'chromadb';
 import { VoiceMemoProcessor } from './voice-processor';
 
 export default class ADHDSecondBrain extends Plugin {
-    private chromaClient: ChromaClient;
-    private voiceProcessor: VoiceMemoProcessor;
-    private semanticIndex: Map<string, number[]> = new Map();
-    
-    async onload() {
-        // Initialize ChromaDB connection
-        this.chromaClient = new ChromaClient({
-            path: "http://localhost:8000"
-        });
-        
-        // Create ADHD-optimized collections
-        await this.initializeCollections();
-        
-        // Set up file watchers for real-time sync
-        this.registerEvent(
-            this.app.vault.on('create', this.handleFileCreate.bind(this))
-        );
-        
-        // Initialize voice memo monitoring
-        this.voiceProcessor = new VoiceMemoProcessor(
-            this.app.vault,
-            this.chromaClient
-        );
-        await this.voiceProcessor.startMonitoring();
+  private chromaClient: ChromaClient;
+  private voiceProcessor: VoiceMemoProcessor;
+  private semanticIndex: Map<string, number[]> = new Map();
+
+  async onload() {
+    // Initialize ChromaDB connection
+    this.chromaClient = new ChromaClient({
+      path: 'http://localhost:8000',
+    });
+
+    // Create ADHD-optimized collections
+    await this.initializeCollections();
+
+    // Set up file watchers for real-time sync
+    this.registerEvent(
+      this.app.vault.on('create', this.handleFileCreate.bind(this))
+    );
+
+    // Initialize voice memo monitoring
+    this.voiceProcessor = new VoiceMemoProcessor(
+      this.app.vault,
+      this.chromaClient
+    );
+    await this.voiceProcessor.startMonitoring();
+  }
+
+  private async initializeCollections() {
+    // Domain-specific collections for ADHD organization
+    const collections = [
+      'urgent-tasks',
+      'school-events',
+      'financial-obligations',
+      'medical-reminders',
+      'voice-memos',
+      'daily-captures',
+    ];
+
+    for (const name of collections) {
+      await this.chromaClient.getOrCreateCollection({
+        name,
+        metadata: {
+          domain: name,
+          indexed_at: new Date().toISOString(),
+        },
+      });
     }
-    
-    private async initializeCollections() {
-        // Domain-specific collections for ADHD organization
-        const collections = [
-            'urgent-tasks',
-            'school-events', 
-            'financial-obligations',
-            'medical-reminders',
-            'voice-memos',
-            'daily-captures'
-        ];
-        
-        for (const name of collections) {
-            await this.chromaClient.getOrCreateCollection({
-                name,
-                metadata: { 
-                    domain: name,
-                    indexed_at: new Date().toISOString()
-                }
-            });
-        }
-    }
+  }
 }
 ```
 
@@ -173,52 +173,52 @@ import { join } from 'path';
 import { homedir } from 'os';
 
 export class VoiceMemoProcessor {
-    private watcher: chokidar.FSWatcher;
-    private whisper: WhisperProcessor;
-    private processingQueue: Set<string> = new Set();
-    
-    async startMonitoring() {
-        const voiceMemoPath = join(
-            homedir(),
-            'Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings'
-        );
-        
-        this.watcher = chokidar.watch(voiceMemoPath, {
-            ignored: /(^|[\/\\])\../, 
-            persistent: true,
-            awaitWriteFinish: {
-                stabilityThreshold: 2000,
-                pollInterval: 100
-            }
-        });
-        
-        this.watcher.on('add', async (filePath) => {
-            if (filePath.endsWith('.m4a') && !this.processingQueue.has(filePath)) {
-                this.processingQueue.add(filePath);
-                await this.processVoiceMemo(filePath);
-                this.processingQueue.delete(filePath);
-            }
-        });
-    }
-    
-    private async processVoiceMemo(filePath: string) {
-        // Transcribe with Whisper
-        const transcription = await this.whisper.transcribe(filePath);
-        
-        // Create Obsidian note automatically
-        const note = voiceMemoTemplate(transcription, {
-            timestamp: new Date(),
-            duration: await this.getAudioDuration(filePath),
-            inferredEnergyLevel: this.inferEnergyLevel()
-        });
-        
-        // Save to Obsidian vault
-        const fileName = `Voice Memo - ${new Date().toISOString()}.md`;
-        await this.vault.create(`Inbox/${fileName}`, note);
-        
-        // Index in ChromaDB
-        await this.indexInChroma(transcription, fileName);
-    }
+  private watcher: chokidar.FSWatcher;
+  private whisper: WhisperProcessor;
+  private processingQueue: Set<string> = new Set();
+
+  async startMonitoring() {
+    const voiceMemoPath = join(
+      homedir(),
+      'Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings'
+    );
+
+    this.watcher = chokidar.watch(voiceMemoPath, {
+      ignored: /(^|[\/\\])\../,
+      persistent: true,
+      awaitWriteFinish: {
+        stabilityThreshold: 2000,
+        pollInterval: 100,
+      },
+    });
+
+    this.watcher.on('add', async filePath => {
+      if (filePath.endsWith('.m4a') && !this.processingQueue.has(filePath)) {
+        this.processingQueue.add(filePath);
+        await this.processVoiceMemo(filePath);
+        this.processingQueue.delete(filePath);
+      }
+    });
+  }
+
+  private async processVoiceMemo(filePath: string) {
+    // Transcribe with Whisper
+    const transcription = await this.whisper.transcribe(filePath);
+
+    // Create Obsidian note automatically
+    const note = voiceMemoTemplate(transcription, {
+      timestamp: new Date(),
+      duration: await this.getAudioDuration(filePath),
+      inferredEnergyLevel: this.inferEnergyLevel(),
+    });
+
+    // Save to Obsidian vault
+    const fileName = `Voice Memo - ${new Date().toISOString()}.md`;
+    await this.vault.create(`Inbox/${fileName}`, note);
+
+    // Index in ChromaDB
+    await this.indexInChroma(transcription, fileName);
+  }
 }
 ```
 
@@ -235,9 +235,9 @@ import { useADHDMetrics } from "./hooks/useADHDMetrics";
 export default function ADHDDashboard() {
     const { urgentTasks, cognitiveLoad, medicationStatus } = useADHDMetrics();
     const [captureMode, setCaptureMode] = useState<'voice' | 'text'>('text');
-    
+
     return (
-        <List 
+        <List
             isShowingDetail={false}
             searchBarPlaceholder="Quick capture or search..."
         >
@@ -246,12 +246,12 @@ export default function ADHDDashboard() {
                 <List.Item
                     title="🧠 Cognitive Status"
                     subtitle={getCognitiveStatusMessage(cognitiveLoad)}
-                    accessories={[{ 
-                        text: medicationStatus.hoursUntilWearOff + "h until wear-off" 
+                    accessories={[{
+                        text: medicationStatus.hoursUntilWearOff + "h until wear-off"
                     }]}
                 />
             </List.Section>
-            
+
             {/* Urgent Items - Maximum 3 shown */}
             <List.Section title="⚡ Urgent (Next 2 Hours)">
                 {urgentTasks.slice(0, 3).map(task => (
@@ -262,8 +262,8 @@ export default function ADHDDashboard() {
                         icon={getUrgencyIcon(task.priority)}
                         actions={
                             <ActionPanel>
-                                <Action 
-                                    title="Complete" 
+                                <Action
+                                    title="Complete"
                                     onAction={() => markComplete(task.id)}
                                     shortcut={{ modifiers: ["cmd"], key: "return" }}
                                 />
@@ -277,7 +277,7 @@ export default function ADHDDashboard() {
                     />
                 ))}
             </List.Section>
-            
+
             {/* Quick Capture */}
             <List.Section title="➕ Quick Capture">
                 <List.Item
@@ -314,17 +314,17 @@ function getCognitiveStatusMessage(load: CognitiveLoad): string {
 import { Ollama } from 'ollama';
 
 export class ADHDEmailClassifier {
-    private ollama: Ollama;
-    
-    constructor() {
-        this.ollama = new Ollama({ 
-            host: 'http://localhost:11434',
-            model: 'llama3.2:8b-instruct-q5_k_m' // Optimized for M4
-        });
-    }
-    
-    async classifyEmail(email: GmailMessage): Promise<EmailClassification> {
-        const prompt = `
+  private ollama: Ollama;
+
+  constructor() {
+    this.ollama = new Ollama({
+      host: 'http://localhost:11434',
+      model: 'llama3.2:8b-instruct-q5_k_m', // Optimized for M4
+    });
+  }
+
+  async classifyEmail(email: GmailMessage): Promise<EmailClassification> {
+    const prompt = `
         Analyze this email for ADHD-relevant information:
         
         Subject: ${email.subject}
@@ -346,21 +346,24 @@ export class ADHDEmailClassifier {
         
         Return JSON only.
         `;
-        
-        const response = await this.ollama.generate({ prompt });
-        const classification = JSON.parse(response.response);
-        
-        // Process based on classification
-        if (classification.priority >= 8) {
-            await this.createUrgentTask(email, classification);
-        }
-        
-        return classification;
+
+    const response = await this.ollama.generate({ prompt });
+    const classification = JSON.parse(response.response);
+
+    // Process based on classification
+    if (classification.priority >= 8) {
+      await this.createUrgentTask(email, classification);
     }
-    
-    private async createUrgentTask(email: GmailMessage, classification: EmailClassification) {
-        // Auto-create Obsidian note for urgent items
-        const note = `
+
+    return classification;
+  }
+
+  private async createUrgentTask(
+    email: GmailMessage,
+    classification: EmailClassification
+  ) {
+    // Auto-create Obsidian note for urgent items
+    const note = `
 # Urgent: ${classification.category} - ${email.subject}
 
 **Deadline**: ${classification.deadline || 'ASAP'}
@@ -377,12 +380,12 @@ ${email.body}
 Created: ${new Date().toISOString()}
 Email ID: ${email.id}
         `;
-        
-        await this.vault.create(`Urgent/${email.subject}.md`, note);
-        
-        // Schedule reminders
-        await this.scheduleADHDReminders(classification);
-    }
+
+    await this.vault.create(`Urgent/${email.subject}.md`, note);
+
+    // Schedule reminders
+    await this.scheduleADHDReminders(classification);
+  }
 }
 ```
 
@@ -396,81 +399,91 @@ import { Queue, Worker } from 'bullmq';
 import IORedis from 'ioredis';
 
 export class ADHDAutomationProcessor {
-    private queues: Map<string, Queue> = new Map();
-    private connection: IORedis;
-    
-    constructor() {
-        this.connection = new IORedis({
-            maxRetriesPerRequest: null,
-            retryStrategy: (times) => Math.min(Math.exp(times), 20000)
-        });
-        
-        this.initializeQueues();
-        this.setupWorkers();
-    }
-    
-    private initializeQueues() {
-        // Priority-based queues for ADHD workflows
-        const queueConfigs = [
-            { name: 'urgent-reminders', priority: 10 },
-            { name: 'voice-processing', priority: 8 },
-            { name: 'email-classification', priority: 6 },
-            { name: 'pattern-analysis', priority: 4 },
-            { name: 'sync-operations', priority: 2 }
-        ];
-        
-        queueConfigs.forEach(config => {
-            this.queues.set(config.name, new Queue(config.name, {
-                connection: this.connection,
-                defaultJobOptions: {
-                    removeOnComplete: 100,
-                    removeOnFail: 50,
-                    attempts: 3,
-                    backoff: {
-                        type: 'exponential',
-                        delay: 2000
-                    }
-                }
-            }));
-        });
-    }
-    
-    private setupWorkers() {
-        // Adaptive reminder worker
-        new Worker('urgent-reminders', async (job) => {
-            const { taskId, userId, intensity } = job.data;
-            
-            // Check user context before sending
-            const context = await this.getUserContext(userId);
-            
-            if (context.inFocusMode && intensity < 8) {
-                // Defer non-critical reminders during focus
-                await job.moveToDelayed(Date.now() + 30 * 60 * 1000);
-                return;
-            }
-            
-            // Send appropriate notification based on context
-            await this.sendAdaptiveNotification({
-                taskId,
-                userId,
-                modality: this.selectModality(context, intensity)
-            });
-        }, {
-            connection: this.connection,
-            concurrency: 5
-        });
-    }
-    
-    private selectModality(context: UserContext, intensity: number): NotificationModality {
-        // ADHD-friendly notification selection
-        if (context.notificationFatigue > 0.7) {
-            return 'ambient'; // Subtle visual only
+  private queues: Map<string, Queue> = new Map();
+  private connection: IORedis;
+
+  constructor() {
+    this.connection = new IORedis({
+      maxRetriesPerRequest: null,
+      retryStrategy: times => Math.min(Math.exp(times), 20000),
+    });
+
+    this.initializeQueues();
+    this.setupWorkers();
+  }
+
+  private initializeQueues() {
+    // Priority-based queues for ADHD workflows
+    const queueConfigs = [
+      { name: 'urgent-reminders', priority: 10 },
+      { name: 'voice-processing', priority: 8 },
+      { name: 'email-classification', priority: 6 },
+      { name: 'pattern-analysis', priority: 4 },
+      { name: 'sync-operations', priority: 2 },
+    ];
+
+    queueConfigs.forEach(config => {
+      this.queues.set(
+        config.name,
+        new Queue(config.name, {
+          connection: this.connection,
+          defaultJobOptions: {
+            removeOnComplete: 100,
+            removeOnFail: 50,
+            attempts: 3,
+            backoff: {
+              type: 'exponential',
+              delay: 2000,
+            },
+          },
+        })
+      );
+    });
+  }
+
+  private setupWorkers() {
+    // Adaptive reminder worker
+    new Worker(
+      'urgent-reminders',
+      async job => {
+        const { taskId, userId, intensity } = job.data;
+
+        // Check user context before sending
+        const context = await this.getUserContext(userId);
+
+        if (context.inFocusMode && intensity < 8) {
+          // Defer non-critical reminders during focus
+          await job.moveToDelayed(Date.now() + 30 * 60 * 1000);
+          return;
         }
-        if (context.medicationWearingOff && intensity > 5) {
-            return 'persistent'; // Multiple modalities
-        }
-        return 'gentle'; // Standard notification
+
+        // Send appropriate notification based on context
+        await this.sendAdaptiveNotification({
+          taskId,
+          userId,
+          modality: this.selectModality(context, intensity),
+        });
+      },
+      {
+        connection: this.connection,
+        concurrency: 5,
+      }
+    );
+  }
+
+  private selectModality(
+    context: UserContext,
+    intensity: number
+  ): NotificationModality {
+    // ADHD-friendly notification selection
+    if (context.notificationFatigue > 0.7) {
+      return 'ambient'; // Subtle visual only
     }
+    if (context.medicationWearingOff && intensity > 5) {
+      return 'persistent'; // Multiple modalities
+    }
+    return 'gentle'; // Standard notification
+  }
 }
 ```
 

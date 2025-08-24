@@ -17,14 +17,17 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 ## Approach Options
 
 **Option A: Queue-based Processing with BullMQ**
+
 - Pros: Robust job management, progress tracking, retry mechanisms, Redis-backed persistence
 - Cons: Additional Redis dependency, increased complexity, overkill for single-user system
 
 **Option B: Simple In-Memory Task Processing** (Selected)
+
 - Pros: No external dependencies, simpler implementation, faster development, sufficient for personal use
 - Cons: No persistence across restarts, limited scalability
 
 **Option C: Event-driven Architecture with Native Workers**
+
 - Pros: Node.js native, good performance, no external dependencies
 - Cons: More complex implementation, harder to debug, unnecessary complexity
 
@@ -33,6 +36,7 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 ## External Dependencies
 
 **No new dependencies required** - leveraging existing infrastructure:
+
 - **chromadb**: Already integrated for vector storage
 - **@orchestr8/logger**: Structured logging with correlation IDs
 - **@orchestr8/resilience**: Circuit breakers and retry policies
@@ -45,17 +49,20 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 ```typescript
 interface DocumentIndexingService {
   // Primary processing methods
-  indexVault(): Promise<IndexingProgress>
-  indexFile(filePath: string): Promise<void>
-  reindexFile(filePath: string): Promise<void>
-  deleteFileIndex(filePath: string): Promise<void>
+  indexVault(): Promise<IndexingProgress>;
+  indexFile(filePath: string): Promise<void>;
+  reindexFile(filePath: string): Promise<void>;
+  deleteFileIndex(filePath: string): Promise<void>;
 
   // Document processing
-  chunkDocument(content: string, metadata: FileMetadata): Promise<DocumentChunk[]>
-  extractMetadata(filePath: string): Promise<FileMetadata>
-  
+  chunkDocument(
+    content: string,
+    metadata: FileMetadata
+  ): Promise<DocumentChunk[]>;
+  extractMetadata(filePath: string): Promise<FileMetadata>;
+
   // Progress tracking
-  getIndexingProgress(): IndexingProgress
+  getIndexingProgress(): IndexingProgress;
 }
 ```
 
@@ -63,9 +70,11 @@ interface DocumentIndexingService {
 
 ```typescript
 interface SearchService {
-  search(query: string, options?: SearchOptions): Promise<SearchResult[]>
-  generateQueryEmbedding(query: string): Promise<number[]>
-  filterResultsByCognitiveLoad(results: SearchResult[]): Promise<SearchResult[]>
+  search(query: string, options?: SearchOptions): Promise<SearchResult[]>;
+  generateQueryEmbedding(query: string): Promise<number[]>;
+  filterResultsByCognitiveLoad(
+    results: SearchResult[]
+  ): Promise<SearchResult[]>;
 }
 ```
 
@@ -101,16 +110,18 @@ const COLLECTIONS = {
 ## Processing Pipeline
 
 ### Vault Initialization Flow
+
 ```
 1. FileSystemService.scanMarkdownFiles()
 2. For each file: DocumentIndexingService.extractMetadata()
-3. DocumentIndexingService.chunkDocument() 
+3. DocumentIndexingService.chunkDocument()
 4. OllamaService.generateEmbeddings() (batch processing)
 5. ChromaDBService.addDocuments() with metadata
 6. Update progress tracking
 ```
 
-### Real-time Update Flow  
+### Real-time Update Flow
+
 ```
 1. FileSystemService.watchForChanges() detects change
 2. Determine change type: created/modified/deleted
@@ -120,6 +131,7 @@ const COLLECTIONS = {
 ```
 
 ### Search Query Flow
+
 ```
 1. POST /search receives natural language query
 2. OllamaService.generateEmbedding() for query
@@ -131,12 +143,14 @@ const COLLECTIONS = {
 ## Performance Optimizations
 
 ### M4 MacBook Resource Management
+
 - **Memory Allocation**: 2GB for ChromaDB, 4GB for Ollama embedding generation
 - **Batch Processing**: Process embeddings in batches of 25 documents to prevent memory overflow
 - **Chunk Size**: 500-word chunks for optimal embedding quality vs. processing speed
 - **Concurrent Processing**: Maximum 2 concurrent embedding requests to Ollama
 
 ### ADHD-Specific Performance Features
+
 - **Result Caching**: Cache frequent queries with 15-minute TTL
 - **Cognitive Load Indicators**: Track query time patterns to identify peak vs. low-function periods
 - **Progressive Loading**: Show first 3 results immediately, load additional on demand
@@ -145,12 +159,14 @@ const COLLECTIONS = {
 ## Error Handling Strategy
 
 ### Service Resilience
+
 - **ChromaDB Connectivity**: Circuit breaker with 3-failure threshold, 30-second recovery window
 - **Ollama Availability**: Retry with exponential backoff, graceful degradation to text-based search
 - **File System Errors**: Continue processing remaining files, log errors for manual review
 - **Memory Constraints**: Monitor embedding generation memory usage, implement backpressure
 
 ### User Experience During Failures
-- **Partial Search Results**: Return text-based matches when embeddings unavailable  
+
+- **Partial Search Results**: Return text-based matches when embeddings unavailable
 - **Indexing Interruption**: Resume from last successful file, preserve partial progress
 - **Service Recovery**: Automatic retry with user notification of service restoration

@@ -30,9 +30,9 @@ export const getLogger = (): Logger => {
 export const createCorrelatedLogger = (correlationId?: string): Logger => {
   const baseLogger = getLogger();
   const actualCorrelationId = correlationId || getCurrentCorrelationId();
-  
-  return baseLogger.child({ 
-    correlationId: actualCorrelationId 
+
+  return baseLogger.child({
+    correlationId: actualCorrelationId,
   });
 };
 
@@ -59,7 +59,7 @@ export const logger: Logger = new Proxy({} as Logger, {
   get(target, prop) {
     const actualLogger = getLogger();
     const value = actualLogger[prop as keyof Logger];
-    
+
     if (typeof value === 'function') {
       return value.bind(actualLogger);
     }
@@ -67,7 +67,8 @@ export const logger: Logger = new Proxy({} as Logger, {
   },
   set(target, prop, value) {
     const actualLogger = getLogger();
-    (actualLogger as unknown as Record<string, unknown>)[prop as string] = value;
+    (actualLogger as unknown as Record<string, unknown>)[prop as string] =
+      value;
     return true;
   },
 });
@@ -82,7 +83,7 @@ export const logWithContext = {
       timestamp: new Date().toISOString(),
     });
   },
-  
+
   info: (message: string, context: Record<string, unknown>) => {
     const correlationId = getCurrentCorrelationId();
     logger.info(message, {
@@ -91,7 +92,7 @@ export const logWithContext = {
       timestamp: new Date().toISOString(),
     });
   },
-  
+
   warn: (message: string, context: Record<string, unknown>) => {
     const correlationId = getCurrentCorrelationId();
     logger.warn(message, {
@@ -100,18 +101,20 @@ export const logWithContext = {
       timestamp: new Date().toISOString(),
     });
   },
-  
+
   error: (message: string, context: Record<string, unknown>, error?: Error) => {
     const correlationId = getCurrentCorrelationId();
     logger.error(message, {
       ...context,
       correlationId,
       timestamp: new Date().toISOString(),
-      error: error ? {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-      } : undefined,
+      error: error
+        ? {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          }
+        : undefined,
     });
   },
 };

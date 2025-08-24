@@ -13,11 +13,13 @@ Implement critical production-ready enhancements for the Fastify API server to e
 ### API Reliability and Security
 
 As an ADHD user relying on a local-first application, I want a stable and secure API that:
+
 - Protects against potential service disruptions
 - Provides clear, consistent error messaging
 - Prevents potential abuse or overwhelming system resources
 
-**Workflow:** 
+**Workflow:**
+
 1. User attempts to use the application
 2. API handles requests with consistent error responses
 3. System remains stable under various load conditions
@@ -26,11 +28,13 @@ As an ADHD user relying on a local-first application, I want a stable and secure
 ### Performance and Monitoring
 
 As a user with executive function challenges, I need an API that:
+
 - Responds quickly and consistently
 - Provides clear health status
 - Gracefully handles unexpected scenarios without complete system failure
 
 **Workflow:**
+
 1. User interacts with application features
 2. API processes requests efficiently
 3. System provides transparent performance metrics

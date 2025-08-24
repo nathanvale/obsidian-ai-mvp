@@ -14,6 +14,7 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 **Parameters:** None
 
 **Response:** JSON object with comprehensive health status
+
 ```json
 {
   "status": "healthy" | "degraded" | "unhealthy",
@@ -46,6 +47,7 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 ```
 
 **Errors:**
+
 - 500 Internal Server Error: FileSystemService initialization failure
 - 503 Service Unavailable: Vault path not accessible or configured
 
@@ -54,10 +56,12 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 **Purpose:** Detailed performance metrics for FileSystemService operations, supporting developer observability and ADHD workflow optimization analysis
 
 **Parameters:**
+
 - `timeRange` (query, optional): "1h", "6h", "24h", "7d" (default: "1h")
 - `includeOperations` (query, optional): boolean (default: false) - Include individual operation metrics
 
 **Response:** JSON object with comprehensive performance and reliability metrics
+
 ```json
 {
   "timeRange": "1h",
@@ -111,6 +115,7 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 ```
 
 **Errors:**
+
 - 400 Bad Request: Invalid timeRange parameter
 - 500 Internal Server Error: Metrics collection failure
 
@@ -121,6 +126,7 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 **Parameters:** None (body can be empty)
 
 **Response:** JSON confirmation of cache clearing operation
+
 ```json
 {
   "success": true,
@@ -131,6 +137,7 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 ```
 
 **Errors:**
+
 - 500 Internal Server Error: Cache clearing operation failure
 
 ### GET /filesystem/vault/status
@@ -140,6 +147,7 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 **Parameters:** None
 
 **Response:** JSON object with detailed vault information
+
 ```json
 {
   "vault": {
@@ -169,6 +177,7 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 ```
 
 **Errors:**
+
 - 404 Not Found: Vault path not configured
 - 500 Internal Server Error: Vault status determination failure
 
@@ -177,13 +186,15 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 ### FileSystemHealthController
 
 **Action:** getHealth()
-**Business Logic:** 
+**Business Logic:**
+
 - Check vault path accessibility and configuration validity
 - Verify file watcher operational status and recent activity
 - Analyze cache performance and memory usage
 - Calculate overall system health score based on ADHD reliability requirements
 
 **Error Handling:**
+
 - Graceful degradation when vault temporarily inaccessible
 - Clear error messages for configuration issues
 - Timeout protection for health check operations
@@ -192,12 +203,14 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 
 **Action:** getMetrics(timeRange, includeOperations)
 **Business Logic:**
+
 - Aggregate operation metrics from @orchestr8/logger structured logs
 - Calculate performance percentiles and error rates
 - Provide cache performance analysis and memory usage trends
 - Format metrics for ADHD-focused dashboard consumption
 
 **Error Handling:**
+
 - Handle missing metrics gracefully with partial responses
 - Validate time range parameters with clear error messages
 - Protect against memory exhaustion during large metric queries
@@ -206,12 +219,14 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 
 **Action:** clearCache()
 **Business Logic:**
+
 - Safely clear LRU cache contents while preserving performance metrics
 - Log cache clearing operation with correlation ID for troubleshooting
 - Trigger garbage collection to free memory immediately
 - Provide confirmation with impact metrics (entries cleared, memory freed)
 
 **Error Handling:**
+
 - Handle concurrent cache operations safely
 - Provide clear success/failure status with specific error details
 - Ensure system remains functional even if cache clearing fails
@@ -220,12 +235,14 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 
 **Action:** getVaultStatus()
 **Business Logic:**
+
 - Perform real-time vault accessibility check without full scan
 - Gather recent file activity from watcher event logs
 - Compile configuration settings for system transparency
 - Calculate vault health based on file system responsiveness
 
 **Error Handling:**
+
 - Distinguish between temporary and permanent vault issues
 - Provide actionable error messages for vault configuration problems
 - Handle permission errors with clear user-friendly explanations
@@ -233,6 +250,7 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 ## Integration with Existing Fastify Routes
 
 ### Route Registration Pattern
+
 ```typescript
 // In src/routes/index-routes.ts or dedicated filesystem routes file
 fastify.register(async function fileSystemRoutes(fastify) {
@@ -244,10 +262,12 @@ fastify.register(async function fileSystemRoutes(fastify) {
 ```
 
 ### Request Logging Integration
+
 All endpoints will use @orchestr8/logger with correlation IDs to track requests across the ADHD user journey from Raycast → API → FileSystem → ChromaDB/Ollama services.
 
 ### Response Time Targets
+
 - Health endpoints: <50ms for instant ADHD user feedback
-- Metrics endpoints: <200ms for dashboard responsiveness  
+- Metrics endpoints: <200ms for dashboard responsiveness
 - Cache operations: <100ms for immediate workflow continuation
 - Vault status: <150ms for real-time system awareness

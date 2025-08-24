@@ -44,10 +44,12 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 ## Approach Options
 
 **Option A: Service-by-Service Integration** (Selected)
+
 - Pros: Incremental rollout, easier testing, minimal risk to existing functionality
 - Cons: Multiple deployment cycles, potential inconsistency during transition
 
 **Option B: Comprehensive Refactor**
+
 - Pros: Complete consistency from day one, cleaner architecture
 - Cons: High risk, longer development time, potential for breaking existing ADHD workflows
 

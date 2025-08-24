@@ -15,6 +15,7 @@ Enhance the Ollama Service for our ADHD Digital Second Brain to provide robust, 
 As an ADHD user, I want the AI embedding and processing to be highly reliable during my peak cognitive periods, so that I can trust the system to capture and process my thoughts accurately.
 
 **Workflow:**
+
 - Voice memo recorded
 - Ollama service processes embedding
 - No interruptions or failures during critical capture moments
@@ -24,6 +25,7 @@ As an ADHD user, I want the AI embedding and processing to be highly reliable du
 As a user managing cognitive load, I want clear visibility into the Ollama service's health and performance, so I understand when the system might have limitations.
 
 **Workflow:**
+
 - Service startup checks model availability
 - Automatic recovery if model is unavailable
 - Clear logging of any processing challenges

@@ -9,7 +9,7 @@ export const ErrorResponseSchema = {
     success: {
       type: 'boolean',
       const: false,
-      description: 'Always false for error responses'
+      description: 'Always false for error responses',
     },
     error: {
       type: 'object',
@@ -17,34 +17,34 @@ export const ErrorResponseSchema = {
       properties: {
         message: {
           type: 'string',
-          description: 'Human-readable error message'
+          description: 'Human-readable error message',
         },
         statusCode: {
           type: 'integer',
           minimum: 400,
           maximum: 599,
-          description: 'HTTP status code'
+          description: 'HTTP status code',
         },
         code: {
           type: 'string',
-          description: 'Optional error code for programmatic handling'
+          description: 'Optional error code for programmatic handling',
         },
         details: {
           type: 'object',
-          description: 'Optional additional error details'
-        }
-      }
+          description: 'Optional additional error details',
+        },
+      },
     },
     correlationId: {
       type: 'string',
-      description: 'Correlation ID for tracing requests'
+      description: 'Correlation ID for tracing requests',
     },
     timestamp: {
       type: 'string',
       format: 'date-time',
-      description: 'ISO timestamp when error occurred'
-    }
-  }
+      description: 'ISO timestamp when error occurred',
+    },
+  },
 } as const;
 
 export const ValidationErrorResponseSchema = {
@@ -53,7 +53,7 @@ export const ValidationErrorResponseSchema = {
   properties: {
     success: {
       type: 'boolean',
-      const: false
+      const: false,
     },
     error: {
       type: 'object',
@@ -61,15 +61,15 @@ export const ValidationErrorResponseSchema = {
       properties: {
         message: {
           type: 'string',
-          const: 'Validation failed'
+          const: 'Validation failed',
         },
         statusCode: {
           type: 'integer',
-          const: 400
+          const: 400,
         },
         code: {
           type: 'string',
-          const: 'VALIDATION_ERROR'
+          const: 'VALIDATION_ERROR',
         },
         validation: {
           type: 'array',
@@ -79,28 +79,28 @@ export const ValidationErrorResponseSchema = {
             properties: {
               field: {
                 type: 'string',
-                description: 'Field that failed validation'
+                description: 'Field that failed validation',
               },
               message: {
                 type: 'string',
-                description: 'Validation error message'
+                description: 'Validation error message',
               },
               value: {
-                description: 'The invalid value that was provided'
-              }
-            }
-          }
-        }
-      }
+                description: 'The invalid value that was provided',
+              },
+            },
+          },
+        },
+      },
     },
     correlationId: {
-      type: 'string'
+      type: 'string',
     },
     timestamp: {
       type: 'string',
-      format: 'date-time'
-    }
-  }
+      format: 'date-time',
+    },
+  },
 } as const;
 
 /**
@@ -149,5 +149,5 @@ export const ErrorMessages = {
   INTERNAL_SERVER_ERROR: 'Internal server error',
   BAD_GATEWAY: 'Bad gateway',
   SERVICE_UNAVAILABLE: 'Service unavailable',
-  GATEWAY_TIMEOUT: 'Gateway timeout'
+  GATEWAY_TIMEOUT: 'Gateway timeout',
 } as const;

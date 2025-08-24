@@ -15,6 +15,7 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 **Errors:** 500 if validation system fails
 
 Example Response:
+
 ```json
 {
   "status": "valid",
@@ -22,8 +23,8 @@ Example Response:
   "correlationId": "cfg-val-123",
   "validationResults": {
     "schema": { "status": "valid", "errors": [] },
-    "services": { 
-      "status": "partial", 
+    "services": {
+      "status": "partial",
       "errors": [
         {
           "field": "OLLAMA_URL",
@@ -48,6 +49,7 @@ Example Response:
 **Errors:** 400 if new configuration invalid, 500 if reload fails
 
 Example Response:
+
 ```json
 {
   "status": "success",
@@ -55,7 +57,7 @@ Example Response:
   "correlationId": "cfg-reload-456",
   "changes": [
     {
-      "field": "OLLAMA_MODEL", 
+      "field": "OLLAMA_MODEL",
       "oldValue": "nomic-embed-text",
       "newValue": "all-minilm",
       "action": "updated"
@@ -76,6 +78,7 @@ Example Response:
 **Errors:** 500 if profile system fails
 
 Example Response:
+
 ```json
 {
   "status": "success",
@@ -86,13 +89,13 @@ Example Response:
       "active": true
     },
     {
-      "name": "test", 
+      "name": "test",
       "description": "Testing environment with mock services",
       "active": false
     },
     {
       "name": "production",
-      "description": "Production deployment configuration", 
+      "description": "Production deployment configuration",
       "active": false
     }
   ]
@@ -109,6 +112,7 @@ Example Response:
 ## Error Handling
 
 ### Standard Error Response
+
 ```json
 {
   "error": {
@@ -129,6 +133,7 @@ Example Response:
 ```
 
 ### Potential Error Codes
+
 - **400 Bad Request** - Invalid configuration data or parameters
 - **404 Not Found** - Profile or configuration resource not found
 - **500 Internal Server Error** - Configuration system failure
@@ -163,12 +168,14 @@ The existing `/health` endpoint will include configuration validation status:
 
 **Purpose:** Handle all configuration-related API endpoints
 **Methods:**
+
 - `validateConfiguration()` - GET /config/validate
-- `reloadConfiguration()` - POST /config/reload  
+- `reloadConfiguration()` - POST /config/reload
 - `listProfiles()` - GET /config/profiles
 - `applyProfile(profileName)` - POST /config/profiles/{profileName}/apply
 
 **Dependencies:**
+
 - ConfigValidator service for validation logic
 - ConfigReloadManager for hot reload functionality
 - ProfileManager for profile management

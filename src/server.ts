@@ -30,7 +30,7 @@ async function start() {
     await server.register(requestLoggingPlugin, {
       logRequestBody: config.isDevelopment,
       logResponseBody: config.isDevelopment,
-      excludePaths: ['/health', '/favicon.ico']
+      excludePaths: ['/health', '/favicon.ico'],
     });
 
     // Register security plugin with rate limiting
@@ -39,11 +39,11 @@ async function start() {
         max: config.security.rateLimit.max,
         windowMs: config.security.rateLimit.windowMs,
         skipSuccessfulRequests: config.security.rateLimit.skipOnSuccess,
-        whitelist: config.isDevelopment ? ['127.0.0.1', '::1'] : undefined
+        whitelist: config.isDevelopment ? ['127.0.0.1', '::1'] : undefined,
       },
       requestTimeout: config.security.requestTimeout,
       enhancedHeaders: true,
-      trustProxy: !config.isDevelopment
+      trustProxy: !config.isDevelopment,
     });
 
     // Register performance optimization plugin
@@ -51,10 +51,10 @@ async function start() {
       compression: {
         threshold: config.performance.compression.threshold,
         quality: config.performance.compression.quality,
-        encodings: ['gzip', 'deflate', 'br']
+        encodings: ['gzip', 'deflate', 'br'],
       },
       backPressure: config.performance.backPressure,
-      enableMetrics: true
+      enableMetrics: true,
     });
 
     // Register enhanced health monitoring and graceful shutdown
@@ -62,13 +62,13 @@ async function start() {
       enableDetailedHealthCheck: true,
       checkExternalServices: true,
       gracefulShutdownTimeout: 10000,
-      healthCheckInterval: 30000
+      healthCheckInterval: 30000,
     });
 
     // Register error handler plugin last to catch all errors
     await server.register(errorHandlerPlugin, {
       hideInternalErrors: config.isProduction,
-      includeStackTrace: config.isDevelopment
+      includeStackTrace: config.isDevelopment,
     });
 
     await server.register(helmet, {

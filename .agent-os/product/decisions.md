@@ -26,7 +26,6 @@ The product owner has ADHD and needs a functional cognitive support tool quickly
 1. **Cloud-Based Solution with Third-Party APIs**
    - Pros: Easier setup, managed infrastructure, advanced AI capabilities
    - Cons: Privacy concerns for sensitive ADHD data, ongoing costs, internet dependency
-   
 2. **Full Test-Driven Development Approach**
    - Pros: Higher code quality, better maintainability, comprehensive coverage
    - Cons: Significantly slower development, delays real ADHD management benefits
@@ -45,12 +44,14 @@ The product owner has ADHD and needs a functional cognitive support tool quickly
 ### Consequences
 
 **Positive:**
+
 - Working ADHD management tool in weeks instead of months
 - Complete privacy for sensitive personal data
 - Rapid iteration based on real-world usage patterns
 - Leveraging proven @orchestr8 resilience and logging infrastructure
 
 **Negative:**
+
 - Technical debt may accumulate faster than with TDD approach
 - May require refactoring as usage patterns become clear
 - Less comprehensive documentation than enterprise standards
@@ -92,12 +93,14 @@ ADHD individuals often have sensitive information in their thoughts, emails, and
 ### Consequences
 
 **Positive:**
+
 - Complete privacy for all personal data
 - No ongoing operational costs
 - Consistent performance without internet dependency
 - Full control over AI model behavior
 
 **Negative:**
+
 - Higher local resource usage
 - Potentially lower AI quality than cloud solutions
 - More complex local setup and maintenance
@@ -139,12 +142,14 @@ This is a hobby project where the primary goal is getting a working ADHD managem
 ### Consequences
 
 **Positive:**
+
 - Extremely rapid development and iteration cycles
 - Focus on real-world usage rather than theoretical edge cases
 - Production-grade observability through structured logging
 - Working tool available in days rather than months
 
 **Negative:**
+
 - Potential for more runtime errors in production
 - Less confidence in refactoring without comprehensive tests
 - May need more debugging time when issues arise
@@ -186,12 +191,14 @@ The existing codebase has excellent infrastructure including @orchestr8 packages
 ### Consequences
 
 **Positive:**
+
 - Extremely fast time-to-working-prototype
 - Proven infrastructure with resilience patterns
 - High-performance runtime with excellent TypeScript support
 - Minimal learning curve for existing codebase
 
 **Negative:**
+
 - Committed to Bun ecosystem (smaller community than Node.js)
 - Any existing technical debt carries forward
 - Less flexibility to change architectural decisions

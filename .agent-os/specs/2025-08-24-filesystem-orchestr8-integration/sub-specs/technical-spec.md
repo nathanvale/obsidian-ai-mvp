@@ -38,14 +38,17 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 ## Approach Options
 
 **Option A: Gradual Enhancement (Selected)**
+
 - Pros: Maintains existing API compatibility, minimal risk of breaking current functionality, allows incremental testing and rollback
 - Cons: Some code duplication during transition period, requires careful method signature preservation
 
 **Option B: Complete Service Rewrite**
+
 - Pros: Clean architecture, optimal @orchestr8 integration patterns, modern async/await throughout
 - Cons: High risk of breaking existing integrations, significant development time, delays Phase 1 voice processing work
 
 **Option C: Wrapper Service Approach**
+
 - Pros: Zero risk to existing functionality, can develop new patterns in isolation
 - Cons: Confusing dual APIs, additional complexity, doesn't improve existing code paths
 
@@ -58,7 +61,7 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 - **@lru-cache/lru-cache** - High-performance LRU cache implementation for file content caching
 - **Justification:** Native Map-based caching is insufficient for memory management and TTL requirements. This package provides production-ready cache eviction and memory pressure handling.
 
-- **p-limit** - Concurrency control for parallel file operations  
+- **p-limit** - Concurrency control for parallel file operations
 - **Justification:** Prevents overwhelming the file system and ChromaDB with too many concurrent operations, which could cause performance degradation during large vault processing.
 
 ### Enhanced @orchestr8 Usage
@@ -102,7 +105,7 @@ src/services/filesystem/
 ### Backward Compatibility Strategy
 
 - All existing public methods maintain identical signatures and return types
-- Internal method enhancements are transparent to existing consumers  
+- Internal method enhancements are transparent to existing consumers
 - New features (caching, metrics) are opt-in and don't affect current workflows
 - Existing error handling patterns are preserved while adding structured logging
 - Configuration defaults ensure zero-config upgrade path for existing users

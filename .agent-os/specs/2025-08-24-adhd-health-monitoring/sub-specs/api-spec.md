@@ -15,6 +15,7 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 **Errors:** 503 if core services down, 200 with warnings if degraded
 
 Enhanced Response:
+
 ```json
 {
   "status": "healthy",
@@ -50,6 +51,7 @@ Enhanced Response:
 **Errors:** 500 if monitoring system fails
 
 Example Response:
+
 ```json
 {
   "status": "adapting",
@@ -72,7 +74,7 @@ Example Response:
       "message": "Voice capture working perfectly"
     },
     "semanticSearch": {
-      "status": "adapted", 
+      "status": "adapted",
       "visualIndicator": "🟡",
       "message": "Search slightly slower but reliable"
     }
@@ -83,12 +85,14 @@ Example Response:
 ### GET /health/adhd/prediction
 
 **Purpose:** Predictive health analysis for proactive issue prevention
-**Parameters:** 
+**Parameters:**
+
 - `horizon` (optional): Prediction timeframe in minutes (default: 60)
-**Response:** Health predictions with actionable insights
-**Errors:** 400 if invalid horizon, 500 if prediction engine fails
+  **Response:** Health predictions with actionable insights
+  **Errors:** 400 if invalid horizon, 500 if prediction engine fails
 
 Example Response:
+
 ```json
 {
   "prediction": {
@@ -128,6 +132,7 @@ Example Response:
 **Errors:** 400 if invalid medication data
 
 Example Request:
+
 ```json
 {
   "medicationTaken": "2025-08-24T08:00:00.000Z",
@@ -145,6 +150,7 @@ Example Request:
 **Errors:** 500 if adaptation system fails
 
 Example Response:
+
 ```json
 {
   "activeAdaptations": {
@@ -176,6 +182,7 @@ Example Response:
 **Messages:** JSON health updates with ADHD-specific adaptations
 
 Example Message:
+
 ```json
 {
   "type": "health_update",
@@ -195,6 +202,7 @@ Example Message:
 ## Error Handling
 
 ### ADHD-Friendly Error Response
+
 ```json
 {
   "error": {
@@ -221,6 +229,7 @@ Example Message:
 ```
 
 ### Potential Error Codes
+
 - **200 OK** - Healthy with possible adaptations active
 - **202 Accepted** - Health check in progress, partial results
 - **400 Bad Request** - Invalid medication cycle or prediction parameters

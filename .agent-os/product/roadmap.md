@@ -9,7 +9,7 @@
 The following foundation has need to confirm the implementation exists in full:
 
 - [x] **Bun + TypeScript Runtime** - Fast development environment with native TypeScript support
-- [ ] **Fastify API Server** - Production-ready REST API with CORS, Helmet, and structured routing  
+- [ ] **Fastify API Server** - Production-ready REST API with CORS, Helmet, and structured routing
 - [ ] **ChromaDB Integration** - Complete CRUD operations and semantic search capabilities
 - [ ] **Ollama Service** - Local LLM with embedding generation, batch processing, and health checks
 - [ ] **File System Service** - Obsidian vault integration with file watching and scanning
@@ -27,7 +27,7 @@ The following foundation has need to confirm the implementation exists in full:
 
 ### Must-Have Features
 
-- [ ] **Voice File Monitoring** - Watch ~/Library/Group Containers/*/Recordings for .m4a files `M`
+- [ ] **Voice File Monitoring** - Watch ~/Library/Group Containers/\*/Recordings for .m4a files `M`
 - [ ] **Whisper Integration** - Install and configure whisper-node for transcription `M`
 - [ ] **Voice Processing Pipeline** - Auto-transcribe → generate embeddings → store in ChromaDB `M`
 - [ ] **Obsidian Note Creation** - Auto-create markdown files with transcriptions and metadata `M`
@@ -137,21 +137,25 @@ The following foundation has need to confirm the implementation exists in full:
 ## Success Metrics
 
 ### Phase 1 Metrics
+
 - Voice transcription accuracy >95%
 - Time from voice memo to indexed note <60 seconds
 - Semantic search relevance score >85%
 
-### Phase 2 Metrics  
+### Phase 2 Metrics
+
 - Email classification precision >90%
 - Deadline extraction accuracy >85%
 - Calendar processing latency <30 seconds
 
 ### Phase 3 Metrics
+
 - Quick capture time <10 seconds
 - Daily Raycast usage >5 interactions
 - Keyboard shortcut adoption >80%
 
 ### Phase 4 Metrics
+
 - Medication cycle adaptation accuracy >90%
 - Cognitive load prediction precision >85%
 - User satisfaction with adaptive timing >90%
@@ -159,13 +163,15 @@ The following foundation has need to confirm the implementation exists in full:
 ## Risk Mitigation
 
 ### High-Risk Items
+
 - **Voice transcription accuracy** → Use Whisper base model, manual correction option
 - **Gmail API rate limits** → Implement backoff with @orchestr8/resilience
 - **ChromaDB performance** → Optimize collections and batch operations
 - **Raycast extension complexity** → Start minimal, iterate based on usage
 
 ### Mitigation Strategies
+
 - Extensive structured logging for debugging
-- Graceful degradation when services unavailable  
+- Graceful degradation when services unavailable
 - Manual fallbacks for all automated processes
 - Regular user testing with actual ADHD workflows

@@ -11,7 +11,6 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 1.1 Install missing ChromaDB optional dependencies (ollama, cohere-ai)
   - [x] 1.2 Verify build process completes without errors
   - [x] 1.3 Test application startup with new dependencies
-  
 
 - [x] 2. Create ESLint Configuration
   - [x] 2.1 Install @typescript-eslint/eslint-plugin and @typescript-eslint/parser
@@ -37,4 +36,3 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 5.2 Verify performance meets requirements (startup < 3s, reload < 1s)
   - [x] 5.3 Test production build generates optimized bundle
   - [x] 5.4 Validate all external service connections work correctly
-  

@@ -2,47 +2,51 @@ import { z } from 'zod';
 import type { ResiliencePolicy } from '@orchestr8/schema';
 
 const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
   PORT: z.coerce.number().default(3000),
   HOST: z.string().default('localhost'),
   OBSIDIAN_VAULT_PATH: z.string().optional(),
   CHROMADB_URL: z.string().default('http://localhost:8000'),
   OLLAMA_URL: z.string().default('http://localhost:11434'),
   OLLAMA_MODEL: z.string().default('nomic-embed-text'),
-  LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error']).default('info'),
-  
+  LOG_LEVEL: z
+    .enum(['trace', 'debug', 'info', 'warn', 'error'])
+    .default('info'),
+
   // CORS Configuration
   ALLOWED_ORIGINS: z.string().optional(),
-  
+
   // Resilience Configuration - Ollama
   OLLAMA_RETRY_MAX_ATTEMPTS: z.coerce.number().default(3),
   OLLAMA_CIRCUIT_BREAKER_THRESHOLD: z.coerce.number().default(5),
   OLLAMA_TIMEOUT_DURATION: z.coerce.number().default(30000),
-  
+
   // Resilience Configuration - ChromaDB
   CHROMADB_RETRY_MAX_ATTEMPTS: z.coerce.number().default(2),
   CHROMADB_CIRCUIT_BREAKER_THRESHOLD: z.coerce.number().default(3),
   CHROMADB_TIMEOUT_DURATION: z.coerce.number().default(10000),
-  
+
   // Resilience Configuration - FileSystem
   FILESYSTEM_TIMEOUT_DURATION: z.coerce.number().default(5000),
-  
+
   // Logger Configuration
   LOG_PRETTY: z.coerce.boolean().optional(),
   LOG_MAX_FIELD_SIZE: z.coerce.number().default(1000),
-  
+
   // Security Configuration - Rate Limiting
   RATE_LIMIT_MAX: z.coerce.number().default(100),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60000),
   RATE_LIMIT_SKIP_ON_SUCCESS: z.coerce.boolean().default(true),
-  
+
   // Security Configuration - Request Timeout
   REQUEST_TIMEOUT_MS: z.coerce.number().default(30000),
-  
+
   // Performance Configuration - Compression
   COMPRESSION_THRESHOLD: z.coerce.number().default(1024),
   COMPRESSION_QUALITY: z.coerce.number().min(1).max(9).default(6),
-  
+
   // Performance Configuration - Back Pressure
   MAX_EVENT_LOOP_DELAY: z.coerce.number().default(1000),
   MAX_HEAP_USED_BYTES: z.coerce.number().default(100 * 1024 * 1024), // 100MB
@@ -63,13 +67,14 @@ export const config = {
   isDevelopment: env.NODE_ENV === 'development',
   isProduction: env.NODE_ENV === 'production',
   isTest: env.NODE_ENV === 'test',
-  
+
   // CORS Configuration
-  allowedOrigins: env.ALLOWED_ORIGINS?.split(',').map(origin => origin.trim()) || 
-    (env.NODE_ENV === 'development' 
-      ? ['http://localhost:3000', 'http://127.0.0.1:3000'] 
+  allowedOrigins:
+    env.ALLOWED_ORIGINS?.split(',').map(origin => origin.trim()) ||
+    (env.NODE_ENV === 'development'
+      ? ['http://localhost:3000', 'http://127.0.0.1:3000']
       : []),
-  
+
   // Logger Configuration
   logger: {
     level: env.LOG_LEVEL,
@@ -77,7 +82,7 @@ export const config = {
     redactKeys: ['apiKey', 'token', 'password', 'secret', 'authorization'],
     maxFieldSize: env.LOG_MAX_FIELD_SIZE,
   },
-  
+
   // Security Configuration
   security: {
     rateLimit: {
@@ -87,7 +92,7 @@ export const config = {
     },
     requestTimeout: env.REQUEST_TIMEOUT_MS,
   },
-  
+
   // Performance Configuration
   performance: {
     compression: {
@@ -100,7 +105,7 @@ export const config = {
       maxRssBytes: env.MAX_RSS_BYTES,
     },
   },
-  
+
   // Resilience Policies
   resilience: {
     ollama: {
@@ -119,7 +124,7 @@ export const config = {
       },
       timeout: env.OLLAMA_TIMEOUT_DURATION,
     } satisfies ResiliencePolicy,
-    
+
     chromadb: {
       retry: {
         maxAttempts: env.CHROMADB_RETRY_MAX_ATTEMPTS,
@@ -136,7 +141,7 @@ export const config = {
       },
       timeout: env.CHROMADB_TIMEOUT_DURATION,
     } satisfies ResiliencePolicy,
-    
+
     filesystem: {
       timeout: env.FILESYSTEM_TIMEOUT_DURATION,
     } satisfies ResiliencePolicy,

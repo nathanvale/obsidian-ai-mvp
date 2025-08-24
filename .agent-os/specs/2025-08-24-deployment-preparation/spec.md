@@ -6,7 +6,7 @@
 
 ## Overview
 
-Implement comprehensive deployment preparation infrastructure including pre-commit hooks with Husky for code quality enforcement and GitHub Actions CI workflow to ensure reliable, automated quality gates for the ADHD Digital Second Brain application.
+Implement comprehensive deployment preparation infrastructure based on the proven @orchestr8 monorepo CI/CD pattern, adapted for our Bun-based single project. This includes pre-commit hooks with Husky and lint-staged for optimized code quality enforcement and a GitHub Actions CI workflow using the @orchestr8 "validate" job pattern to ensure reliable, automated quality gates for the ADHD Digital Second Brain application.
 
 ## User Stories
 
@@ -24,11 +24,12 @@ The CI workflow runs on every push and pull request, executing the complete qual
 
 ## Spec Scope
 
-1. **Husky Pre-commit Hook Setup** - Configure Husky to manage Git hooks with automatic installation and cross-platform compatibility
-2. **Prettier Integration** - Enforce consistent code formatting across all TypeScript files with project-specific configuration
-3. **ESLint Configuration** - Run comprehensive linting with TypeScript-specific rules and error reporting
-4. **TypeScript Type Checking** - Validate type safety with strict mode compliance before commits
-5. **Test Execution** - Run Bun test suite with failure reporting and coverage validation
+1. **Husky Two-Hook Setup (@orchestr8 Pattern)** - Configure pre-commit hook with lint-staged for staged files and pre-push hook with comprehensive validation
+2. **Prettier Integration (@orchestr8 Config)** - Adopt the exact Prettier configuration from @orchestr8 monorepo for consistent formatting
+3. **ESLint Configuration** - Run comprehensive linting with TypeScript-specific rules and error reporting aligned with @orchestr8 patterns
+4. **Script Standardization** - Implement `check:no-test` and `check` scripts following @orchestr8 conventions
+5. **GitHub Actions Validate Job** - Single CI job pattern from @orchestr8 with concurrency control and sequential quality gates
+6. **Comprehensive Documentation** - Create .husky/README.md with troubleshooting guides and ADHD-friendly developer workflows
 
 ## Out of Scope
 

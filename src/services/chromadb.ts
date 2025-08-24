@@ -75,9 +75,9 @@ class ChromaDBService {
     try {
       await this.client.deleteCollection({ name: this.collectionName });
     } catch (error) {
-      logWithContext.warn('Failed to delete collection', { 
+      logWithContext.warn('Failed to delete collection', {
         collectionName: this.collectionName,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }

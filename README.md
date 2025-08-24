@@ -13,7 +13,7 @@ Phase 1 infrastructure is now complete with the following features:
   - `GET /` - API information and available endpoints
   - `GET /health` - Health check for ChromaDB and Ollama services
   - `POST /api/search` - Semantic search (placeholder)
-  - `POST /api/chat` - Conversational AI (placeholder)  
+  - `POST /api/chat` - Conversational AI (placeholder)
   - `POST /api/quiz/generate` - Quiz generation (placeholder)
   - `GET /api/index/status` - Indexing status
   - `POST /api/index/start` - Start indexing
@@ -34,32 +34,37 @@ Phase 1 infrastructure is now complete with the following features:
 ## Quick Start
 
 1. **Verify Node.js Version**:
+
    ```bash
    node --version  # Should be v22.11.0 or higher
    ```
 
 2. **Install Dependencies**:
+
    ```bash
    bun install
    ```
 
 3. **Configure Environment**:
+
    ```bash
    cp .env.example .env
    # Edit .env with your vault path and service URLs
    ```
 
 4. **Start Services** (in separate terminals):
+
    ```bash
    # Start ChromaDB
    docker run -p 8000:8000 chromadb/chroma
-   
+
    # Start Ollama and pull model
    ollama serve
    ollama pull nomic-embed-text
    ```
 
 5. **Run Development Server**:
+
    ```bash
    bun run dev
    ```
@@ -102,6 +107,6 @@ Phase 1 provides the foundational infrastructure. The next phase will implement:
 
 - **Runtime**: Bun
 - **API Framework**: Fastify
-- **Vector Database**: ChromaDB  
+- **Vector Database**: ChromaDB
 - **LLM Integration**: Ollama
 - **Language**: TypeScript

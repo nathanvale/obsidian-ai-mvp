@@ -18,14 +18,17 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 ## Approach Options
 
 **Option A:** Comprehensive Development Environment Overhaul
+
 - Pros: Modern tooling, excellent developer experience, comprehensive error detection
 - Cons: Significant time investment, potential compatibility issues, over-engineering risk
 
 **Option B:** Targeted Fixes with Performance Optimization (Selected)
+
 - Pros: Addresses immediate issues, maintains existing working setup, fast implementation
 - Cons: May require future iterations, less comprehensive than full overhaul
 
 **Option C:** Minimal Fixes Only
+
 - Pros: Very fast implementation, minimal risk
 - Cons: Doesn't optimize development experience, misses performance improvements
 

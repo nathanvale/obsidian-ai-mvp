@@ -6,6 +6,7 @@
 
 **Purpose:** Retrieve comprehensive Ollama service health status
 **Response Formats:**
+
 ```typescript
 interface HealthResponse {
   status: 'healthy' | 'degraded' | 'unhealthy';
@@ -16,7 +17,7 @@ interface HealthResponse {
     modelName: string;
     modelVersion: string;
     issues?: string[];
-  }
+  };
 }
 ```
 
@@ -24,6 +25,7 @@ interface HealthResponse {
 
 **Purpose:** Generate embeddings with enhanced resilience
 **Request Body:**
+
 ```typescript
 interface EmbeddingRequest {
   texts: string[];
@@ -31,11 +33,12 @@ interface EmbeddingRequest {
   options?: {
     timeout?: number;
     retryAttempts?: number;
-  }
+  };
 }
 ```
 
 **Response Body:**
+
 ```typescript
 interface EmbeddingResponse {
   embeddings: number[][];
@@ -49,6 +52,7 @@ interface EmbeddingResponse {
 
 **Purpose:** List and manage available models
 **Response Body:**
+
 ```typescript
 interface ModelInfo {
   name: string;
@@ -67,6 +71,7 @@ interface ModelsResponse {
 ## Error Handling
 
 ### Standard Error Response
+
 ```typescript
 interface ErrorResponse {
   code: string;
@@ -77,6 +82,7 @@ interface ErrorResponse {
 ```
 
 ### Potential Error Codes
+
 - `OLLAMA_CONNECTION_ERROR`
 - `MODEL_UNAVAILABLE`
 - `EMBEDDING_GENERATION_FAILED`
@@ -88,6 +94,7 @@ interface ErrorResponse {
 
 **Purpose:** Dynamic configuration of Ollama service
 **Configurable Parameters:**
+
 - Retry attempts
 - Timeout durations
 - Default model

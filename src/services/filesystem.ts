@@ -35,22 +35,28 @@ class FileSystemService {
 
   private ensureVaultPath(): string {
     if (!this.vaultPath) {
-      throw new Error('Obsidian vault path not configured. Set OBSIDIAN_VAULT_PATH environment variable.');
+      throw new Error(
+        'Obsidian vault path not configured. Set OBSIDIAN_VAULT_PATH environment variable.'
+      );
     }
     return this.vaultPath;
   }
 
   async validateVaultPath(vaultPath?: string): Promise<boolean> {
     const pathToCheck = vaultPath || this.vaultPath;
-    if (!pathToCheck) {return false;}
+    if (!pathToCheck) {
+      return false;
+    }
 
     try {
       const stats = await fs.stat(pathToCheck);
-      if (!stats.isDirectory()) {return false;}
+      if (!stats.isDirectory()) {
+        return false;
+      }
 
       const files = await fs.readdir(pathToCheck);
       const hasObsidianConfig = files.includes('.obsidian');
-      
+
       return hasObsidianConfig;
     } catch (error) {
       return false;
@@ -89,9 +95,9 @@ class FileSystemService {
         }
       }
     } catch (error) {
-      logWithContext.warn(`Failed to scan directory ${currentPath}`, { 
+      logWithContext.warn(`Failed to scan directory ${currentPath}`, {
         path: currentPath,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -123,9 +129,9 @@ class FileSystemService {
         relativePath,
       };
     } catch (error) {
-      logWithContext.warn(`Failed to read file ${filePath}`, { 
+      logWithContext.warn(`Failed to read file ${filePath}`, {
         filePath,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return null;
     }
@@ -135,16 +141,16 @@ class FileSystemService {
     try {
       const vaultPath = this.ensureVaultPath();
       const fullPath = path.resolve(vaultPath, filePath);
-      
+
       if (!fullPath.startsWith(vaultPath)) {
         throw new Error('File path outside vault directory not allowed');
       }
 
       return await fs.readFile(fullPath, 'utf-8');
     } catch (error) {
-      logWithContext.warn(`Failed to read file ${filePath}`, { 
+      logWithContext.warn(`Failed to read file ${filePath}`, {
         filePath,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       return null;
     }
@@ -155,7 +161,7 @@ class FileSystemService {
     let totalSize = 0;
 
     const markdownFiles = await this.scanMarkdownFiles();
-    
+
     totalFiles = markdownFiles.length;
     totalSize = markdownFiles.reduce((sum, file) => sum + file.size, 0);
 
@@ -166,25 +172,37 @@ class FileSystemService {
     };
   }
 
-  async watchForChanges(callback: (filePath: string, changeType: 'added' | 'modified' | 'deleted') => void): Promise<void> {
+  async watchForChanges(
+    callback: (
+      filePath: string,
+      changeType: 'added' | 'modified' | 'deleted'
+    ) => void
+  ): Promise<void> {
     const vaultPath = this.ensureVaultPath();
-    
+
     logWithContext.info(`Starting file watcher for vault`, { vaultPath });
-    
+
     try {
       const watcher = fs.watch(vaultPath, { recursive: true });
-      
+
       for await (const event of watcher) {
         if (event.filename && this.isMarkdownFile(event.filename)) {
-          const changeType = event.eventType === 'rename' ? 
-            (await this.fileExists(path.join(vaultPath, event.filename)) ? 'added' : 'deleted') :
-            'modified';
-            
+          const changeType =
+            event.eventType === 'rename'
+              ? (await this.fileExists(path.join(vaultPath, event.filename)))
+                ? 'added'
+                : 'deleted'
+              : 'modified';
+
           callback(event.filename, changeType);
         }
       }
     } catch (error) {
-      logWithContext.error('File watcher error', { vaultPath }, error instanceof Error ? error : new Error(String(error)));
+      logWithContext.error(
+        'File watcher error',
+        { vaultPath },
+        error instanceof Error ? error : new Error(String(error))
+      );
       throw new Error(`Failed to watch vault for changes: ${error}`);
     }
   }
@@ -201,11 +219,12 @@ class FileSystemService {
   async findFilesByPattern(pattern: string): Promise<MarkdownFile[]> {
     const allFiles = await this.scanMarkdownFiles();
     const regex = new RegExp(pattern, 'i');
-    
-    return allFiles.filter(file => 
-      regex.test(file.name) || 
-      regex.test(file.relativePath) ||
-      regex.test(file.content)
+
+    return allFiles.filter(
+      file =>
+        regex.test(file.name) ||
+        regex.test(file.relativePath) ||
+        regex.test(file.content)
     );
   }
 

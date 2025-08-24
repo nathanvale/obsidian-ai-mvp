@@ -15,6 +15,7 @@ Complete the remaining @orchestr8 infrastructure integration for OllamaService a
 As an ADHD adult using the system during afternoon medication wear-off, I want detailed structured logs with correlation tracking, so that when the AI processing fails during my lowest cognitive function period, I can easily understand what went wrong without having to debug complex technical issues myself.
 
 **Detailed Workflow:**
+
 - User's medication effectiveness decreases around 2 PM
 - Voice memo transcription or semantic search begins failing
 - Correlation IDs allow tracking the failure from voice upload through Ollama embedding to ChromaDB storage
@@ -25,6 +26,7 @@ As an ADHD adult using the system during afternoon medication wear-off, I want d
 As an ADHD professional depending on the system for executive function support, I want automatic circuit breaker protection and retry policies, so that when Ollama or ChromaDB temporarily fails, the system gracefully recovers without losing my critical thoughts and deadlines.
 
 **Detailed Workflow:**
+
 - User captures important voice memo about upcoming deadline
 - Ollama service temporarily fails during embedding generation
 - Circuit breaker prevents cascade failures to other services
@@ -36,6 +38,7 @@ As an ADHD professional depending on the system for executive function support, 
 As an ADHD user during a hyperfocus session, I want the system to monitor service health and automatically handle failures, so that I can maintain my flow state without being interrupted by technical issues or having to manually troubleshoot system problems.
 
 **Detailed Workflow:**
+
 - User enters hyperfocus state working on important project
 - Background services (file monitoring, search indexing) continue processing
 - ChromaDB connection temporarily drops due to system resource contention

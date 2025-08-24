@@ -12,6 +12,7 @@ Following the minimal testing philosophy (maximum 5 critical tests), focusing on
 ### Critical Smoke Tests (Following Minimal Testing Philosophy)
 
 **1. Service Connectivity with Correlation Tracking Test**
+
 - Verify OllamaService can generate embeddings with correlation ID headers
 - Verify ChromaDBService can perform vector queries with correlation context
 - Verify FileSystemService can scan vault with correlation logging
@@ -19,6 +20,7 @@ Following the minimal testing philosophy (maximum 5 critical tests), focusing on
 - Assert structured logs contain correlation metadata
 
 **2. Circuit Breaker Protection Test**
+
 - Simulate Ollama service failure (connection refused)
 - Verify circuit breaker opens and prevents cascade failures
 - Simulate ChromaDB connection failure
@@ -26,6 +28,7 @@ Following the minimal testing philosophy (maximum 5 critical tests), focusing on
 - Assert error responses include correlation IDs for debugging
 
 **3. Retry Policy Functionality Test**
+
 - Inject temporary failures into OllamaService HTTP calls
 - Verify automatic retry with exponential backoff
 - Inject temporary failures into ChromaDBService operations
@@ -33,12 +36,14 @@ Following the minimal testing philosophy (maximum 5 critical tests), focusing on
 - Assert retry attempts are logged with correlation context
 
 **4. ADHD Workflow Integration Test**
+
 - Execute complete voice memo pipeline: file detection → transcription → embeddings → storage
 - Verify semantic search functionality remains operational
 - Verify correlation IDs track the entire workflow end-to-end
 - Assert no regression in performance for critical ADHD support features
 
 **5. Error Context Propagation Test**
+
 - Trigger service failures at different points in the pipeline
 - Verify correlation IDs are maintained through error boundaries
 - Verify structured error logs provide actionable debugging information
@@ -47,16 +52,19 @@ Following the minimal testing philosophy (maximum 5 critical tests), focusing on
 ### Unit Tests
 
 **OllamaService**
+
 - Test correlation ID propagation to Ollama API calls
 - Test circuit breaker behavior with various failure scenarios
 - Test retry policy configuration and exponential backoff timing
 
 **ChromaDBService**
+
 - Test correlation context in vector database operations
 - Test resilience patterns for bulk operations
 - Test structured error handling for connection failures
 
 **FileSystemService**
+
 - Test retry policies for file watching operations
 - Test correlation tracking for file processing workflows
 - Test graceful degradation when vault becomes unavailable
@@ -64,11 +72,13 @@ Following the minimal testing philosophy (maximum 5 critical tests), focusing on
 ### Integration Tests
 
 **Service Orchestration**
+
 - Test correlation ID flow through multi-service operations
 - Test error recovery across service boundaries
 - Test performance impact of @orchestr8 integration
 
 **Route Handler Integration**
+
 - Test request.getLogger() usage in all routes
 - Test correlation ID propagation from routes to services
 - Test structured error responses with debugging context

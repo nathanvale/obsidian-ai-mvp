@@ -17,12 +17,14 @@ The ADHD Digital Second Brain is a local-first cognitive support system that act
 ### User Personas
 
 **ADHD Parent Professional** (30-45 years old)
+
 - **Role:** Working parent managing career and family
 - **Context:** Juggling work deadlines, school events, medical appointments, bill payments
 - **Pain Points:** Forgets permission slips, misses bill due dates, loses brilliant ideas, struggles during medication wear-off
 - **Goals:** Never miss important deadlines, reduce cognitive load, maintain productivity throughout the day, capture fleeting thoughts
 
 **ADHD Student/Professional** (22-35 years old)
+
 - **Role:** Student or early-career professional
 - **Context:** High cognitive demands with limited executive function support
 - **Pain Points:** Assignment deadlines, email overwhelm, task initiation paralysis, hyperfocus management

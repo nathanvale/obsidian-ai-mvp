@@ -1,5 +1,9 @@
 import { ProductionResilienceAdapter } from '@orchestr8/resilience';
-import type { ResiliencePolicy, CompositionOrder, ResilienceInvocationContext } from '@orchestr8/schema';
+import type {
+  ResiliencePolicy,
+  CompositionOrder,
+  ResilienceInvocationContext,
+} from '@orchestr8/schema';
 import { config } from '../config/environment.js';
 
 export class ResilienceService {
@@ -8,7 +12,7 @@ export class ResilienceService {
 
   private constructor() {
     this.adapter = new ProductionResilienceAdapter();
-    
+
     // Set up logging for circuit breaker events if available
     // Note: The exact API for circuit breaker observers may need adjustment based on @orchestr8/resilience documentation
   }
@@ -87,11 +91,13 @@ export class ResilienceService {
     signal?: AbortSignal,
     context?: Partial<ResilienceInvocationContext>
   ): Promise<T> {
-    const invocationContext: ResilienceInvocationContext | undefined = context ? {
-      workflowId: context.workflowId || 'custom-operation',
-      stepId: context.stepId || 'operation',
-      correlationId: context.correlationId,
-    } : undefined;
+    const invocationContext: ResilienceInvocationContext | undefined = context
+      ? {
+          workflowId: context.workflowId || 'custom-operation',
+          stepId: context.stepId || 'operation',
+          correlationId: context.correlationId,
+        }
+      : undefined;
 
     return await this.adapter.applyNormalizedPolicy(
       operation,
@@ -102,7 +108,10 @@ export class ResilienceService {
     );
   }
 
-  public getCircuitBreakerStates(): Record<string, { state: string; failureCount: number }> {
+  public getCircuitBreakerStates(): Record<
+    string,
+    { state: string; failureCount: number }
+  > {
     // This would typically return actual circuit breaker states
     // For now, return a placeholder structure
     return {

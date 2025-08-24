@@ -27,7 +27,7 @@ As an ADHD user whose cognitive capacity varies throughout the day, I want searc
 ## Spec Scope
 
 1. **Complete Search Route Implementation** - Connect existing ChromaDB service to `/search` endpoint with embedding generation
-2. **Document Indexing Pipeline** - Orchestrate Obsidian vault scanning → chunking → embedding → storage workflow  
+2. **Document Indexing Pipeline** - Orchestrate Obsidian vault scanning → chunking → embedding → storage workflow
 3. **Real-time File Processing** - Integrate file system monitoring with automatic indexing for vault changes
 4. **Background Job System** - Queue-based processing for large vault indexing with progress tracking
 5. **ADHD-Optimized Results** - Cognitive load-aware result filtering and adaptive complexity management

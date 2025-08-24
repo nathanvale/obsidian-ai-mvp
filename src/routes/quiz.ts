@@ -8,48 +8,63 @@ const generateQuizSchema = z.object({
 });
 
 export async function quizRoutes(server: FastifyInstance) {
-  server.post('/generate', {
-    schema: {
-      body: {
-        type: 'object',
-        properties: {
-          topic: { type: 'string', minLength: 1 },
-          numQuestions: { type: 'number', minimum: 1, maximum: 20, default: 5 },
-          difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'], default: 'medium' },
-        },
-        required: ['topic'],
-      },
-      response: {
-        200: {
+  server.post(
+    '/generate',
+    {
+      schema: {
+        body: {
           type: 'object',
           properties: {
-            questions: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  id: { type: 'string' },
-                  question: { type: 'string' },
-                  options: { type: 'array', items: { type: 'string' } },
-                  correctAnswer: { type: 'number' },
-                  explanation: { type: 'string' },
+            topic: { type: 'string', minLength: 1 },
+            numQuestions: {
+              type: 'number',
+              minimum: 1,
+              maximum: 20,
+              default: 5,
+            },
+            difficulty: {
+              type: 'string',
+              enum: ['easy', 'medium', 'hard'],
+              default: 'medium',
+            },
+          },
+          required: ['topic'],
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              questions: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    question: { type: 'string' },
+                    options: { type: 'array', items: { type: 'string' } },
+                    correctAnswer: { type: 'number' },
+                    explanation: { type: 'string' },
+                  },
                 },
               },
+              topic: { type: 'string' },
+              difficulty: { type: 'string' },
             },
-            topic: { type: 'string' },
-            difficulty: { type: 'string' },
           },
         },
       },
     },
-  }, async (request, reply) => {
-    const { topic, numQuestions, difficulty } = request.body as z.infer<typeof generateQuizSchema>;
+    async (request, reply) => {
+      const { topic, numQuestions, difficulty } = request.body as z.infer<
+        typeof generateQuizSchema
+      >;
 
-    return reply.status(200).send({
-      questions: [],
-      topic,
-      difficulty,
-      numQuestions, // Include numQuestions in response
-    });
-  });
+      return reply.status(200).send({
+        questions: [],
+        topic,
+        difficulty,
+        numQuestions, // Include numQuestions in response
+      });
+    }
+  );
 }

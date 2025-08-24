@@ -8,6 +8,7 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 ## Technical Requirements
 
 ### Enhanced Zod Schema Validation
+
 - Add custom validators for file/directory path existence
 - Implement URL format validation with connectivity checks
 - Create port range validation (1-65535) with availability checks
@@ -16,6 +17,7 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 - Create service availability validators (Ollama, ChromaDB connectivity)
 
 ### ADHD-Friendly Error Message System
+
 - Transform Zod validation errors into actionable, human-readable messages
 - Include specific fix suggestions for each error type
 - Provide context-aware troubleshooting steps
@@ -23,6 +25,7 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 - Include correlation IDs for debugging support
 
 ### Configuration Hot Reload Mechanism
+
 - Implement file system watcher for .env file changes using chokidar
 - Create thread-safe configuration reload without service interruption
 - Validate new configuration before applying changes
@@ -30,6 +33,7 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 - Generate configuration change events for monitoring
 
 ### Environment Profile Management
+
 - Define preset configurations for development, testing, production
 - Support profile-specific variable overrides and inheritance
 - Implement profile validation and switching mechanisms
@@ -38,16 +42,18 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 ## Approach Options
 
 **Option A: In-Memory Configuration Management (Selected)**
-- Pros: 
+
+- Pros:
   - Complete control over configuration lifecycle
   - No external dependencies beyond chokidar for file watching
   - Optimized for ADHD tool's specific validation needs
   - Minimal performance overhead
-- Cons: 
+- Cons:
   - More complex implementation
   - Custom reload logic required
 
 **Option B: Configuration Management Library**
+
 - Pros:
   - Faster implementation with existing solutions
   - Battle-tested reload mechanisms
@@ -62,17 +68,20 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 ## External Dependencies
 
 ### New Package Dependencies
+
 - **chokidar** `^3.5.3` - Cross-platform file system watching for configuration hot reload
   - Justification: Reliable file watching across all supported platforms
   - Alternative considered: Node.js fs.watch (less reliable cross-platform)
 
-### Enhanced @orchestr8 Usage  
+### Enhanced @orchestr8 Usage
+
 - **@orchestr8/logger** - Enhanced structured logging for configuration changes and validation
 - **@orchestr8/resilience** - Integration with existing resilience patterns for service validation
 
 ## Implementation Architecture
 
 ### Configuration Validator Service
+
 ```typescript
 interface ConfigValidator {
   validateSchema(config: unknown): ValidationResult;
@@ -82,6 +91,7 @@ interface ConfigValidator {
 ```
 
 ### Hot Reload Manager
+
 ```typescript
 interface ConfigReloadManager {
   watchConfigFiles(): void;
@@ -92,6 +102,7 @@ interface ConfigReloadManager {
 ```
 
 ### Environment Profile System
+
 ```typescript
 interface ProfileManager {
   getProfile(name: string): EnvironmentProfile;
@@ -101,6 +112,7 @@ interface ProfileManager {
 ```
 
 ### Service Availability Checks
+
 - Real-time connectivity validation for Ollama service
 - ChromaDB collection and connection validation
 - File system permissions and vault access verification
