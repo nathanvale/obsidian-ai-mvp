@@ -31,9 +31,11 @@
     "health:chromadb": "curl -f http://localhost:8000/api/v1/heartbeat || echo 'ChromaDB not running'",
     "services:status": "bun run health",
     "clean": "rm -rf dist node_modules/.cache",
-    "reset": "bun run clean && bun install",
-    "check": "bun run lint && bun run typecheck && bun run test && bun run build:prod",
-    "postinstall": "bun run check-node && bun run check-bun"
+    "reset": "bun run clean && pnpm install",
+    "install:clean": "rm -rf node_modules pnpm-lock.yaml && pnpm install",
+    "deps:update": "pnpm update --latest",
+    "deps:audit": "pnpm audit",
+    "check": "bun run lint && bun run typecheck && bun run test && bun run build:prod"
   },
   "engines": {
     "node": ">=22.11.0",
@@ -47,9 +49,11 @@
     "@fastify/under-pressure": "8.5.0",
     "@orchestr8/logger": "^1.0.0",
     "@orchestr8/resilience": "^1.0.0",
+    "@orchestr8/schema": "^1.0.0",
     "chromadb": "^1.7.3",
     "cohere-ai": "^7.18.1",
     "fastify": "^4.24.3",
+    "fastify-plugin": "^5.0.1",
     "ollama": "^0.5.17",
     "pino": "^9.0.0",
     "pino-pretty": "^10.2.3",
