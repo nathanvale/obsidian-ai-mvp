@@ -30,6 +30,23 @@ const envSchema = z.object({
   // Logger Configuration
   LOG_PRETTY: z.coerce.boolean().optional(),
   LOG_MAX_FIELD_SIZE: z.coerce.number().default(1000),
+  
+  // Security Configuration - Rate Limiting
+  RATE_LIMIT_MAX: z.coerce.number().default(100),
+  RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60000),
+  RATE_LIMIT_SKIP_ON_SUCCESS: z.coerce.boolean().default(true),
+  
+  // Security Configuration - Request Timeout
+  REQUEST_TIMEOUT_MS: z.coerce.number().default(30000),
+  
+  // Performance Configuration - Compression
+  COMPRESSION_THRESHOLD: z.coerce.number().default(1024),
+  COMPRESSION_QUALITY: z.coerce.number().min(1).max(9).default(6),
+  
+  // Performance Configuration - Back Pressure
+  MAX_EVENT_LOOP_DELAY: z.coerce.number().default(1000),
+  MAX_HEAP_USED_BYTES: z.coerce.number().default(100 * 1024 * 1024), // 100MB
+  MAX_RSS_BYTES: z.coerce.number().default(300 * 1024 * 1024), // 300MB
 });
 
 const env = envSchema.parse(process.env);
@@ -61,6 +78,29 @@ export const config = {
     maxFieldSize: env.LOG_MAX_FIELD_SIZE,
   },
   
+  // Security Configuration
+  security: {
+    rateLimit: {
+      max: env.RATE_LIMIT_MAX,
+      windowMs: env.RATE_LIMIT_WINDOW_MS,
+      skipOnSuccess: env.RATE_LIMIT_SKIP_ON_SUCCESS,
+    },
+    requestTimeout: env.REQUEST_TIMEOUT_MS,
+  },
+  
+  // Performance Configuration
+  performance: {
+    compression: {
+      threshold: env.COMPRESSION_THRESHOLD,
+      quality: env.COMPRESSION_QUALITY,
+    },
+    backPressure: {
+      maxEventLoopDelay: env.MAX_EVENT_LOOP_DELAY,
+      maxHeapUsedBytes: env.MAX_HEAP_USED_BYTES,
+      maxRssBytes: env.MAX_RSS_BYTES,
+    },
+  },
+  
   // Resilience Policies
   resilience: {
     ollama: {
@@ -69,7 +109,7 @@ export const config = {
         initialDelay: 100,
         maxDelay: 5000,
         backoffStrategy: 'exponential' as const,
-        jitterStrategy: 'full' as const,
+        jitterStrategy: 'full-jitter' as const,
       },
       circuitBreaker: {
         failureThreshold: env.OLLAMA_CIRCUIT_BREAKER_THRESHOLD,
@@ -77,10 +117,7 @@ export const config = {
         sampleSize: 10,
         halfOpenPolicy: 'single-probe' as const,
       },
-      timeout: {
-        duration: env.OLLAMA_TIMEOUT_DURATION,
-        operationName: 'ollama-operation',
-      },
+      timeout: env.OLLAMA_TIMEOUT_DURATION,
     } satisfies ResiliencePolicy,
     
     chromadb: {
@@ -97,17 +134,11 @@ export const config = {
         sampleSize: 8,
         halfOpenPolicy: 'single-probe' as const,
       },
-      timeout: {
-        duration: env.CHROMADB_TIMEOUT_DURATION,
-        operationName: 'chromadb-operation',
-      },
+      timeout: env.CHROMADB_TIMEOUT_DURATION,
     } satisfies ResiliencePolicy,
     
     filesystem: {
-      timeout: {
-        duration: env.FILESYSTEM_TIMEOUT_DURATION,
-        operationName: 'filesystem-operation',
-      },
+      timeout: env.FILESYSTEM_TIMEOUT_DURATION,
     } satisfies ResiliencePolicy,
   },
 };
