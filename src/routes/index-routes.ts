@@ -13,7 +13,16 @@ export async function indexRoutes(server: FastifyInstance) {
   server.get('/status', {
     schema: {
       response: {
-        200: indexStatusSchema,
+        200: {
+          type: 'object',
+          properties: {
+            status: { type: 'string', enum: ['idle', 'indexing', 'completed', 'error'] },
+            progress: { type: 'number', minimum: 0, maximum: 1 },
+            totalFiles: { type: 'number', minimum: 0 },
+            processedFiles: { type: 'number', minimum: 0 },
+            lastUpdated: { type: 'string' },
+          },
+        },
       },
     },
   }, async (request, reply) => {

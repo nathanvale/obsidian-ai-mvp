@@ -1,86 +1,90 @@
 # Product Mission
 
-> Last Updated: 2025-08-23
+> Last Updated: 2025-08-24
 > Version: 1.0.0
 
 ## Pitch
 
-Obsidian AI MVP is a local-first AI-powered knowledge assistant that helps Obsidian users unlock deeper insights from their personal knowledge base by providing semantic search, intelligent quiz generation, and conversational AI - all while keeping data completely private and secure on their local machine.
+The ADHD Digital Second Brain is a local-first cognitive support system that acts as an external executive function prosthetic, helping ADHD adults capture thoughts through voice, automatically process emails for deadlines, and adapt its interface to medication cycles—providing zero-friction cognitive support exactly when the ADHD brain needs it most.
 
 ## Users
 
 ### Primary Customers
 
-- **Knowledge Workers**: Researchers, writers, students, and professionals who maintain extensive Obsidian vaults
-- **Privacy-Conscious Users**: Individuals who want AI capabilities without sending their personal notes to external services
+- **ADHD Adults (25-45)**: Parents and professionals managing complex family, work, and personal responsibilities
+- **ADHD Students/Early Career (22-35)**: Individuals with high cognitive demands and executive dysfunction challenges
 
 ### User Personas
 
-**Academic Researcher** (25-45 years old)
-- **Role:** PhD Student, Professor, Research Scientist
-- **Context:** Maintains extensive research notes, literature reviews, and theoretical frameworks in Obsidian
-- **Pain Points:** Difficulty finding relevant connections across hundreds of notes, time-consuming manual review for exam preparation
-- **Goals:** Quickly locate relevant research, generate study materials, discover hidden connections in their knowledge base
+**ADHD Parent Professional** (30-45 years old)
+- **Role:** Working parent managing career and family
+- **Context:** Juggling work deadlines, school events, medical appointments, bill payments
+- **Pain Points:** Forgets permission slips, misses bill due dates, loses brilliant ideas, struggles during medication wear-off
+- **Goals:** Never miss important deadlines, reduce cognitive load, maintain productivity throughout the day, capture fleeting thoughts
 
-**Professional Knowledge Worker** (28-50 years old)
-- **Role:** Consultant, Product Manager, Technical Writer
-- **Context:** Uses Obsidian for project documentation, meeting notes, and strategic planning
-- **Pain Points:** Information silos, difficulty accessing relevant past work, manual knowledge synthesis
-- **Goals:** Rapid information retrieval, automated knowledge synthesis, enhanced decision-making support
+**ADHD Student/Professional** (22-35 years old)
+- **Role:** Student or early-career professional
+- **Context:** High cognitive demands with limited executive function support
+- **Pain Points:** Assignment deadlines, email overwhelm, task initiation paralysis, hyperfocus management
+- **Goals:** Automatic organization, visual progress tracking, leverage hyperfocus strengths
 
 ## The Problem
 
-### Information Overload in Personal Knowledge Systems
+### Executive Function Breakdown
 
-Personal knowledge bases grow exponentially but traditional search methods rely on exact keyword matching, making it difficult to find relevant information when you don't remember the exact terms used. Users spend significant time manually browsing through notes instead of leveraging their accumulated knowledge effectively.
+ADHD brains struggle with working memory limitations, task initiation paralysis, and time blindness. During medication wear-off periods (typically afternoons), these challenges intensify, leading to missed deadlines, forgotten responsibilities, and underutilization of creative potential.
 
-**Our Solution:** Semantic search powered by local LLMs that understands meaning and context, not just keywords.
+**Our Solution:** An intelligent system that externalizes executive function by automatically capturing, organizing, and surfacing relevant information while adapting to predictable medication cycles and cognitive load patterns.
 
-### Privacy Concerns with AI-Powered Knowledge Tools
+### Information Overwhelm
 
-Most AI knowledge tools require uploading personal notes to external services, creating privacy and security risks that knowledge workers cannot accept, especially in sensitive domains like research, consulting, or personal journaling.
+The modern ADHD adult faces constant information streams—emails, calendar events, family communications, work tasks—without the executive function bandwidth to process and organize effectively.
 
-**Our Solution:** Complete local processing using Ollama and ChromaDB, ensuring all data stays on the user's machine.
+**Our Solution:** Local AI processing that automatically classifies emails for urgency, extracts deadlines, and creates actionable tasks in Obsidian, all while maintaining complete privacy.
 
-### Passive Knowledge Consumption
+### Cognitive Load During Low-Function Periods
 
-Knowledge bases become write-only systems where users add information but struggle to actively engage with and test their understanding of accumulated knowledge.
+Traditional productivity tools assume consistent cognitive capacity, but ADHD brains have predictable high and low-function periods based on medication timing and daily patterns.
 
-**Our Solution:** AI-powered quiz generation and conversational interfaces that transform passive note storage into active learning systems.
+**Our Solution:** Adaptive interface that automatically simplifies during medication wear-off, increases visual cues, and schedules complex tasks for optimal cognitive windows.
 
 ## Differentiators
 
-### Complete Local Processing
+### Medication Cycle Awareness
 
-Unlike tools like Notion AI or Roam Research AI features, we provide enterprise-grade AI capabilities that never send data to external servers. This results in absolute privacy, no subscription costs for AI API usage, and no internet dependency for core functionality.
+Unlike generic productivity tools, our system learns and adapts to predictable ADHD medication patterns. During peak effectiveness (typically 9 AM - 1 PM), the system schedules complex cognitive tasks. As medication wears off, the interface automatically simplifies with increased visual cues and gentler reminders.
 
-### Obsidian-Native Integration
+### Zero-Friction Cognitive Capture
 
-Unlike generic AI knowledge tools, we're built specifically for Obsidian's markdown format and linking structure. This results in seamless integration with existing workflows and preservation of Obsidian's core philosophy of local, future-proof note storage.
+Voice memos from Apple Watch automatically transcribe and organize into Obsidian with semantic indexing. Email processing extracts actionable items without manual intervention. The system captures thoughts at the speed of ADHD thinking without requiring organization decisions in the moment.
 
-### Real-time Learning Capability
+### Local-First Privacy
 
-Unlike static search systems, our AI continuously learns from user interactions and note updates, providing increasingly relevant results and suggestions over time while maintaining complete local processing.
+All AI processing occurs locally on M4 MacBook hardware, ensuring ADHD-sensitive information (medical details, financial obligations, personal struggles) never leaves the device while maintaining full functionality and speed.
+
+### Executive Function Externalization
+
+Rather than expecting ADHD brains to remember context and maintain working memory, the system becomes the external prefrontal cortex—tracking all relationships, deadlines, and decision states while presenting only the most relevant information needed for immediate action.
 
 ## Key Features
 
 ### Core Features
 
-- **Semantic Search:** Find notes by meaning and context, not just exact keyword matches
-- **Real-time Indexing:** Automatically updates as notes are modified or added to the vault
-- **Local LLM Integration:** Uses Ollama for all AI operations, ensuring complete privacy
-- **Intelligent Chunking:** Breaks down large notes into meaningful segments for better search relevance
+- **Voice Memo Transcription**: Apple Watch → iCloud → Whisper → Obsidian pipeline with semantic indexing
+- **Email Intelligence**: Gmail classification for urgent items, deadline extraction, automatic note creation
+- **Semantic Search**: ChromaDB-powered search across all captured content with context understanding
+- **File System Integration**: Automatic Obsidian vault monitoring and content indexing
 
-### Learning Features
+### ADHD-Optimized Features
 
-- **Quiz Generation:** Creates personalized quizzes from note content to test knowledge retention
-- **Conversational AI:** Chat interface to ask questions about your knowledge base
-- **Knowledge Gap Identification:** Highlights areas where additional research might be beneficial
-- **Concept Relationship Mapping:** Discovers and visualizes connections between different topics
+- **Medication Tracking**: Interface adaptation based on medication effectiveness cycles
+- **Cognitive Load Management**: Dynamic complexity adjustment and visual cue enhancement
+- **Progressive Disclosure**: Maximum 3 options presented at any decision point
+- **Time Blindness Mitigation**: Visual time representations with urgency gradients
 
-### Technical Features
+### Collaboration Features
 
-- **High Performance:** Built with Bun and TypeScript for maximum speed
-- **ChromaDB Integration:** Efficient vector storage and similarity search capabilities
-- **Batch Processing:** Optimized embedding generation for large vault processing
-- **RESTful API:** Clean interface for potential future integrations and extensions
+- **Raycast Integration**: Quick capture dashboard with keyboard shortcuts and instant access
+- **Calendar Intelligence**: Google Calendar integration with pattern recognition for recurring responsibilities
+- **Task Breakdown**: Automatic complex task decomposition into 2-minute actionable chunks
+- **Context Preservation**: Full metadata and relationship tracking for all captured information

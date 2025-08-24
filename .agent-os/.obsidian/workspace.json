@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 353.5
   },
   "right": {
     "id": "7f782c6eb63d8490",
@@ -157,9 +157,40 @@
   },
   "active": "c36087b0287230bf",
   "lastOpenFiles": [
-    "product/mission.md",
+    "specs/2025-01-24-fastify-production-api/sub-specs/technical-spec.md",
+    "specs/2025-08-24-ollama-service-enhancement/spec.md.tmp.21444.1756033878538",
+    "specs/2025-08-24-ollama-service-enhancement/tasks.md",
+    "specs/2025-08-24-ollama-service-enhancement/sub-specs/tests.md",
+    "specs/2025-08-24-ollama-service-enhancement/sub-specs/api-spec.md",
+    "specs/2025-08-24-ollama-service-enhancement/sub-specs/technical-spec.md",
+    "specs/2025-08-24-ollama-service-enhancement/spec.md",
+    "specs/2025-08-24-ollama-service-enhancement/sub-specs",
+    "specs/2025-08-24-ollama-service-enhancement",
+    "specs/2025-01-24-fastify-production-api/sub-specs/tests.md",
+    "specs/2025-01-24-fastify-production-api/spec.md",
     "product/roadmap.md",
     "product/tech-stack.md",
-    "product/obsidian_ai_mvp_setup.md"
+    "product/architecture.md",
+    "specs/2025-08-24-chromadb-semantic-search/tasks.md",
+    "specs/2025-01-24-fastify-production-api/tasks.md",
+    "specs/2025-08-24-bun-typescript-runtime/tasks.md",
+    "specs/2025-08-24-bun-typescript-runtime/spec.md",
+    "specs/2025-08-24-chromadb-semantic-search/sub-specs/tests.md",
+    "specs/2025-08-24-chromadb-semantic-search/sub-specs/api-spec.md",
+    "specs/2025-08-24-chromadb-semantic-search/sub-specs/technical-spec.md",
+    "specs/2025-08-24-chromadb-semantic-search/sub-specs",
+    "specs/2025-08-24-chromadb-semantic-search/spec.md",
+    "specs/2025-08-24-chromadb-semantic-search",
+    "specs/2025-08-24-bun-typescript-runtime/sub-specs/technical-spec.md",
+    "specs/2025-01-24-fastify-production-api/sub-specs",
+    "specs/2025-01-24-fastify-production-api",
+    "specs/2025-08-24-bun-typescript-runtime/sub-specs/tests.md",
+    "specs/2025-08-24-bun-typescript-runtime/sub-specs",
+    "specs/2025-08-24-bun-typescript-runtime",
+    "specs",
+    "product/decisions.md",
+    "product/mission.md",
+    "specs/2025-08-23-obsidian-api-core/tasks.md",
+    "specs/2025-08-24-core-api-infrastructure/tasks.md"
   ]
 }

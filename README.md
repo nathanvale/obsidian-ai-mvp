@@ -25,25 +25,31 @@ Phase 1 infrastructure is now complete with the following features:
 
 ## Prerequisites
 
-1. **Bun**: Install from [bun.sh](https://bun.sh)
-2. **Ollama**: Install and run with `nomic-embed-text` model
-3. **ChromaDB**: Running locally (Docker or standalone)
-4. **Obsidian Vault**: Accessible file path
+1. **Node.js 22**: Install Node.js 22.11.0 or later from [nodejs.org](https://nodejs.org) or use nvm: `nvm install 22.11.0`
+2. **Bun**: Install from [bun.sh](https://bun.sh)
+3. **Ollama**: Install and run with `nomic-embed-text` model
+4. **ChromaDB**: Running locally (Docker or standalone)
+5. **Obsidian Vault**: Accessible file path
 
 ## Quick Start
 
-1. **Install Dependencies**:
+1. **Verify Node.js Version**:
+   ```bash
+   node --version  # Should be v22.11.0 or higher
+   ```
+
+2. **Install Dependencies**:
    ```bash
    bun install
    ```
 
-2. **Configure Environment**:
+3. **Configure Environment**:
    ```bash
    cp .env.example .env
    # Edit .env with your vault path and service URLs
    ```
 
-3. **Start Services** (in separate terminals):
+4. **Start Services** (in separate terminals):
    ```bash
    # Start ChromaDB
    docker run -p 8000:8000 chromadb/chroma
@@ -53,12 +59,12 @@ Phase 1 infrastructure is now complete with the following features:
    ollama pull nomic-embed-text
    ```
 
-4. **Run Development Server**:
+5. **Run Development Server**:
    ```bash
    bun run dev
    ```
 
-5. **Test API**:
+6. **Test API**:
    ```bash
    curl http://localhost:3000/health
    ```

@@ -10,18 +10,35 @@ const searchRequestSchema = z.object({
 export async function searchRoutes(server: FastifyInstance) {
   server.post('/', {
     schema: {
-      body: searchRequestSchema,
+      body: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', minLength: 1 },
+          limit: { type: 'number', minimum: 1, maximum: 100, default: 10 },
+          threshold: { type: 'number', minimum: 0, maximum: 1, default: 0.3 },
+        },
+        required: ['query'],
+      },
       response: {
-        200: z.object({
-          results: z.array(z.object({
-            id: z.string(),
-            content: z.string(),
-            metadata: z.record(z.any()),
-            score: z.number(),
-          })),
-          query: z.string(),
-          total: z.number(),
-        }),
+        200: {
+          type: 'object',
+          properties: {
+            results: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  content: { type: 'string' },
+                  metadata: { type: 'object' },
+                  score: { type: 'number' },
+                },
+              },
+            },
+            query: { type: 'string' },
+            total: { type: 'number' },
+          },
+        },
       },
     },
   }, async (request, reply) => {

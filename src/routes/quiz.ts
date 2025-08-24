@@ -10,19 +10,36 @@ const generateQuizSchema = z.object({
 export async function quizRoutes(server: FastifyInstance) {
   server.post('/generate', {
     schema: {
-      body: generateQuizSchema,
+      body: {
+        type: 'object',
+        properties: {
+          topic: { type: 'string', minLength: 1 },
+          numQuestions: { type: 'number', minimum: 1, maximum: 20, default: 5 },
+          difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'], default: 'medium' },
+        },
+        required: ['topic'],
+      },
       response: {
-        200: z.object({
-          questions: z.array(z.object({
-            id: z.string(),
-            question: z.string(),
-            options: z.array(z.string()),
-            correctAnswer: z.number(),
-            explanation: z.string(),
-          })),
-          topic: z.string(),
-          difficulty: z.string(),
-        }),
+        200: {
+          type: 'object',
+          properties: {
+            questions: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  question: { type: 'string' },
+                  options: { type: 'array', items: { type: 'string' } },
+                  correctAnswer: { type: 'number' },
+                  explanation: { type: 'string' },
+                },
+              },
+            },
+            topic: { type: 'string' },
+            difficulty: { type: 'string' },
+          },
+        },
       },
     },
   }, async (request, reply) => {

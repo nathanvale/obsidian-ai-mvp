@@ -9,12 +9,22 @@ const chatRequestSchema = z.object({
 export async function chatRoutes(server: FastifyInstance) {
   server.post('/', {
     schema: {
-      body: chatRequestSchema,
+      body: {
+        type: 'object',
+        properties: {
+          message: { type: 'string', minLength: 1 },
+          context: { type: 'array', items: { type: 'string' } },
+        },
+        required: ['message'],
+      },
       response: {
-        200: z.object({
-          response: z.string(),
-          context: z.array(z.string()),
-        }),
+        200: {
+          type: 'object',
+          properties: {
+            response: { type: 'string' },
+            context: { type: 'array', items: { type: 'string' } },
+          },
+        },
       },
     },
   }, async (request, reply) => {

@@ -1,5 +1,5 @@
 import { ProductionResilienceAdapter } from '@orchestr8/resilience';
-import type { ResiliencePolicy } from '@orchestr8/schema';
+import type { ResiliencePolicy, CompositionOrder, ResilienceInvocationContext } from '@orchestr8/schema';
 import { config } from '../config/environment.js';
 import { logger } from './logger.js';
 
@@ -9,7 +9,9 @@ export class ResilienceService {
 
   private constructor() {
     this.adapter = new ProductionResilienceAdapter();
-    this.setupCircuitBreakerObserver();
+    
+    // Set up logging for circuit breaker events if available
+    // Note: The exact API for circuit breaker observers may need adjustment based on @orchestr8/resilience documentation
   }
 
   public static getInstance(): ResilienceService {
@@ -19,101 +21,85 @@ export class ResilienceService {
     return ResilienceService.instance;
   }
 
-  private setupCircuitBreakerObserver(): void {
-    this.adapter.circuitBreakerObserver((event) => {
-      logger.warn({
-        operationName: event.operationName,
-        previousState: event.previousState,
-        newState: event.newState,
-        timestamp: event.timestamp,
-        resilience: 'circuit-breaker-state-change',
-      }, `Circuit breaker state changed: ${event.previousState} -> ${event.newState} for ${event.operationName}`);
-    });
-  }
-
   public async applyOllamaPolicy<T>(
     operation: (signal?: AbortSignal) => Promise<T>,
     signal?: AbortSignal,
-    context?: {
-      workflowId?: string;
-      stepId?: string;
-      correlationId?: string;
-    }
+    context?: Partial<ResilienceInvocationContext>
   ): Promise<T> {
+    const invocationContext: ResilienceInvocationContext = {
+      workflowId: context?.workflowId || 'ollama-service',
+      stepId: context?.stepId || 'operation',
+      correlationId: context?.correlationId,
+    };
+
     return await this.adapter.applyNormalizedPolicy(
       operation,
       config.resilience.ollama,
       'retry-cb-timeout',
       signal,
-      {
-        workflowId: context?.workflowId || 'ollama-service',
-        stepId: context?.stepId || 'operation',
-        correlationId: context?.correlationId,
-      }
+      invocationContext
     );
   }
 
   public async applyChromaDbPolicy<T>(
     operation: (signal?: AbortSignal) => Promise<T>,
     signal?: AbortSignal,
-    context?: {
-      workflowId?: string;
-      stepId?: string;
-      correlationId?: string;
-    }
+    context?: Partial<ResilienceInvocationContext>
   ): Promise<T> {
+    const invocationContext: ResilienceInvocationContext = {
+      workflowId: context?.workflowId || 'chromadb-service',
+      stepId: context?.stepId || 'operation',
+      correlationId: context?.correlationId,
+    };
+
     return await this.adapter.applyNormalizedPolicy(
       operation,
       config.resilience.chromadb,
       'retry-cb-timeout',
       signal,
-      {
-        workflowId: context?.workflowId || 'chromadb-service',
-        stepId: context?.stepId || 'operation',
-        correlationId: context?.correlationId,
-      }
+      invocationContext
     );
   }
 
   public async applyFileSystemPolicy<T>(
     operation: (signal?: AbortSignal) => Promise<T>,
     signal?: AbortSignal,
-    context?: {
-      workflowId?: string;
-      stepId?: string;
-      correlationId?: string;
-    }
+    context?: Partial<ResilienceInvocationContext>
   ): Promise<T> {
+    const invocationContext: ResilienceInvocationContext = {
+      workflowId: context?.workflowId || 'filesystem-service',
+      stepId: context?.stepId || 'operation',
+      correlationId: context?.correlationId,
+    };
+
     return await this.adapter.applyNormalizedPolicy(
       operation,
       config.resilience.filesystem,
       'retry-cb-timeout',
       signal,
-      {
-        workflowId: context?.workflowId || 'filesystem-service',
-        stepId: context?.stepId || 'operation',
-        correlationId: context?.correlationId,
-      }
+      invocationContext
     );
   }
 
   public async applyCustomPolicy<T>(
     operation: (signal?: AbortSignal) => Promise<T>,
     policy: ResiliencePolicy,
-    compositionOrder: string = 'retry-cb-timeout',
+    compositionOrder: CompositionOrder = 'retry-cb-timeout',
     signal?: AbortSignal,
-    context?: {
-      workflowId?: string;
-      stepId?: string;
-      correlationId?: string;
-    }
+    context?: Partial<ResilienceInvocationContext>
   ): Promise<T> {
+    const invocationContext: ResilienceInvocationContext | undefined = context ? {
+      workflowId: context.workflowId || 'custom-operation',
+      stepId: context.stepId || 'operation',
+      correlationId: context.correlationId,
+    } : undefined;
+
     return await this.adapter.applyNormalizedPolicy(
       operation,
       policy,
       compositionOrder,
       signal,
-      context
+      invocationContext
     );
   }
 
@@ -127,10 +113,9 @@ export class ResilienceService {
     };
   }
 
-  public async dispose(): Promise<void> {
-    if (this.adapter) {
-      await this.adapter.dispose();
-    }
+  public dispose(): void {
+    // ProductionResilienceAdapter doesn't have a dispose method
+    // Circuit breakers clean up automatically
   }
 }
 

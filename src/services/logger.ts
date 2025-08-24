@@ -1,5 +1,5 @@
-import { createLogger, getCorrelationId, setCorrelationId, withCorrelationId } from '@orchestr8/logger';
-import type { Logger } from 'pino';
+import { createPinoLogger, generateCorrelationId, CorrelationContext } from '@orchestr8/logger';
+import type { Logger } from '@orchestr8/logger';
 import { config } from '../config/environment.js';
 
 let loggerInstance: Logger | null = null;
@@ -9,7 +9,7 @@ export async function initializeLogger(): Promise<Logger> {
     return loggerInstance;
   }
 
-  loggerInstance = await createLogger({
+  loggerInstance = await createPinoLogger({
     level: config.logger.level,
     pretty: config.logger.pretty,
     redactKeys: config.logger.redactKeys,
@@ -29,7 +29,7 @@ export const getLogger = (): Logger => {
 // Create logger with correlation context
 export const createCorrelatedLogger = (correlationId?: string): Logger => {
   const baseLogger = getLogger();
-  const actualCorrelationId = correlationId || getCorrelationId();
+  const actualCorrelationId = correlationId || getCurrentCorrelationId();
   
   return baseLogger.child({ 
     correlationId: actualCorrelationId 
@@ -41,24 +41,17 @@ export const executeWithCorrelation = async <T>(
   correlationId: string,
   operation: () => Promise<T>
 ): Promise<T> => {
-  return await withCorrelationId(correlationId, operation);
+  return await CorrelationContext.run(correlationId, operation);
 };
 
-// Generate and set new correlation ID
-export const generateCorrelationId = (): string => {
-  const correlationId = `req-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
-  setCorrelationId(correlationId);
-  return correlationId;
-};
-
-// Get current correlation ID
+// Get current correlation ID - using context directly
 export const getCurrentCorrelationId = (): string | undefined => {
-  return getCorrelationId();
-};
-
-// Set correlation ID
-export const setCurrentCorrelationId = (correlationId: string): void => {
-  setCorrelationId(correlationId);
+  // Use CorrelationContext.get() to retrieve current correlation ID
+  try {
+    return CorrelationContext.get();
+  } catch {
+    return undefined;
+  }
 };
 
 // Export logger instance for direct use (will be initialized during app startup)
@@ -81,36 +74,36 @@ export const logger: Logger = new Proxy({} as Logger, {
 
 // Utility functions for structured logging with context
 export const logWithContext = {
-  debug: (context: Record<string, any>, message: string) => {
-    const correlationId = getCorrelationId();
-    logger.debug({
+  debug: (message: string, context: Record<string, any>) => {
+    const correlationId = getCurrentCorrelationId();
+    logger.debug(message, {
       ...context,
       correlationId,
       timestamp: new Date().toISOString(),
-    }, message);
+    });
   },
   
-  info: (context: Record<string, any>, message: string) => {
-    const correlationId = getCorrelationId();
-    logger.info({
+  info: (message: string, context: Record<string, any>) => {
+    const correlationId = getCurrentCorrelationId();
+    logger.info(message, {
       ...context,
       correlationId,
       timestamp: new Date().toISOString(),
-    }, message);
+    });
   },
   
-  warn: (context: Record<string, any>, message: string) => {
-    const correlationId = getCorrelationId();
-    logger.warn({
+  warn: (message: string, context: Record<string, any>) => {
+    const correlationId = getCurrentCorrelationId();
+    logger.warn(message, {
       ...context,
       correlationId,
       timestamp: new Date().toISOString(),
-    }, message);
+    });
   },
   
-  error: (context: Record<string, any>, message: string, error?: Error) => {
-    const correlationId = getCorrelationId();
-    logger.error({
+  error: (message: string, context: Record<string, any>, error?: Error) => {
+    const correlationId = getCurrentCorrelationId();
+    logger.error(message, {
       ...context,
       correlationId,
       timestamp: new Date().toISOString(),
@@ -119,6 +112,6 @@ export const logWithContext = {
         message: error.message,
         stack: error.stack,
       } : undefined,
-    }, message);
+    });
   },
 };
