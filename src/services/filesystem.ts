@@ -1,6 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { config } from '../config/environment.js';
+import { logWithContext } from './logger.js';
 
 interface MarkdownFile {
   path: string;
@@ -41,11 +42,11 @@ class FileSystemService {
 
   async validateVaultPath(vaultPath?: string): Promise<boolean> {
     const pathToCheck = vaultPath || this.vaultPath;
-    if (!pathToCheck) return false;
+    if (!pathToCheck) {return false;}
 
     try {
       const stats = await fs.stat(pathToCheck);
-      if (!stats.isDirectory()) return false;
+      if (!stats.isDirectory()) {return false;}
 
       const files = await fs.readdir(pathToCheck);
       const hasObsidianConfig = files.includes('.obsidian');
@@ -88,7 +89,10 @@ class FileSystemService {
         }
       }
     } catch (error) {
-      console.warn(`Failed to scan directory ${currentPath}:`, error);
+      logWithContext.warn(`Failed to scan directory ${currentPath}`, { 
+        path: currentPath,
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   }
 
@@ -119,7 +123,10 @@ class FileSystemService {
         relativePath,
       };
     } catch (error) {
-      console.warn(`Failed to read file ${filePath}:`, error);
+      logWithContext.warn(`Failed to read file ${filePath}`, { 
+        filePath,
+        error: error instanceof Error ? error.message : String(error)
+      });
       return null;
     }
   }
@@ -135,13 +142,15 @@ class FileSystemService {
 
       return await fs.readFile(fullPath, 'utf-8');
     } catch (error) {
-      console.warn(`Failed to read file ${filePath}:`, error);
+      logWithContext.warn(`Failed to read file ${filePath}`, { 
+        filePath,
+        error: error instanceof Error ? error.message : String(error)
+      });
       return null;
     }
   }
 
   async getVaultStats(): Promise<VaultStats> {
-    const vaultPath = this.ensureVaultPath();
     let totalFiles = 0;
     let totalSize = 0;
 
@@ -160,7 +169,7 @@ class FileSystemService {
   async watchForChanges(callback: (filePath: string, changeType: 'added' | 'modified' | 'deleted') => void): Promise<void> {
     const vaultPath = this.ensureVaultPath();
     
-    console.log(`Starting file watcher for vault: ${vaultPath}`);
+    logWithContext.info(`Starting file watcher for vault`, { vaultPath });
     
     try {
       const watcher = fs.watch(vaultPath, { recursive: true });
@@ -175,7 +184,7 @@ class FileSystemService {
         }
       }
     } catch (error) {
-      console.error('File watcher error:', error);
+      logWithContext.error('File watcher error', { vaultPath }, error instanceof Error ? error : new Error(String(error)));
       throw new Error(`Failed to watch vault for changes: ${error}`);
     }
   }

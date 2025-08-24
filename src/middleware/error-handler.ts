@@ -3,6 +3,7 @@ import fp from 'fastify-plugin';
 import { generateCorrelationId } from '@orchestr8/logger';
 import { getCurrentCorrelationId, logWithContext } from '../services/logger.js';
 import type { ErrorResponse, ValidationErrorResponse } from '../schemas/errors.js';
+import type { ErrorWithStatus, FastifyRequestWithContext } from '../types/fastify.js';
 import { ErrorMessages } from '../schemas/errors.js';
 
 export interface ErrorHandlerOptions {
@@ -52,7 +53,7 @@ async function errorHandlerPlugin(
           message: 'Validation failed',
           statusCode: 400,
           code: 'VALIDATION_ERROR',
-          validation: error.validation.map((item: any) => ({
+          validation: error.validation.map((item: { instancePath?: string; schemaPath?: string; message?: string; data?: unknown }) => ({
             field: item.instancePath?.replace('/', '') || item.schemaPath || 'unknown',
             message: item.message || 'Invalid value',
             value: item.data
@@ -67,7 +68,7 @@ async function errorHandlerPlugin(
     }
 
     // Determine status code
-    const statusCode = error.statusCode || (error as any).status || 500;
+    const statusCode = error.statusCode || (error as ErrorWithStatus).status || 500;
     
     // Get appropriate error message
     let message = getErrorMessage(statusCode);
@@ -127,7 +128,7 @@ async function errorHandlerPlugin(
     const correlationId = existingCorrelationId || generateCorrelationId();
     
     // Store correlation ID in request for later use
-    (request as any).correlationId = correlationId;
+    (request as FastifyRequestWithContext).correlationId = correlationId;
   });
 }
 

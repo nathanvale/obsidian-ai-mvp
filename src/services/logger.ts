@@ -1,4 +1,4 @@
-import { createPinoLogger, generateCorrelationId, CorrelationContext } from '@orchestr8/logger';
+import { createPinoLogger, CorrelationContext } from '@orchestr8/logger';
 import type { Logger } from '@orchestr8/logger';
 import { config } from '../config/environment.js';
 
@@ -67,14 +67,14 @@ export const logger: Logger = new Proxy({} as Logger, {
   },
   set(target, prop, value) {
     const actualLogger = getLogger();
-    (actualLogger as any)[prop] = value;
+    (actualLogger as unknown as Record<string, unknown>)[prop as string] = value;
     return true;
   },
 });
 
 // Utility functions for structured logging with context
 export const logWithContext = {
-  debug: (message: string, context: Record<string, any>) => {
+  debug: (message: string, context: Record<string, unknown>) => {
     const correlationId = getCurrentCorrelationId();
     logger.debug(message, {
       ...context,
@@ -83,7 +83,7 @@ export const logWithContext = {
     });
   },
   
-  info: (message: string, context: Record<string, any>) => {
+  info: (message: string, context: Record<string, unknown>) => {
     const correlationId = getCurrentCorrelationId();
     logger.info(message, {
       ...context,
@@ -92,7 +92,7 @@ export const logWithContext = {
     });
   },
   
-  warn: (message: string, context: Record<string, any>) => {
+  warn: (message: string, context: Record<string, unknown>) => {
     const correlationId = getCurrentCorrelationId();
     logger.warn(message, {
       ...context,
@@ -101,7 +101,7 @@ export const logWithContext = {
     });
   },
   
-  error: (message: string, context: Record<string, any>, error?: Error) => {
+  error: (message: string, context: Record<string, unknown>, error?: Error) => {
     const correlationId = getCurrentCorrelationId();
     logger.error(message, {
       ...context,

@@ -1,7 +1,8 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import fp from 'fastify-plugin';
 import { generateCorrelationId } from '@orchestr8/logger';
-import { getCurrentCorrelationId, executeWithCorrelation, logWithContext } from '../services/logger.js';
+import { executeWithCorrelation, logWithContext } from '../services/logger.js';
+import type { FastifyRequestWithContext, GenericObject } from '../types/fastify.js';
 
 export interface RequestLoggingOptions {
   logRequestBody?: boolean;
@@ -38,8 +39,8 @@ async function requestLoggingPlugin(
     const correlationId = existingCorrelationId || generateCorrelationId();
     
     // Store correlation ID and start time in request
-    (request as any).correlationId = correlationId;
-    (request as any).startTime = startTime;
+    (request as FastifyRequestWithContext).correlationId = correlationId;
+    (request as FastifyRequestWithContext).startTime = startTime;
     
     // Add correlation ID to response headers
     reply.header('x-correlation-id', correlationId);
@@ -51,7 +52,7 @@ async function requestLoggingPlugin(
 
     // Execute in correlation context and log request
     await executeWithCorrelation(correlationId, async () => {
-      const logData: Record<string, any> = {
+      const logData: GenericObject = {
         method: request.method,
         url: request.url,
         userAgent: request.headers['user-agent'],
@@ -82,9 +83,9 @@ async function requestLoggingPlugin(
   });
 
   // Pre-serialization: Log response details before sending
-  fastify.addHook('preSerialization', async (request: FastifyRequest, reply: FastifyReply, payload: any) => {
-    const correlationId = (request as any).correlationId;
-    const startTime = (request as any).startTime;
+  fastify.addHook('preSerialization', async (request: FastifyRequest, reply: FastifyReply, payload: unknown) => {
+    const correlationId = (request as FastifyRequestWithContext).correlationId;
+    const startTime = (request as FastifyRequestWithContext).startTime;
 
     if (!correlationId || config.excludePaths?.includes(request.url)) {
       return payload;
@@ -93,7 +94,7 @@ async function requestLoggingPlugin(
     await executeWithCorrelation(correlationId, async () => {
       const duration = startTime ? Date.now() - startTime : 0;
       
-      const logData: Record<string, any> = {
+      const logData: GenericObject = {
         method: request.method,
         url: request.url,
         statusCode: reply.statusCode,
@@ -122,8 +123,8 @@ async function requestLoggingPlugin(
 
   // Error handler: Ensure errors are logged with correlation context
   fastify.addHook('onError', async (request: FastifyRequest, reply: FastifyReply, error: Error) => {
-    const correlationId = (request as any).correlationId;
-    const startTime = (request as any).startTime;
+    const correlationId = (request as FastifyRequestWithContext).correlationId;
+    const startTime = (request as FastifyRequestWithContext).startTime;
 
     if (!correlationId) {
       return;
@@ -144,20 +145,20 @@ async function requestLoggingPlugin(
 
   // Add helper to get current request's correlation ID
   fastify.decorateRequest('getCorrelationId', function() {
-    return (this as any).correlationId;
+    return (this as FastifyRequestWithContext).correlationId;
   });
 
   // Add helper to create correlated child logger for route handlers
   fastify.decorateRequest('getLogger', function() {
-    const correlationId = (this as any).correlationId;
+    const correlationId = (this as FastifyRequestWithContext).correlationId;
     return {
-      debug: (message: string, context?: Record<string, any>) => 
+      debug: (message: string, context?: GenericObject) => 
         logWithContext.debug(message, { ...context, correlationId }),
-      info: (message: string, context?: Record<string, any>) => 
+      info: (message: string, context?: GenericObject) => 
         logWithContext.info(message, { ...context, correlationId }),
-      warn: (message: string, context?: Record<string, any>) => 
+      warn: (message: string, context?: GenericObject) => 
         logWithContext.warn(message, { ...context, correlationId }),
-      error: (message: string, context?: Record<string, any>, error?: Error) => 
+      error: (message: string, context?: GenericObject, error?: Error) => 
         logWithContext.error(message, { ...context, correlationId }, error)
     };
   });
@@ -168,10 +169,10 @@ declare module 'fastify' {
   interface FastifyRequest {
     getCorrelationId(): string;
     getLogger(): {
-      debug(message: string, context?: Record<string, any>): void;
-      info(message: string, context?: Record<string, any>): void;
-      warn(message: string, context?: Record<string, any>): void;
-      error(message: string, context?: Record<string, any>, error?: Error): void;
+      debug(message: string, context?: Record<string, unknown>): void;
+      info(message: string, context?: Record<string, unknown>): void;
+      warn(message: string, context?: Record<string, unknown>): void;
+      error(message: string, context?: Record<string, unknown>, error?: Error): void;
     };
   }
 }

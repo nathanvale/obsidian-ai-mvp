@@ -1,7 +1,9 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { Socket } from 'net';
 import fp from 'fastify-plugin';
 import { logWithContext, getCurrentCorrelationId } from '../services/logger.js';
 import { config } from '../config/environment.js';
+import type { HealthResult, HealthCheckResult } from '../types/fastify.js';
 
 export interface HealthCheckOptions {
   enableDetailedHealthCheck?: boolean;
@@ -28,8 +30,8 @@ async function enhancedHealthPlugin(
   const healthConfig = { ...defaultOptions, ...options };
   
   // Store health check results
-  let lastHealthCheck: any = {
-    status: 'unknown',
+  let lastHealthCheck: Partial<HealthResult> = {
+    status: 'unknown' as const,
     timestamp: new Date().toISOString(),
     checks: {}
   };
@@ -43,13 +45,13 @@ async function enhancedHealthPlugin(
         });
         
         if (response.ok) {
-          return { status: 'healthy', responseTime: response.headers.get('x-response-time') };
+          return { status: 'healthy' as const, responseTime: response.headers.get('x-response-time') };
         } else {
-          return { status: 'unhealthy', statusCode: response.status };
+          return { status: 'unhealthy' as const, statusCode: response.status };
         }
       } catch (error) {
         return { 
-          status: 'unhealthy', 
+          status: 'unhealthy' as const, 
           error: error instanceof Error ? error.message : 'Unknown error' 
         };
       }
@@ -62,13 +64,13 @@ async function enhancedHealthPlugin(
         });
         
         if (response.ok) {
-          return { status: 'healthy', responseTime: response.headers.get('x-response-time') };
+          return { status: 'healthy' as const, responseTime: response.headers.get('x-response-time') };
         } else {
-          return { status: 'unhealthy', statusCode: response.status };
+          return { status: 'unhealthy' as const, statusCode: response.status };
         }
       } catch (error) {
         return { 
-          status: 'unhealthy', 
+          status: 'unhealthy' as const, 
           error: error instanceof Error ? error.message : 'Unknown error' 
         };
       }
@@ -80,12 +82,12 @@ async function enhancedHealthPlugin(
           // Check if Obsidian vault is accessible
           const fs = await import('fs/promises');
           await fs.access(config.obsidianVaultPath);
-          return { status: 'healthy', path: config.obsidianVaultPath };
+          return { status: 'healthy' as const, path: config.obsidianVaultPath };
         }
-        return { status: 'not_configured' };
+        return { status: 'not_configured' as const };
       } catch (error) {
         return { 
-          status: 'unhealthy', 
+          status: 'unhealthy' as const, 
           error: error instanceof Error ? error.message : 'Vault inaccessible' 
         };
       }
@@ -93,12 +95,12 @@ async function enhancedHealthPlugin(
   };
 
   // Perform comprehensive health check
-  const performHealthCheck = async (): Promise<any> => {
+  const performHealthCheck = async (): Promise<HealthResult> => {
     const startTime = Date.now();
     const memUsage = process.memoryUsage();
     const uptime = process.uptime();
 
-    const healthResult: any = {
+    const healthResult: HealthResult = {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       uptime: Math.round(uptime),
@@ -124,7 +126,7 @@ async function enhancedHealthPlugin(
           healthResult.checks[serviceName] = await checker();
         } catch (error) {
           healthResult.checks[serviceName] = {
-            status: 'error',
+            status: 'error' as const,
             error: error instanceof Error ? error.message : 'Check failed'
           };
         }
@@ -132,7 +134,7 @@ async function enhancedHealthPlugin(
 
       // Determine overall status based on service checks
       const unhealthyServices = Object.entries(healthResult.checks)
-        .filter(([, check]: [string, any]) => check.status === 'unhealthy')
+        .filter(([, check]: [string, HealthCheckResult]) => check.status === 'unhealthy')
         .map(([name]) => name);
 
       if (unhealthyServices.length > 0) {
@@ -172,7 +174,7 @@ async function enhancedHealthPlugin(
       } catch (error) {
         logWithContext.error('Health check failed', {}, error instanceof Error ? error : new Error('Unknown error'));
         lastHealthCheck = {
-          status: 'error',
+          status: 'error' as const,
           timestamp: new Date().toISOString(),
           error: error instanceof Error ? error.message : 'Health check failed',
           checks: {}
@@ -233,7 +235,7 @@ async function enhancedHealthPlugin(
     };
 
     // Use cached status if available
-    if (lastHealthCheck.status !== 'healthy' && lastHealthCheck.status !== 'unknown') {
+    if (lastHealthCheck.status && lastHealthCheck.status !== 'healthy' && lastHealthCheck.status !== 'unknown') {
       quickHealth.status = lastHealthCheck.status;
       reply.status(lastHealthCheck.status === 'degraded' ? 200 : 503);
     }
@@ -305,7 +307,7 @@ async function enhancedHealthPlugin(
       
       // Force close remaining connections
       for (const socket of connections) {
-        (socket as any).destroy();
+        (socket as Socket).destroy();
       }
       
       process.exit(1);
@@ -333,7 +335,7 @@ async function enhancedHealthPlugin(
     void gracefulShutdown('UNCAUGHT_EXCEPTION');
   });
 
-  process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+  process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
     const error = reason instanceof Error ? reason : new Error(String(reason));
     logWithContext.error('Unhandled promise rejection, initiating shutdown', { 
       promise: promise.toString() 

@@ -48,6 +48,8 @@ export async function searchRoutes(server: FastifyInstance) {
       results: [],
       query,
       total: 0,
+      limit,
+      threshold,
     });
   });
 }

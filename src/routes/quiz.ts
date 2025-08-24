@@ -49,6 +49,7 @@ export async function quizRoutes(server: FastifyInstance) {
       questions: [],
       topic,
       difficulty,
+      numQuestions, // Include numQuestions in response
     });
   });
 }

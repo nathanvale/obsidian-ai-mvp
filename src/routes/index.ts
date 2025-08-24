@@ -12,7 +12,7 @@ export async function setupRoutes(server: FastifyInstance) {
   await server.register(quizRoutes, { prefix: '/api/quiz' });
   await server.register(indexRoutes, { prefix: '/api/index' });
 
-  server.get('/', async (request, reply) => {
+  server.get('/', async () => {
     return {
       message: 'Obsidian AI MVP API',
       version: '0.1.0',

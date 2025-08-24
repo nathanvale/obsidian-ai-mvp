@@ -1,7 +1,6 @@
 import { ProductionResilienceAdapter } from '@orchestr8/resilience';
 import type { ResiliencePolicy, CompositionOrder, ResilienceInvocationContext } from '@orchestr8/schema';
 import { config } from '../config/environment.js';
-import { logger } from './logger.js';
 
 export class ResilienceService {
   private static instance: ResilienceService;
@@ -103,7 +102,7 @@ export class ResilienceService {
     );
   }
 
-  public getCircuitBreakerStates(): Record<string, any> {
+  public getCircuitBreakerStates(): Record<string, { state: string; failureCount: number }> {
     // This would typically return actual circuit breaker states
     // For now, return a placeholder structure
     return {

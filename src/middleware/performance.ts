@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import fp from 'fastify-plugin';
 import fastifyCompress from '@fastify/compress';
 import underPressure, { type UnderPressureOptions } from '@fastify/under-pressure';
+import type { FastifyRequestWithContext } from '../types/fastify.js';
 import { logWithContext, getCurrentCorrelationId } from '../services/logger.js';
 import { config } from '../config/environment.js';
 
@@ -39,6 +40,7 @@ async function performancePlugin(
 
   // Register response compression
   if (performanceConfig.compression) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await fastify.register(fastifyCompress as any, {
       threshold: performanceConfig.compression.threshold,
       
@@ -101,15 +103,16 @@ async function performancePlugin(
 
     // Pre-handler: Start timing
     fastify.addHook('preHandler', async (request: FastifyRequest) => {
-      (request as any).startTime = process.hrtime.bigint();
+      (request as FastifyRequestWithContext).startTime = Date.now();
+      (request as { startTimeBigInt?: bigint }).startTimeBigInt = process.hrtime.bigint();
       requestCount++;
     });
 
     // Response timing and metrics
-    fastify.addHook('onSend', async (request: FastifyRequest, reply: FastifyReply, payload: any) => {
-      const startTime = (request as any).startTime;
-      if (startTime) {
-        const duration = Number(process.hrtime.bigint() - startTime) / 1e6; // Convert to milliseconds
+    fastify.addHook('onSend', async (request: FastifyRequest, reply: FastifyReply, payload: unknown) => {
+      const startTimeBigInt = (request as { startTimeBigInt?: bigint }).startTimeBigInt;
+      if (startTimeBigInt) {
+        const duration = Number(process.hrtime.bigint() - startTimeBigInt) / 1e6; // Convert to milliseconds
         totalResponseTime += duration;
 
         // Log slow requests
@@ -175,25 +178,18 @@ async function performancePlugin(
   // Add performance helper methods using hook
   fastify.decorateRequest('performance', null);
   fastify.addHook('onRequest', async (request: FastifyRequest) => {
-    (request as any).performance = {
-      getStartTime: () => (request as any).startTime,
+    const requestWithPerf = request as FastifyRequestWithContext & { performance?: { getStartTime(): bigint | undefined; getResponseTime(): number; }; startTimeBigInt?: bigint };
+    requestWithPerf.performance = {
+      getStartTime: () => requestWithPerf.startTimeBigInt,
       getResponseTime: () => {
-        const startTime = (request as any).startTime;
-        return startTime ? Number(process.hrtime.bigint() - startTime) / 1e6 : 0;
+        const startTimeBigInt = requestWithPerf.startTimeBigInt;
+        return startTimeBigInt ? Number(process.hrtime.bigint() - startTimeBigInt) / 1e6 : 0;
       }
     };
   });
 }
 
-// Extend FastifyRequest interface for TypeScript
-declare module 'fastify' {
-  interface FastifyRequest {
-    performance: {
-      getStartTime(): bigint | undefined;
-      getResponseTime(): number;
-    };
-  }
-}
+// Performance interface extensions are defined in src/types/fastify.d.ts
 
 export default fp(performancePlugin, {
   name: 'performance',

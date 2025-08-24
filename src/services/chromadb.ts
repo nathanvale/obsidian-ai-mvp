@@ -1,5 +1,6 @@
 import { ChromaClient } from 'chromadb';
 import { config } from '../config/environment.js';
+import { logWithContext } from './logger.js';
 
 class ChromaDBService {
   private client: ChromaClient;
@@ -35,7 +36,7 @@ class ChromaDBService {
 
   async addDocuments(
     documents: string[],
-    metadatas: Record<string, any>[],
+    metadatas: Record<string, string | number | boolean>[],
     ids: string[],
     embeddings: number[][]
   ): Promise<void> {
@@ -52,7 +53,7 @@ class ChromaDBService {
   async query(
     queryEmbeddings: number[][],
     numResults: number = 10,
-    where?: Record<string, any>
+    where?: Record<string, unknown>
   ) {
     const collection = await this.getCollection();
 
@@ -74,7 +75,10 @@ class ChromaDBService {
     try {
       await this.client.deleteCollection({ name: this.collectionName });
     } catch (error) {
-      console.warn(`Failed to delete collection: ${error}`);
+      logWithContext.warn('Failed to delete collection', { 
+        collectionName: this.collectionName,
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   }
 
@@ -92,7 +96,7 @@ class ChromaDBService {
   async upsertDocument(
     id: string,
     document: string,
-    metadata: Record<string, any>,
+    metadata: Record<string, string | number | boolean>,
     embedding: number[]
   ): Promise<void> {
     const collection = await this.getCollection();

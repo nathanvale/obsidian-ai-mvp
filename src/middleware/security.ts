@@ -41,7 +41,7 @@ async function securityPlugin(
       allowList: securityConfig.rateLimit.whitelist,
       
       // Custom error response with correlation ID
-      errorResponseBuilder: (request: FastifyRequest, context: any) => {
+      errorResponseBuilder: (request: FastifyRequest, context: { max: number; after: string; ttl: number }) => {
         const correlationId = getCurrentCorrelationId() || 'rate-limit-error';
         
         // Log rate limit violation
@@ -88,7 +88,7 @@ async function securityPlugin(
 
   // Add enhanced security headers
   if (securityConfig.enhancedHeaders) {
-    fastify.addHook('onSend', async (request: FastifyRequest, reply: FastifyReply, payload: any) => {
+    fastify.addHook('onSend', async (request: FastifyRequest, reply: FastifyReply, payload: unknown) => {
       // Additional security headers beyond basic Helmet
       reply.header('X-Frame-Options', 'DENY');
       reply.header('X-Content-Type-Options', 'nosniff');
@@ -153,7 +153,7 @@ async function securityPlugin(
       if (forwardedFor && forwardedFor.length > 0) {
         // Take the first IP in the chain (original client IP)
         const originalIp = forwardedFor.split(',')[0].trim();
-        (request as any).ip = originalIp;
+        (request as FastifyRequest & { ip: string }).ip = originalIp;
       }
     });
   }
@@ -193,7 +193,7 @@ async function securityPlugin(
   // Add security helper methods to request using getter
   fastify.decorateRequest('security', null);
   fastify.addHook('onRequest', async (request: FastifyRequest) => {
-    (request as any).security = {
+    (request as FastifyRequest & { security: { isRateLimited: boolean; isTimedOut: boolean; clientIp(): string; isSuspicious(): boolean } }).security = {
       isRateLimited: false,
       isTimedOut: false,
       clientIp: () => request.ip,

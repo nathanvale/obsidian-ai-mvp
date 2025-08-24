@@ -1,13 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { z } from 'zod';
 
-const indexStatusSchema = z.object({
-  status: z.enum(['idle', 'indexing', 'completed', 'error']),
-  progress: z.number().min(0).max(1),
-  totalFiles: z.number().int().nonnegative(),
-  processedFiles: z.number().int().nonnegative(),
-  lastUpdated: z.string(),
-});
 
 export async function indexRoutes(server: FastifyInstance) {
   server.get('/status', {
