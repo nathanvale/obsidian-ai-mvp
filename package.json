@@ -6,6 +6,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "prepare": "husky",
     "dev": "bun --watch --hot src/server.ts",
     "dev:debug": "bun --watch --inspect src/server.ts",
     "dev:verbose": "bun --watch --verbose src/server.ts",
@@ -20,10 +21,14 @@
     "test:compatibility": "bun run check-node && bun run typecheck && bun run test",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
+    "lint:check": "eslint . --cache --max-warnings 0",
     "format": "prettier --write src/**/*.ts",
-    "format:check": "prettier --check src/**/*.ts",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "typecheck:watch": "tsc --noEmit --watch",
+    "test:smoke": "bun test tests/integration/husky.test.ts",
+    "check:no-test": "bun run format:check && bun run lint:check && bun run typecheck",
+    "check": "bun run check:no-test && bun run test:smoke",
     "check-node": "node --version && echo 'Node.js version check passed'",
     "check-bun": "bun --version && echo 'Bun version check passed'",
     "health": "bun run health:ollama && bun run health:chromadb",
@@ -34,8 +39,7 @@
     "reset": "bun run clean && pnpm install",
     "install:clean": "rm -rf node_modules pnpm-lock.yaml && pnpm install",
     "deps:update": "pnpm update --latest",
-    "deps:audit": "pnpm audit",
-    "check": "bun run lint && bun run typecheck && bun run test && bun run build:prod"
+    "deps:audit": "pnpm audit"
   },
   "engines": {
     "node": ">=22.11.0",
@@ -61,13 +65,27 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.17.2",
     "@typescript-eslint/eslint-plugin": "^6.9.0",
     "@typescript-eslint/parser": "^6.9.0",
     "eslint": "^8.52.0",
+    "husky": "^8.0.3",
+    "js-yaml": "^4.1.0",
+    "lint-staged": "^15.0.2",
     "prettier": "^3.0.3",
     "supertest": "^6.3.3",
     "typescript": "^5.2.2",
     "vitest": "^0.34.6"
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "prettier --write",
+      "eslint --fix --cache",
+      "bash -c 'bun run typecheck'"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }

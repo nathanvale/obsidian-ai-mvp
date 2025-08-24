@@ -17,7 +17,7 @@ describe('Request Logging Smoke Test', () => {
   it('should add correlation ID to response headers', async () => {
     const response = await server.inject({
       method: 'GET',
-      url: '/'
+      url: '/',
     });
 
     expect(response.statusCode).toBe(200);
@@ -31,8 +31,8 @@ describe('Request Logging Smoke Test', () => {
       method: 'GET',
       url: '/',
       headers: {
-        'x-correlation-id': customCorrelationId
-      }
+        'x-correlation-id': customCorrelationId,
+      },
     });
 
     expect(response.statusCode).toBe(200);
