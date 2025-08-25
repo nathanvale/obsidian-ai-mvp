@@ -7,40 +7,39 @@
  * Industry-standard email validation regex pattern
  * Based on RFC 5322 specification with practical constraints
  */
-const EMAIL_PATTERN = '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$';
+const EMAIL_PATTERN = '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'
 
 /**
  * URL validation pattern supporting http/https/file protocols
  * Optimized for ADHD workflow context (including local file references)
  */
-const URL_PATTERN =
-  "^(?:https?://|file://|/)[\\w\\-._~:/?#[\\]@!$&'()*+,;=%]+$";
+const URL_PATTERN = "^(?:https?://|file://|/)[\\w\\-._~:/?#[\\]@!$&'()*+,;=%]+$"
 
 /**
  * ADHD medication name pattern - allows common medication formats
  * Supports brand names, generics, and common abbreviations
  */
-const MEDICATION_NAME_PATTERN = '^[a-zA-Z][a-zA-Z0-9\\s\\-().]*$';
+const MEDICATION_NAME_PATTERN = '^[a-zA-Z][a-zA-Z0-9\\s\\-().]*$'
 
 /**
  * Time format pattern for medication schedules (24-hour and 12-hour)
  * Examples: "08:00", "2:30 PM", "14:15"
  */
 const TIME_PATTERN =
-  '^(?:(?:[01]?\\d|2[0-3]):[0-5]\\d(?:\\s?[AaPp][Mm])?|(?:0?[1-9]|1[0-2]):[0-5]\\d\\s?[AaPp][Mm])$';
+  '^(?:(?:[01]?\\d|2[0-3]):[0-5]\\d(?:\\s?[AaPp][Mm])?|(?:0?[1-9]|1[0-2]):[0-5]\\d\\s?[AaPp][Mm])$'
 
 /**
  * Voice memo transcript pattern - flexible for speech-to-text variations
  * Allows common speech patterns and filler words but excludes HTML tags
  */
 const VOICE_TRANSCRIPT_PATTERN =
-  '^[\\w\\s\\-.,!?\'":;()\\[\\]{}/@#$%&*+=~`|\\n\\r\\t]*$';
+  '^[\\w\\s\\-.,!?\'":;()\\[\\]{}/@#$%&*+=~`|\\n\\r\\t]*$'
 
 export const CorrelationIdSchema = {
   type: 'string',
   pattern: '^[a-zA-Z0-9-_]{8,64}$',
   description: 'Correlation ID for request tracing',
-} as const;
+} as const
 
 export const CommonHeadersSchema = {
   type: 'object',
@@ -56,7 +55,7 @@ export const CommonHeadersSchema = {
       description: 'Request content type',
     },
   },
-} as const;
+} as const
 
 export const SuccessResponseSchema = {
   type: 'object',
@@ -80,7 +79,7 @@ export const SuccessResponseSchema = {
       description: 'ISO timestamp when response was generated',
     },
   },
-} as const;
+} as const
 
 export const PaginationQuerySchema = {
   type: 'object',
@@ -104,7 +103,7 @@ export const PaginationQuerySchema = {
       description: 'Sort field and direction (e.g., "createdAt:desc")',
     },
   },
-} as const;
+} as const
 
 export const PaginatedResponseSchema = {
   type: 'object',
@@ -152,7 +151,7 @@ export const PaginatedResponseSchema = {
       format: 'date-time',
     },
   },
-} as const;
+} as const
 
 /**
  * Enhanced validation schemas for ADHD Digital Second Brain data types
@@ -169,7 +168,7 @@ export const EmailSchema = {
     minLength: 'Email must be at least 3 characters long',
     maxLength: 'Email cannot exceed 254 characters',
   },
-} as const;
+} as const
 
 export const UrlSchema = {
   type: 'string',
@@ -183,7 +182,7 @@ export const UrlSchema = {
     minLength: 'URL must be at least 3 characters long',
     maxLength: 'URL cannot exceed 2048 characters',
   },
-} as const;
+} as const
 
 export const MedicationNameSchema = {
   type: 'string',
@@ -197,7 +196,7 @@ export const MedicationNameSchema = {
     minLength: 'Medication name must be at least 2 characters long',
     maxLength: 'Medication name cannot exceed 100 characters',
   },
-} as const;
+} as const
 
 export const MedicationDosageSchema = {
   type: 'number',
@@ -210,7 +209,7 @@ export const MedicationDosageSchema = {
     maximum:
       'Dosage cannot exceed 1000mg (please verify with healthcare provider)',
   },
-} as const;
+} as const
 
 export const TimeSchema = {
   type: 'string',
@@ -220,7 +219,7 @@ export const TimeSchema = {
     pattern:
       'Please provide time in format like "08:00", "2:30 PM", or "14:15"',
   },
-} as const;
+} as const
 
 export const AdhdSymptomSeveritySchema = {
   type: 'integer',
@@ -231,7 +230,7 @@ export const AdhdSymptomSeveritySchema = {
     minimum: 'Severity rating must be between 1 and 10',
     maximum: 'Severity rating must be between 1 and 10',
   },
-} as const;
+} as const
 
 export const VoiceTranscriptSchema = {
   type: 'string',
@@ -245,7 +244,7 @@ export const VoiceTranscriptSchema = {
     minLength: 'Transcript cannot be empty',
     maxLength: 'Transcript cannot exceed 10,000 characters',
   },
-} as const;
+} as const
 
 export const MarkdownContentSchema = {
   type: 'string',
@@ -257,7 +256,7 @@ export const MarkdownContentSchema = {
     minLength: 'Content cannot be empty',
     maxLength: 'Content cannot exceed 100,000 characters',
   },
-} as const;
+} as const
 
 export const TagsSchema = {
   type: 'array',
@@ -275,7 +274,7 @@ export const TagsSchema = {
     maxItems: 'Cannot have more than 20 tags',
     uniqueItems: 'Duplicate tags are not allowed',
   },
-} as const;
+} as const
 
 export const CategorySchema = {
   type: 'string',
@@ -300,7 +299,7 @@ export const CategorySchema = {
   errorMessage: {
     enum: 'Please select a valid category from the predefined list',
   },
-} as const;
+} as const
 
 export const PrioritySchema = {
   type: 'string',
@@ -309,7 +308,7 @@ export const PrioritySchema = {
   errorMessage: {
     enum: 'Priority must be: low, medium, high, or urgent',
   },
-} as const;
+} as const
 
 export const DateTimeSchema = {
   type: 'string',
@@ -319,7 +318,7 @@ export const DateTimeSchema = {
     format:
       'Please provide a valid ISO 8601 datetime (e.g., "2023-12-25T10:30:00Z")',
   },
-} as const;
+} as const
 
 export const DateSchema = {
   type: 'string',
@@ -328,7 +327,7 @@ export const DateSchema = {
   errorMessage: {
     pattern: 'Please provide date in YYYY-MM-DD format (e.g., "2023-12-25")',
   },
-} as const;
+} as const
 
 /**
  * Input sanitization and validation utilities
@@ -337,7 +336,7 @@ export const TextSanitizationSchema = {
   type: 'string',
   transform: ['trim'], // Remove leading/trailing whitespace
   description: 'Auto-sanitized text input with whitespace normalization',
-} as const;
+} as const
 
 /**
  * Search query schema optimized for ADHD semantic search
@@ -355,7 +354,7 @@ export const SearchQuerySchema = {
     minLength: 'Search query cannot be empty',
     maxLength: 'Search query cannot exceed 500 characters',
   },
-} as const;
+} as const
 
 /**
  * File path validation for Obsidian vault integration
@@ -371,46 +370,46 @@ export const VaultPathSchema = {
     minLength: 'File path cannot be empty',
     maxLength: 'File path cannot exceed 1000 characters',
   },
-} as const;
+} as const
 
 /**
  * TypeScript interfaces for common responses and ADHD-specific data types
  */
 export interface SuccessResponse<T = unknown> {
-  success: true;
-  data: T;
-  correlationId: string;
-  timestamp: string;
+  success: true
+  data: T
+  correlationId: string
+  timestamp: string
 }
 
 export interface PaginatedResponse<T = unknown> {
-  success: true;
-  data: T[];
+  success: true
+  data: T[]
   pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    pages: number;
-  };
-  correlationId: string;
-  timestamp: string;
+    page: number
+    limit: number
+    total: number
+    pages: number
+  }
+  correlationId: string
+  timestamp: string
 }
 
 export interface PaginationQuery {
-  page?: number;
-  limit?: number;
-  sort?: string;
+  page?: number
+  limit?: number
+  sort?: string
 }
 
 /**
  * ADHD-specific TypeScript interfaces
  */
 export interface MedicationInfo {
-  name: string;
-  dosage: number;
-  time: string;
-  frequency: 'once' | 'twice' | 'three_times' | 'four_times' | 'as_needed';
-  notes?: string;
+  name: string
+  dosage: number
+  time: string
+  frequency: 'once' | 'twice' | 'three_times' | 'four_times' | 'as_needed'
+  notes?: string
 }
 
 export interface AdhdSymptomTracking {
@@ -420,25 +419,25 @@ export interface AdhdSymptomTracking {
     | 'impulsivity'
     | 'organization'
     | 'time_management'
-    | 'emotional_regulation';
-  severity: number; // 1-10 scale
-  timestamp: string;
-  context?: string;
-  triggers?: string[];
+    | 'emotional_regulation'
+  severity: number // 1-10 scale
+  timestamp: string
+  context?: string
+  triggers?: string[]
 }
 
 export interface VoiceMemoMetadata {
-  transcriptId: string;
-  originalFilePath: string;
-  transcriptionConfidence?: number;
-  duration?: number; // in seconds
-  timestamp: string;
-  category?: string;
-  tags?: string[];
+  transcriptId: string
+  originalFilePath: string
+  transcriptionConfidence?: number
+  duration?: number // in seconds
+  timestamp: string
+  category?: string
+  tags?: string[]
 }
 
 export interface EmailClassification {
-  emailId: string;
+  emailId: string
   category:
     | 'urgent'
     | 'medical'
@@ -446,27 +445,27 @@ export interface EmailClassification {
     | 'school'
     | 'work'
     | 'family'
-    | 'other';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  extractedDeadlines?: string[];
-  actionRequired: boolean;
-  confidenceScore?: number;
+    | 'other'
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  extractedDeadlines?: string[]
+  actionRequired: boolean
+  confidenceScore?: number
 }
 
 export interface TaskData {
-  id: string;
-  title: string;
-  description?: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  category: string;
-  dueDate?: string;
-  estimatedDuration?: number; // in minutes
-  cognitiveLoad: 'low' | 'medium' | 'high'; // ADHD-specific
-  medicationOptimal?: boolean; // Best done during medication effectiveness
-  tags?: string[];
-  status: 'pending' | 'in_progress' | 'completed' | 'blocked';
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  title: string
+  description?: string
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  category: string
+  dueDate?: string
+  estimatedDuration?: number // in minutes
+  cognitiveLoad: 'low' | 'medium' | 'high' // ADHD-specific
+  medicationOptimal?: boolean // Best done during medication effectiveness
+  tags?: string[]
+  status: 'pending' | 'in_progress' | 'completed' | 'blocked'
+  createdAt: string
+  updatedAt: string
 }
 
 /**
@@ -490,7 +489,7 @@ export const ValidationErrorMessages = {
   INVALID_PRIORITY: 'Priority must be: low, medium, high, or urgent',
   DUPLICATE_TAGS: 'Duplicate tags are not allowed',
   TOO_MANY_TAGS: 'Cannot have more than 20 tags',
-} as const;
+} as const
 
 /**
  * Comprehensive validation schema factory for creating context-aware validators
@@ -498,10 +497,10 @@ export const ValidationErrorMessages = {
 export function createValidationSchema(
   type: 'email' | 'url' | 'medication' | 'time' | 'search' | 'content' | 'tags',
   options?: {
-    maxLength?: number;
-    minLength?: number;
-    required?: boolean;
-  }
+    maxLength?: number
+    minLength?: number
+    required?: boolean
+  },
 ) {
   const baseSchemas = {
     email: EmailSchema,
@@ -511,19 +510,19 @@ export function createValidationSchema(
     search: SearchQuerySchema,
     content: MarkdownContentSchema,
     tags: TagsSchema,
-  };
+  }
 
   const schema = { ...baseSchemas[type] } as Record<string, unknown> & {
-    maxLength?: number;
-    minLength?: number;
-  };
+    maxLength?: number
+    minLength?: number
+  }
 
   if (
     options?.maxLength &&
     'maxLength' in schema &&
     typeof schema.maxLength === 'number'
   ) {
-    schema.maxLength = Math.min(schema.maxLength, options.maxLength);
+    schema.maxLength = Math.min(schema.maxLength, options.maxLength)
   }
 
   if (
@@ -531,8 +530,8 @@ export function createValidationSchema(
     'minLength' in schema &&
     typeof schema.minLength === 'number'
   ) {
-    schema.minLength = Math.max(schema.minLength, options.minLength);
+    schema.minLength = Math.max(schema.minLength, options.minLength)
   }
 
-  return schema;
+  return schema
 }

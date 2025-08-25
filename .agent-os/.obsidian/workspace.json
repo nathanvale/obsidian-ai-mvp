@@ -151,7 +151,6 @@
   },
   "active": "c36087b0287230bf",
   "lastOpenFiles": [
-    "product/obsidian_ai_mvp_setup.md",
     "specs/2025-08-24-orchestr8-integration-completion/sub-specs/tests.md",
     "specs/2025-08-24-orchestr8-integration-completion/sub-specs/technical-spec.md",
     "specs/2025-08-24-ollama-service-enhancement/sub-specs/tests.md",
@@ -177,6 +176,7 @@
     "specs/2025-01-24-file-system-service/sub-specs/api-spec.md",
     "specs/2025-01-24-fastify-production-api/sub-specs/tests.md",
     "specs/2025-01-24-fastify-production-api/sub-specs/technical-spec.md",
+    "specs/2025-08-24-orchestr8-integration-completion/tasks.md",
     "specs/2025-08-24-orchestr8-integration-completion/sub-specs",
     "specs/2025-08-24-ollama-service-enhancement/sub-specs",
     "specs/2025-08-24-filesystem-orchestr8-integration/sub-specs",

@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance } from 'fastify'
 
 export async function indexRoutes(server: FastifyInstance) {
   server.get(
@@ -29,21 +29,21 @@ export async function indexRoutes(server: FastifyInstance) {
         totalFiles: 0,
         processedFiles: 0,
         lastUpdated: new Date().toISOString(),
-      });
-    }
-  );
+      })
+    },
+  )
 
   server.post('/start', async (request, reply) => {
     return reply.status(200).send({
       message: 'Indexing started',
       status: 'indexing',
-    });
-  });
+    })
+  })
 
   server.post('/stop', async (request, reply) => {
     return reply.status(200).send({
       message: 'Indexing stopped',
       status: 'idle',
-    });
-  });
+    })
+  })
 }

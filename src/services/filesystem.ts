@@ -1,30 +1,30 @@
-import { promises as fs } from 'fs';
-import path from 'path';
-import { config } from '../config/environment.js';
-import { logWithContext } from './logger.js';
+import { promises as fs } from 'fs'
+import path from 'path'
+import { config } from '../config/environment.js'
+import { logWithContext } from './logger.js'
 
 interface MarkdownFile {
-  path: string;
-  name: string;
-  content: string;
-  size: number;
-  modifiedAt: Date;
-  relativePath: string;
+  path: string
+  name: string
+  content: string
+  size: number
+  modifiedAt: Date
+  relativePath: string
 }
 
 interface VaultStats {
-  totalFiles: number;
-  totalSize: number;
-  lastScanned: Date;
+  totalFiles: number
+  totalSize: number
+  lastScanned: Date
 }
 
 class FileSystemService {
-  private vaultPath: string | null = null;
+  private vaultPath: string | null = null
 
   constructor() {
     // Validate environment vault path on initialization
     if (config.obsidianVaultPath) {
-      this.setVaultPath(config.obsidianVaultPath);
+      this.setVaultPath(config.obsidianVaultPath)
     }
   }
 
@@ -34,10 +34,10 @@ class FileSystemService {
    */
   private validateAndNormalizePath(
     inputPath: string,
-    vaultRoot: string
+    vaultRoot: string,
   ): string {
     // Remove null bytes and normalize
-    const sanitized = inputPath.replace(/\0/g, '');
+    const sanitized = inputPath.replace(/\0/g, '')
 
     // Check for obvious traversal attempts
     if (sanitized.includes('..') || sanitized.includes('~')) {
@@ -45,13 +45,13 @@ class FileSystemService {
         inputPath,
         sanitized,
         correlationId: 'security-violation',
-      });
-      throw new Error('Invalid file path: directory traversal not allowed');
+      })
+      throw new Error('Invalid file path: directory traversal not allowed')
     }
 
     // Resolve and normalize both paths to handle all edge cases
-    const normalizedVault = path.resolve(vaultRoot);
-    const resolvedPath = path.resolve(normalizedVault, sanitized);
+    const normalizedVault = path.resolve(vaultRoot)
+    const resolvedPath = path.resolve(normalizedVault, sanitized)
 
     // Critical security check: ensure resolved path is within vault
     if (
@@ -64,16 +64,16 @@ class FileSystemService {
         resolvedPath,
         normalizedVault,
         correlationId: 'security-violation',
-      });
-      throw new Error('Access denied: path outside vault boundary');
+      })
+      throw new Error('Access denied: path outside vault boundary')
     }
 
-    return resolvedPath;
+    return resolvedPath
   }
 
   setVaultPath(vaultPath: string): void {
     // Validate and normalize the vault path to prevent injection
-    const sanitized = vaultPath.replace(/\0/g, '');
+    const sanitized = vaultPath.replace(/\0/g, '')
 
     if (sanitized.includes('..')) {
       logWithContext.error(
@@ -81,72 +81,72 @@ class FileSystemService {
         {
           inputPath: vaultPath,
           correlationId: 'security-violation',
-        }
-      );
-      throw new Error('Invalid vault path: directory traversal not allowed');
+        },
+      )
+      throw new Error('Invalid vault path: directory traversal not allowed')
     }
 
-    const normalizedPath = path.resolve(sanitized);
+    const normalizedPath = path.resolve(sanitized)
     logWithContext.info('Vault path configured', {
       originalPath: vaultPath,
       normalizedPath,
       correlationId: 'vault-config',
-    });
+    })
 
-    this.vaultPath = normalizedPath;
+    this.vaultPath = normalizedPath
   }
 
   getVaultPath(): string | null {
-    return this.vaultPath;
+    return this.vaultPath
   }
 
   private ensureVaultPath(): string {
     if (!this.vaultPath) {
       throw new Error(
-        'Obsidian vault path not configured. Set OBSIDIAN_VAULT_PATH environment variable.'
-      );
+        'Obsidian vault path not configured. Set OBSIDIAN_VAULT_PATH environment variable.',
+      )
     }
-    return this.vaultPath;
+    return this.vaultPath
   }
 
   async validateVaultPath(vaultPath?: string): Promise<boolean> {
-    const pathToCheck = vaultPath || this.vaultPath;
+    const pathToCheck = vaultPath || this.vaultPath
     if (!pathToCheck) {
-      return false;
+      return false
     }
 
     try {
-      const stats = await fs.stat(pathToCheck);
+      const stats = await fs.stat(pathToCheck)
       if (!stats.isDirectory()) {
-        return false;
+        return false
       }
 
-      const files = await fs.readdir(pathToCheck);
-      const hasObsidianConfig = files.includes('.obsidian');
+      const files = await fs.readdir(pathToCheck)
+      const hasObsidianConfig = files.includes('.obsidian')
 
-      return hasObsidianConfig;
+      return hasObsidianConfig
     } catch (error) {
-      return false;
+      return false
     }
   }
 
   async scanMarkdownFiles(): Promise<MarkdownFile[]> {
-    const vaultPath = this.ensureVaultPath();
-    const markdownFiles: MarkdownFile[] = [];
+    const vaultPath = this.ensureVaultPath()
+    const markdownFiles: MarkdownFile[] = []
 
-    await this.scanDirectory(vaultPath, vaultPath, markdownFiles);
-    return markdownFiles;
+    await this.scanDirectory(vaultPath, vaultPath, markdownFiles)
+    return markdownFiles
   }
 
   private async scanDirectory(
     currentPath: string,
     vaultRoot: string,
-    results: MarkdownFile[]
+    results: MarkdownFile[],
   ): Promise<void> {
     try {
       // Validate current directory is within vault boundaries
-      const normalizedVault = path.resolve(vaultRoot);
-      const normalizedCurrent = path.resolve(currentPath);
+      const normalizedVault = path.resolve(vaultRoot)
+      const normalizedCurrent = path.resolve(currentPath)
 
       if (
         !normalizedCurrent.startsWith(normalizedVault + path.sep) &&
@@ -157,11 +157,11 @@ class FileSystemService {
           normalizedCurrent,
           normalizedVault,
           correlationId: 'security-violation',
-        });
-        return;
+        })
+        return
       }
 
-      const entries = await fs.readdir(currentPath, { withFileTypes: true });
+      const entries = await fs.readdir(currentPath, { withFileTypes: true })
 
       for (const entry of entries) {
         // Validate each entry name for suspicious patterns
@@ -170,21 +170,21 @@ class FileSystemService {
             entryName: entry.name,
             currentPath,
             correlationId: 'security-violation',
-          });
-          continue;
+          })
+          continue
         }
 
-        const fullPath = path.join(currentPath, entry.name);
+        const fullPath = path.join(currentPath, entry.name)
 
         if (entry.isDirectory()) {
           if (this.shouldSkipDirectory(entry.name)) {
-            continue;
+            continue
           }
-          await this.scanDirectory(fullPath, vaultRoot, results);
+          await this.scanDirectory(fullPath, vaultRoot, results)
         } else if (entry.isFile() && this.isMarkdownFile(entry.name)) {
-          const fileInfo = await this.getFileInfo(fullPath, vaultRoot);
+          const fileInfo = await this.getFileInfo(fullPath, vaultRoot)
           if (fileInfo) {
-            results.push(fileInfo);
+            results.push(fileInfo)
           }
         }
       }
@@ -193,27 +193,27 @@ class FileSystemService {
         path: currentPath,
         error: error instanceof Error ? error.message : String(error),
         correlationId: 'directory-scan-error',
-      });
+      })
     }
   }
 
   private shouldSkipDirectory(dirName: string): boolean {
-    const skipDirs = ['.obsidian', '.trash', '.git', 'node_modules'];
-    return skipDirs.includes(dirName) || dirName.startsWith('.');
+    const skipDirs = ['.obsidian', '.trash', '.git', 'node_modules']
+    return skipDirs.includes(dirName) || dirName.startsWith('.')
   }
 
   private isMarkdownFile(fileName: string): boolean {
-    return fileName.toLowerCase().endsWith('.md');
+    return fileName.toLowerCase().endsWith('.md')
   }
 
   private async getFileInfo(
     filePath: string,
-    vaultRoot: string
+    vaultRoot: string,
   ): Promise<MarkdownFile | null> {
     try {
-      const stats = await fs.stat(filePath);
-      const content = await fs.readFile(filePath, 'utf-8');
-      const relativePath = path.relative(vaultRoot, filePath);
+      const stats = await fs.stat(filePath)
+      const content = await fs.readFile(filePath, 'utf-8')
+      const relativePath = path.relative(vaultRoot, filePath)
 
       return {
         path: filePath,
@@ -222,69 +222,69 @@ class FileSystemService {
         size: stats.size,
         modifiedAt: stats.mtime,
         relativePath,
-      };
+      }
     } catch (error) {
       logWithContext.warn(`Failed to read file ${filePath}`, {
         filePath,
         error: error instanceof Error ? error.message : String(error),
-      });
-      return null;
+      })
+      return null
     }
   }
 
   async readFile(filePath: string): Promise<string | null> {
     try {
-      const vaultPath = this.ensureVaultPath();
+      const vaultPath = this.ensureVaultPath()
 
       // Use secure path validation - this will throw on traversal attempts
-      const fullPath = this.validateAndNormalizePath(filePath, vaultPath);
+      const fullPath = this.validateAndNormalizePath(filePath, vaultPath)
 
-      return await fs.readFile(fullPath, 'utf-8');
+      return await fs.readFile(fullPath, 'utf-8')
     } catch (error) {
       logWithContext.warn(`Failed to read file ${filePath}`, {
         filePath,
         error: error instanceof Error ? error.message : String(error),
         correlationId: 'file-access-error',
-      });
-      return null;
+      })
+      return null
     }
   }
 
   async getVaultStats(): Promise<VaultStats> {
-    let totalFiles = 0;
-    let totalSize = 0;
+    let totalFiles = 0
+    let totalSize = 0
 
-    const markdownFiles = await this.scanMarkdownFiles();
+    const markdownFiles = await this.scanMarkdownFiles()
 
-    totalFiles = markdownFiles.length;
-    totalSize = markdownFiles.reduce((sum, file) => sum + file.size, 0);
+    totalFiles = markdownFiles.length
+    totalSize = markdownFiles.reduce((sum, file) => sum + file.size, 0)
 
     return {
       totalFiles,
       totalSize,
       lastScanned: new Date(),
-    };
+    }
   }
 
   async watchForChanges(
     callback: (
       filePath: string,
-      changeType: 'added' | 'modified' | 'deleted'
-    ) => void
+      changeType: 'added' | 'modified' | 'deleted',
+    ) => void,
   ): Promise<void> {
-    const vaultPath = this.ensureVaultPath();
+    const vaultPath = this.ensureVaultPath()
 
-    logWithContext.info(`Starting file watcher for vault`, { vaultPath });
+    logWithContext.info(`Starting file watcher for vault`, { vaultPath })
 
     try {
-      const watcher = fs.watch(vaultPath, { recursive: true });
+      const watcher = fs.watch(vaultPath, { recursive: true })
 
       for await (const event of watcher) {
         if (event.filename && this.isMarkdownFile(event.filename)) {
           // Validate the file path from filesystem event
           try {
             // Sanitize and validate the filename from filesystem event
-            const sanitizedFilename = event.filename.replace(/\0/g, '');
+            const sanitizedFilename = event.filename.replace(/\0/g, '')
 
             if (
               sanitizedFilename.includes('..') ||
@@ -296,14 +296,14 @@ class FileSystemService {
                   originalFilename: event.filename,
                   sanitizedFilename,
                   correlationId: 'security-violation',
-                }
-              );
-              continue;
+                },
+              )
+              continue
             }
 
-            const fullPath = path.join(vaultPath, sanitizedFilename);
-            const normalizedVault = path.resolve(vaultPath);
-            const normalizedFilePath = path.resolve(fullPath);
+            const fullPath = path.join(vaultPath, sanitizedFilename)
+            const normalizedVault = path.resolve(vaultPath)
+            const normalizedFilePath = path.resolve(fullPath)
 
             // Ensure the file event is within vault boundaries
             if (!normalizedFilePath.startsWith(normalizedVault + path.sep)) {
@@ -313,8 +313,8 @@ class FileSystemService {
                 normalizedFilePath,
                 normalizedVault,
                 correlationId: 'security-violation',
-              });
-              continue;
+              })
+              continue
             }
 
             const changeType =
@@ -322,9 +322,9 @@ class FileSystemService {
                 ? (await this.fileExists(fullPath))
                   ? 'added'
                   : 'deleted'
-                : 'modified';
+                : 'modified'
 
-            callback(sanitizedFilename, changeType);
+            callback(sanitizedFilename, changeType)
           } catch (validationError) {
             logWithContext.error('File watcher path validation failed', {
               filename: event.filename,
@@ -333,7 +333,7 @@ class FileSystemService {
                   ? validationError.message
                   : String(validationError),
               correlationId: 'security-violation',
-            });
+            })
           }
         }
       }
@@ -341,9 +341,9 @@ class FileSystemService {
       logWithContext.error(
         'File watcher error',
         { vaultPath },
-        error instanceof Error ? error : new Error(String(error))
-      );
-      throw new Error(`Failed to watch vault for changes: ${error}`);
+        error instanceof Error ? error : new Error(String(error)),
+      )
+      throw new Error(`Failed to watch vault for changes: ${error}`)
     }
   }
 
@@ -351,28 +351,28 @@ class FileSystemService {
     try {
       // This method is only called internally with already-validated paths
       // from the watchForChanges method, so it should be safe
-      await fs.access(filePath);
-      return true;
+      await fs.access(filePath)
+      return true
     } catch {
-      return false;
+      return false
     }
   }
 
   async findFilesByPattern(pattern: string): Promise<MarkdownFile[]> {
-    const allFiles = await this.scanMarkdownFiles();
-    const regex = new RegExp(pattern, 'i');
+    const allFiles = await this.scanMarkdownFiles()
+    const regex = new RegExp(pattern, 'i')
 
     return allFiles.filter(
-      file =>
+      (file) =>
         regex.test(file.name) ||
         regex.test(file.relativePath) ||
-        regex.test(file.content)
-    );
+        regex.test(file.content),
+    )
   }
 
   generateFileId(file: MarkdownFile): string {
-    return Buffer.from(file.relativePath).toString('base64');
+    return Buffer.from(file.relativePath).toString('base64')
   }
 }
 
-export const fileSystemService = new FileSystemService();
+export const fileSystemService = new FileSystemService()

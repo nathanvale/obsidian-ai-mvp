@@ -1,12 +1,12 @@
-import type { FastifyInstance } from 'fastify';
-import { z } from 'zod';
+import type { FastifyInstance } from 'fastify'
+import { z } from 'zod'
 import {
   validateTopicName,
   createSecurityErrorResponse,
   SecureSchemas,
-} from '../utils/input-validation.js';
-import { logWithContext, getCurrentCorrelationId } from '../services/logger.js';
-import { ErrorResponseSchema } from '../schemas/errors.js';
+} from '../utils/input-validation.js'
+import { logWithContext, getCurrentCorrelationId } from '../services/logger.js'
+import { ErrorResponseSchema } from '../schemas/errors.js'
 
 /**
  * Zod schema with enhanced security validation for quiz generation
@@ -19,7 +19,7 @@ const generateQuizSchema = z.object({
     .regex(/^[a-zA-Z0-9\s\-_.,&()]+$/, 'Topic contains invalid characters'),
   numQuestions: z.number().int().positive().max(20).default(5),
   difficulty: z.enum(['easy', 'medium', 'hard']).default('medium'),
-});
+})
 
 export async function quizRoutes(server: FastifyInstance) {
   server.post(
@@ -124,17 +124,17 @@ export async function quizRoutes(server: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const correlationId = getCurrentCorrelationId() || 'quiz-generate';
+      const correlationId = getCurrentCorrelationId() || 'quiz-generate'
 
       try {
         // First, validate using Zod schema (catches basic format issues)
-        const parseResult = generateQuizSchema.safeParse(request.body);
+        const parseResult = generateQuizSchema.safeParse(request.body)
 
         if (!parseResult.success) {
           logWithContext.warn('Quiz generation request failed Zod validation', {
             errors: parseResult.error.errors,
             body: request.body,
-          });
+          })
 
           return reply.status(400).send({
             success: false,
@@ -143,7 +143,7 @@ export async function quizRoutes(server: FastifyInstance) {
               statusCode: 400,
               code: 'VALIDATION_ERROR',
               details: {
-                issues: parseResult.error.errors.map(err => ({
+                issues: parseResult.error.errors.map((err) => ({
                   field: err.path.join('.'),
                   message: err.message,
                 })),
@@ -151,13 +151,13 @@ export async function quizRoutes(server: FastifyInstance) {
             },
             correlationId,
             timestamp: new Date().toISOString(),
-          });
+          })
         }
 
-        const { topic, numQuestions, difficulty } = parseResult.data;
+        const { topic, numQuestions, difficulty } = parseResult.data
 
         // Second, perform deep security validation on the topic
-        const topicValidation = validateTopicName(topic);
+        const topicValidation = validateTopicName(topic)
 
         if (!topicValidation.isValid) {
           // Log the security violation (violations are already logged in validateTopicName)
@@ -169,18 +169,18 @@ export async function quizRoutes(server: FastifyInstance) {
             difficulty,
             clientIp: request.ip,
             userAgent: request.headers['user-agent'],
-          });
+          })
 
           const securityError = createSecurityErrorResponse(
             topicValidation.violations,
-            correlationId
-          );
+            correlationId,
+          )
 
-          return reply.status(400).send(securityError);
+          return reply.status(400).send(securityError)
         }
 
         // Use the sanitized topic for processing
-        const sanitizedTopic = topicValidation.sanitized;
+        const sanitizedTopic = topicValidation.sanitized
 
         // Additional validation - prevent resource exhaustion attacks
         if (numQuestions > 10 && difficulty === 'hard') {
@@ -191,8 +191,8 @@ export async function quizRoutes(server: FastifyInstance) {
               difficulty,
               topic: sanitizedTopic,
               clientIp: request.ip,
-            }
-          );
+            },
+          )
 
           return reply.status(400).send({
             success: false,
@@ -207,7 +207,7 @@ export async function quizRoutes(server: FastifyInstance) {
             },
             correlationId,
             timestamp: new Date().toISOString(),
-          });
+          })
         }
 
         // Log successful quiz generation request
@@ -218,7 +218,7 @@ export async function quizRoutes(server: FastifyInstance) {
           difficulty,
           wasTopicModified: topicValidation.wasModified,
           clientIp: request.ip,
-        });
+        })
 
         // TODO: Implement actual quiz generation logic here
         // This would integrate with Ollama to generate quiz questions
@@ -227,21 +227,21 @@ export async function quizRoutes(server: FastifyInstance) {
           topic: sanitizedTopic, // Return the sanitized version
           difficulty,
           numQuestions,
-        };
+        }
 
         return reply.status(200).send({
           success: true,
           data: quizData,
           correlationId,
           timestamp: new Date().toISOString(),
-        });
+        })
       } catch (error) {
         // Never expose internal errors to clients
         logWithContext.error('Quiz generation processing error', {
           error: error instanceof Error ? error.message : 'Unknown error',
           stack: error instanceof Error ? error.stack : undefined,
           body: request.body,
-        });
+        })
 
         return reply.status(500).send({
           success: false,
@@ -252,8 +252,8 @@ export async function quizRoutes(server: FastifyInstance) {
           },
           correlationId,
           timestamp: new Date().toISOString(),
-        });
+        })
       }
-    }
-  );
+    },
+  )
 }

@@ -1,12 +1,12 @@
-import type { FastifyInstance } from 'fastify';
-import { z } from 'zod';
+import type { FastifyInstance } from 'fastify'
+import { z } from 'zod'
 import {
   validateSearchQuery,
   createSecurityErrorResponse,
   SecureSchemas,
-} from '../utils/input-validation.js';
-import { logWithContext, getCurrentCorrelationId } from '../services/logger.js';
-import { ErrorResponseSchema } from '../schemas/errors.js';
+} from '../utils/input-validation.js'
+import { logWithContext, getCurrentCorrelationId } from '../services/logger.js'
+import { ErrorResponseSchema } from '../schemas/errors.js'
 
 /**
  * Zod schema with enhanced security validation
@@ -20,7 +20,7 @@ const searchRequestSchema = z.object({
     .regex(/^[^<>\x00-\x1f\x7f-\x9f]*$/, 'Query contains invalid characters'),
   limit: z.number().int().positive().max(100).default(10),
   threshold: z.number().min(0).max(1).default(0.3),
-});
+})
 
 export async function searchRoutes(server: FastifyInstance) {
   server.post(
@@ -112,17 +112,17 @@ export async function searchRoutes(server: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const correlationId = getCurrentCorrelationId() || 'search-request';
+      const correlationId = getCurrentCorrelationId() || 'search-request'
 
       try {
         // First, validate using Zod schema (catches basic format issues)
-        const parseResult = searchRequestSchema.safeParse(request.body);
+        const parseResult = searchRequestSchema.safeParse(request.body)
 
         if (!parseResult.success) {
           logWithContext.warn('Search request failed Zod validation', {
             errors: parseResult.error.errors,
             body: request.body,
-          });
+          })
 
           return reply.status(400).send({
             success: false,
@@ -131,7 +131,7 @@ export async function searchRoutes(server: FastifyInstance) {
               statusCode: 400,
               code: 'VALIDATION_ERROR',
               details: {
-                issues: parseResult.error.errors.map(err => ({
+                issues: parseResult.error.errors.map((err) => ({
                   field: err.path.join('.'),
                   message: err.message,
                 })),
@@ -139,13 +139,13 @@ export async function searchRoutes(server: FastifyInstance) {
             },
             correlationId,
             timestamp: new Date().toISOString(),
-          });
+          })
         }
 
-        const { query, limit, threshold } = parseResult.data;
+        const { query, limit, threshold } = parseResult.data
 
         // Second, perform deep security validation on the query
-        const queryValidation = validateSearchQuery(query);
+        const queryValidation = validateSearchQuery(query)
 
         if (!queryValidation.isValid) {
           // Log the security violation (violations are already logged in validateSearchQuery)
@@ -155,18 +155,18 @@ export async function searchRoutes(server: FastifyInstance) {
             wasModified: queryValidation.wasModified,
             clientIp: request.ip,
             userAgent: request.headers['user-agent'],
-          });
+          })
 
           const securityError = createSecurityErrorResponse(
             queryValidation.violations,
-            correlationId
-          );
+            correlationId,
+          )
 
-          return reply.status(400).send(securityError);
+          return reply.status(400).send(securityError)
         }
 
         // Use the sanitized query for processing
-        const sanitizedQuery = queryValidation.sanitized;
+        const sanitizedQuery = queryValidation.sanitized
 
         // Log successful search request
         logWithContext.info('Processing search request', {
@@ -175,7 +175,7 @@ export async function searchRoutes(server: FastifyInstance) {
           threshold,
           wasQueryModified: queryValidation.wasModified,
           clientIp: request.ip,
-        });
+        })
 
         // TODO: Implement actual search logic here
         // For now, return empty results with proper structure
@@ -185,21 +185,21 @@ export async function searchRoutes(server: FastifyInstance) {
           total: 0,
           limit,
           threshold,
-        };
+        }
 
         return reply.status(200).send({
           success: true,
           data: searchResults,
           correlationId,
           timestamp: new Date().toISOString(),
-        });
+        })
       } catch (error) {
         // Never expose internal errors to clients
         logWithContext.error('Search request processing error', {
           error: error instanceof Error ? error.message : 'Unknown error',
           stack: error instanceof Error ? error.stack : undefined,
           body: request.body,
-        });
+        })
 
         return reply.status(500).send({
           success: false,
@@ -210,8 +210,8 @@ export async function searchRoutes(server: FastifyInstance) {
           },
           correlationId,
           timestamp: new Date().toISOString(),
-        });
+        })
       }
-    }
-  );
+    },
+  )
 }

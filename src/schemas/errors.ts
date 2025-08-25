@@ -93,7 +93,7 @@ export const ErrorCodes = {
   VALIDATION_ERROR: 'VALID_REQUEST_MALFORMED',
   INTERNAL_ERROR: 'SVC_INTERNAL_ERROR',
   CSP_REPORT_ERROR: 'SVC_SECURITY_VIOLATION',
-} as const;
+} as const
 
 /**
  * Error severity levels for prioritization and handling
@@ -109,9 +109,9 @@ export enum ErrorSeverity {
  * Stack trace handling policies
  */
 export interface StackTraceOptions {
-  include: boolean;
-  maxFrames: number;
-  sanitized: boolean;
+  include: boolean
+  maxFrames: number
+  sanitized: boolean
 }
 
 /**
@@ -133,23 +133,23 @@ export const StackTracePolicies = {
     maxFrames: 10,
     sanitized: false,
   } as StackTraceOptions,
-} as const;
+} as const
 
 /**
  * Error context metadata for comprehensive debugging
  */
 export interface ErrorContext {
-  correlationId: string;
-  timestamp: string;
-  severity: ErrorSeverity;
-  category: string;
+  correlationId: string
+  timestamp: string
+  severity: ErrorSeverity
+  category: string
   retryPolicy?: {
-    retryable: boolean;
-    maxAttempts?: number;
-    backoffMs?: number;
-  };
-  troubleshootingHints: string[];
-  relatedDocumentation?: string;
+    retryable: boolean
+    maxAttempts?: number
+    backoffMs?: number
+  }
+  troubleshootingHints: string[]
+  relatedDocumentation?: string
 }
 
 /**
@@ -327,7 +327,7 @@ export const ErrorResponseSchema = {
       description: 'ISO 8601 timestamp when error occurred',
     },
   },
-} as const;
+} as const
 
 /**
  * Enhanced validation error response schema with improved field-level details
@@ -467,7 +467,7 @@ export const ValidationErrorResponseSchema = {
       format: 'date-time',
     },
   },
-} as const;
+} as const
 
 /**
  * Enhanced TypeScript interfaces for standardized error responses
@@ -477,40 +477,40 @@ export const ValidationErrorResponseSchema = {
  * Stack trace information with sanitization flags
  */
 export interface StackTrace {
-  frames: string[];
-  truncated: boolean;
-  sanitized: boolean;
+  frames: string[]
+  truncated: boolean
+  sanitized: boolean
 }
 
 /**
  * Retry policy information embedded in error responses
  */
 export interface RetryPolicy {
-  retryable: boolean;
-  maxAttempts?: number;
-  backoffMs?: number;
+  retryable: boolean
+  maxAttempts?: number
+  backoffMs?: number
 }
 
 /**
  * ADHD-specific context for error analysis
  */
 export interface AdhdErrorContext {
-  adhdWorkflowType?: string;
-  medicationHour?: number;
-  cognitiveLoadLevel?: 'low' | 'medium' | 'high' | 'peak';
-  relatedErrors?: string[];
+  adhdWorkflowType?: string
+  medicationHour?: number
+  cognitiveLoadLevel?: 'low' | 'medium' | 'high' | 'peak'
+  relatedErrors?: string[]
 }
 
 /**
  * Standardized error response interface with comprehensive error information
  */
 export interface ErrorResponse {
-  success: false;
+  success: false
   error: {
-    message: string;
-    statusCode: number;
-    code: string;
-    severity: ErrorSeverity;
+    message: string
+    statusCode: number
+    code: string
+    severity: ErrorSeverity
     category:
       | 'voice_processing'
       | 'search'
@@ -523,59 +523,59 @@ export interface ErrorResponse {
       | 'rate_limiting'
       | 'system'
       | 'security'
-      | 'unknown';
-    userImpact: string;
-    troubleshootingHints: string[];
-    retryPolicy: RetryPolicy;
-    stackTrace?: StackTrace;
-    context?: AdhdErrorContext;
-    details?: Record<string, unknown>;
-    relatedDocumentation?: string;
-  };
-  correlationId: string;
-  timestamp: string;
+      | 'unknown'
+    userImpact: string
+    troubleshootingHints: string[]
+    retryPolicy: RetryPolicy
+    stackTrace?: StackTrace
+    context?: AdhdErrorContext
+    details?: Record<string, unknown>
+    relatedDocumentation?: string
+  }
+  correlationId: string
+  timestamp: string
 }
 
 /**
  * Field-level validation error with enhanced details
  */
 export interface ValidationFieldError {
-  field: string;
-  code: string;
-  message: string;
-  value?: unknown;
-  expectedFormat?: string;
-  suggestion?: string;
+  field: string
+  code: string
+  message: string
+  value?: unknown
+  expectedFormat?: string
+  suggestion?: string
 }
 
 /**
  * Validation context with summary information
  */
 export interface ValidationContext {
-  totalFieldsValidated: number;
-  failedFieldsCount: number;
-  validationSchema?: string;
+  totalFieldsValidated: number
+  failedFieldsCount: number
+  validationSchema?: string
 }
 
 /**
  * Enhanced validation error response with field-level details and ADHD-friendly messaging
  */
 export interface ValidationErrorResponse {
-  success: false;
+  success: false
   error: {
-    message: 'Request validation failed';
-    statusCode: 400;
-    code: 'VALID_REQUEST_MALFORMED';
-    severity: 'warning';
-    category: 'validation';
-    userImpact: string;
-    troubleshootingHints: string[];
-    retryPolicy: RetryPolicy;
-    validation: ValidationFieldError[];
-    context?: ValidationContext;
-  };
-  correlationId: string;
-  timestamp: string;
+    message: 'Request validation failed'
+    statusCode: 400
+    code: 'VALID_REQUEST_MALFORMED'
+    severity: 'warning'
+    category: 'validation'
+    userImpact: string
+    troubleshootingHints: string[]
+    retryPolicy: RetryPolicy
+    validation: ValidationFieldError[]
+    context?: ValidationContext
+  }
+  correlationId: string
+  timestamp: string
 }
 
 /**
@@ -595,7 +595,7 @@ export const AdhdFriendlyMessages = {
   502: 'The service is having connection issues',
   503: 'The service is temporarily unavailable',
   504: 'The request took too long to complete',
-} as const;
+} as const
 
 /**
  * Legacy error messages for backward compatibility
@@ -614,7 +614,7 @@ export const ErrorMessages = {
   BAD_GATEWAY: 'Bad gateway',
   SERVICE_UNAVAILABLE: 'Service unavailable',
   GATEWAY_TIMEOUT: 'Gateway timeout',
-} as const;
+} as const
 
 /**
  * Error code to severity mapping for automatic classification
@@ -642,7 +642,7 @@ export const ErrorCodeSeverityMap: Record<string, ErrorSeverity> = {
   // Informational errors that provide feedback
   [ErrorCodes.SEARCH_QUERY_TOO_COMPLEX]: ErrorSeverity.INFO,
   [ErrorCodes.EMAIL_API_RATE_LIMIT]: ErrorSeverity.INFO,
-};
+}
 
 /**
  * Default troubleshooting hints for each error category
@@ -708,7 +708,7 @@ export const CategoryTroubleshootingHints: Record<string, string[]> = {
     'Check system logs for more details',
     'Contact support if the problem persists',
   ],
-};
+}
 
 /**
  * Utility functions for error handling
@@ -718,7 +718,7 @@ export class ErrorSchemaUtils {
    * Get error severity from error code
    */
   static getSeverity(errorCode: string): ErrorSeverity {
-    return ErrorCodeSeverityMap[errorCode] || ErrorSeverity.ERROR;
+    return ErrorCodeSeverityMap[errorCode] || ErrorSeverity.ERROR
   }
 
   /**
@@ -728,7 +728,7 @@ export class ErrorSchemaUtils {
     return (
       CategoryTroubleshootingHints[category] ||
       CategoryTroubleshootingHints.unknown
-    );
+    )
   }
 
   /**
@@ -737,12 +737,12 @@ export class ErrorSchemaUtils {
   static createRetryPolicy(
     retryable: boolean,
     maxAttempts = 3,
-    backoffMs = 1000
+    backoffMs = 1000,
   ): RetryPolicy {
     return {
       retryable,
       ...(retryable && { maxAttempts, backoffMs }),
-    };
+    }
   }
 
   /**
@@ -752,7 +752,7 @@ export class ErrorSchemaUtils {
     return (
       /^[A-Z_]+$/.test(code) &&
       (Object.values(ErrorCodes) as string[]).includes(code)
-    );
+    )
   }
 
   /**
@@ -762,7 +762,7 @@ export class ErrorSchemaUtils {
     return (
       AdhdFriendlyMessages[statusCode as keyof typeof AdhdFriendlyMessages] ||
       'Something unexpected happened'
-    );
+    )
   }
 
   /**
@@ -774,7 +774,7 @@ export class ErrorSchemaUtils {
     message: string,
     value?: unknown,
     expectedFormat?: string,
-    suggestion?: string
+    suggestion?: string,
   ): ValidationFieldError {
     return {
       field,
@@ -783,7 +783,7 @@ export class ErrorSchemaUtils {
       ...(value !== undefined && { value }),
       ...(expectedFormat && { expectedFormat }),
       ...(suggestion && { suggestion }),
-    };
+    }
   }
 }
 
@@ -803,41 +803,41 @@ export class ErrorTypeGuards {
       'error' in response &&
       'correlationId' in response &&
       'timestamp' in response
-    );
+    )
   }
 
   /**
    * Check if response is a validation error response
    */
   static isValidationErrorResponse(
-    response: unknown
+    response: unknown,
   ): response is ValidationErrorResponse {
     return (
       this.isErrorResponse(response) &&
       'validation' in response.error &&
       Array.isArray(response.error.validation)
-    );
+    )
   }
 
   /**
    * Check if error has stack trace
    */
   static hasStackTrace(errorResponse: ErrorResponse): boolean {
-    return !!errorResponse.error.stackTrace?.frames?.length;
+    return !!errorResponse.error.stackTrace?.frames?.length
   }
 
   /**
    * Check if error is retryable
    */
   static isRetryable(errorResponse: ErrorResponse): boolean {
-    return errorResponse.error.retryPolicy.retryable;
+    return errorResponse.error.retryPolicy.retryable
   }
 
   /**
    * Check if error is critical severity
    */
   static isCritical(errorResponse: ErrorResponse): boolean {
-    return errorResponse.error.severity === ErrorSeverity.CRITICAL;
+    return errorResponse.error.severity === ErrorSeverity.CRITICAL
   }
 }
 

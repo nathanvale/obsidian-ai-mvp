@@ -1,6 +1,6 @@
-import type { FastifyInstance } from 'fastify';
-import { chromaClient } from '../services/chromadb.js';
-import { ollamaClient } from '../services/ollama.js';
+import type { FastifyInstance } from 'fastify'
+import { chromaClient } from '../services/chromadb.js'
+import { ollamaClient } from '../services/ollama.js'
 
 export async function healthRoutes(server: FastifyInstance) {
   server.get('/', async (request, reply) => {
@@ -11,29 +11,29 @@ export async function healthRoutes(server: FastifyInstance) {
         chromadb: 'unknown',
         ollama: 'unknown',
       },
-    };
-
-    try {
-      await chromaClient.heartbeat();
-      health.services.chromadb = 'connected';
-    } catch (error) {
-      health.services.chromadb = 'disconnected';
     }
 
     try {
-      await ollamaClient.ping();
-      health.services.ollama = 'connected';
+      await chromaClient.heartbeat()
+      health.services.chromadb = 'connected'
     } catch (error) {
-      health.services.ollama = 'disconnected';
+      health.services.chromadb = 'disconnected'
+    }
+
+    try {
+      await ollamaClient.ping()
+      health.services.ollama = 'connected'
+    } catch (error) {
+      health.services.ollama = 'disconnected'
     }
 
     const overallHealthy = Object.values(health.services).every(
-      status => status === 'connected'
-    );
+      (status) => status === 'connected',
+    )
 
     return reply.status(overallHealthy ? 200 : 503).send({
       ...health,
       status: overallHealthy ? 'healthy' : 'degraded',
-    });
-  });
+    })
+  })
 }
