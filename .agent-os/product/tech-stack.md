@@ -1,120 +1,134 @@
 # Technical Stack
 
-> Last Updated: 2025-08-23
+> Last Updated: 2025-08-24
 > Version: 1.0.0
 
 ## Core Technologies
 
-### Runtime Environment
-- **Runtime:** Bun
-- **Version:** Latest stable
-- **Language:** TypeScript
+### Application Framework
 
-### Database & Vector Storage
-- **Vector Database:** ChromaDB
+- **Runtime:** Bun 1.2.20+
 - **Version:** Latest stable
-- **Purpose:** Vector embeddings storage and similarity search
-
-## Backend Stack
+- **Language:** TypeScript with strict mode
 
 ### API Framework
-- **Framework:** Fastify
-- **Version:** Latest stable
-- **Purpose:** Lightweight, high-performance API server
 
-### Local AI Integration
-- **LLM Runtime:** Ollama
-- **Embedding Model:** nomic-embed-text
-- **Purpose:** Local embedding generation and AI processing
+- **Framework:** Fastify 4.24.3+
+- **Middleware:** CORS, Helmet for security
+- **Validation:** JSON Schema for route validation
+- **Logging:** @orchestr8/logger with structured logging
 
-### File Processing
-- **File System:** Node.js fs module
-- **Markdown Processing:** Custom TypeScript implementation
-- **Text Chunking:** Intelligent semantic chunking algorithms
+### Database Systems
 
-## Frontend Stack (Future)
+- **Vector Database:** ChromaDB 1.7.3+ for semantic search
+- **Document Storage:** Obsidian vault (markdown files)
+- **Configuration:** Environment-based with Zod validation
 
-### JavaScript Framework
-- **Framework:** React (planned)
-- **Version:** Latest stable
-- **Build Tool:** Vite
+## AI & Processing Stack
 
-### CSS Framework
-- **Framework:** TailwindCSS (planned)
-- **Version:** 4.0+
+### Local LLM Integration
 
-### UI Components
-- **Library:** To be determined
-- **Implementation:** React components
+- **Service:** Ollama (localhost:11434)
+- **Model:** nomic-embed-text for embeddings
+- **Processing:** Local-first, no cloud dependencies
+- **Batch Processing:** Built-in rate limiting and batching
 
-## Development Tools
+### Voice Processing
 
-### Package Management
-- **Package Manager:** Bun
-- **Lock File:** bun.lockb
-- **Node Compatibility:** Full Node.js module support
+- **Transcription:** Whisper (to be implemented)
+- **File Monitoring:** Chokidar for .m4a file detection
+- **Source:** Apple Watch voice memos via iCloud sync
 
-### Development Environment
-- **Language:** TypeScript
-- **Type Checking:** Built-in Bun TypeScript support
-- **Hot Reload:** Bun development server
+### Semantic Search
 
-### Code Quality
-- **Linting:** To be configured
-- **Formatting:** To be configured
-- **Testing Framework:** To be determined
+- **Engine:** ChromaDB collections with metadata
+- **Embeddings:** Generated via Ollama service
+- **Collections:** Domain-specific (voice, email, tasks, notes)
 
 ## Infrastructure
 
-### Local Services
-- **ChromaDB:** Local Docker container or standalone
-- **Ollama:** Local installation
-- **File System:** Direct access to Obsidian vault directory
+### Development Environment
 
-### Deployment
-- **Environment:** Local development machine
-- **Process Management:** Direct Bun execution
-- **Configuration:** Environment variables
+- **Package Manager:** Bun (preferred), npm (fallback)
+- **Build Tool:** Bun native compilation
+- **Hot Reload:** Bun --watch for development
 
-### Data Storage
-- **Vault Access:** Read-only access to Obsidian markdown files
-- **Vector Storage:** ChromaDB local persistence
-- **Configuration:** Local environment variables
+### Monitoring & Resilience
 
-## API Architecture
+- **Circuit Breakers:** @orchestr8/resilience 1.0.0+
+- **Retry Policies:** Service-specific configurations
+- **Logging:** Correlation ID tracking with @orchestr8/logger
+- **Health Checks:** Automated service connectivity monitoring
 
-### Service Layer
-- **Indexing Service:** Processes markdown files and generates embeddings
-- **Search Service:** Handles semantic search queries
-- **Quiz Service:** Generates quizzes from knowledge base content
-- **Chat Service:** Provides conversational AI interface
+### File System Integration
 
-### Data Flow
-- **Input:** Obsidian markdown files
-- **Processing:** Text chunking → Embedding generation → Vector storage
-- **Output:** RESTful API endpoints for search, quiz, and chat functionality
+- **Vault Access:** Direct file system monitoring
+- **File Watching:** Native fs.watch with recursive monitoring
+- **Security:** Path validation and vault boundary enforcement
 
-## Security & Privacy
+## External Integrations
 
-### Local-First Architecture
-- **External Dependencies:** None for core AI functionality
-- **Data Privacy:** All processing occurs locally
-- **Network Requirements:** Only for initial setup and model downloads
+### Email & Calendar
 
-### File System Access
-- **Permissions:** Read-only access to specified Obsidian vault
-- **Security:** No file modification capabilities
-- **Isolation:** Sandboxed access pattern
+- **Gmail API:** @google-cloud/local-auth for OAuth2
+- **Calendar API:** Google Calendar integration
+- **Processing:** Local LLM classification and deadline extraction
+
+### Interface
+
+- **Dashboard:** Raycast extension (to be implemented)
+- **Quick Capture:** Keyboard shortcuts and instant access
+- **Visual Design:** ADHD-optimized with max 3 options
+
+### Voice Memo Pipeline
+
+- **Source:** ~/Library/Group Containers/\*/Recordings
+- **Processing:** Whisper transcription + Ollama embeddings
+- **Storage:** ChromaDB + Obsidian markdown files
+
+## Deployment Architecture
+
+### Local Development
+
+- **Host:** localhost (127.0.0.1)
+- **Port:** 3000 (configurable)
+- **Hot Reload:** Automatic with file watching
+- **Environment:** .env file configuration
+
+### Production (Personal Use)
+
+- **Target:** Personal M4 MacBook
+- **Services:** All running locally
+- **Data:** Stored locally, no cloud sync
+- **Privacy:** Complete local processing
 
 ## Performance Considerations
 
-### Optimization Strategy
-- **Batch Processing:** Efficient embedding generation for large vaults
-- **Caching:** Vector embeddings persistence in ChromaDB
-- **Memory Management:** Streaming file processing for large notes
-- **Concurrent Processing:** Parallel embedding generation where possible
+### M4 MacBook Optimization
 
-### Scalability
-- **Vault Size:** Designed to handle large knowledge bases (1000+ notes)
-- **Real-time Updates:** Incremental indexing for modified files
-- **Resource Usage:** Optimized for local machine constraints
+- **Memory:** 6-8GB for LLM, 4-6GB for ChromaDB
+- **CPU:** Metal Performance Shaders for Whisper
+- **Storage:** SSD for fast file system operations
+- **Network:** Local-only, no external API calls
+
+### Scaling Strategy
+
+- **Voice Processing:** Batch transcription during idle periods
+- **Email Processing:** Configurable polling intervals
+- **Search:** ChromaDB indexing with incremental updates
+- **UI Responsiveness:** Async processing with progress indicators
+
+## Security & Privacy
+
+### Data Protection
+
+- **Processing:** 100% local on device
+- **Storage:** AES-256 encryption for sensitive ChromaDB collections
+- **Access:** Oauth2 with minimal Google permissions
+- **Network:** No external data transmission for core features
+
+### Development Security
+
+- **Dependencies:** Regular security audits
+- **Environment:** Secure credential management
+- **Validation:** Input sanitization and path traversal protection

@@ -1,0 +1,191 @@
+{
+  "main": {
+    "id": "3e13cfa2a64a1fb5",
+    "type": "split",
+    "children": [
+      {
+        "id": "41ec37d8e5a64d5c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c36087b0287230bf",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "c110884fe3559b6d",
+    "type": "split",
+    "children": [
+      {
+        "id": "22767b2240c96531",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d407872b56702359",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "55f881f8e18f48dd",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "0fb5b9b6bb27d3f6",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 499.5004348754883
+  },
+  "right": {
+    "id": "7f782c6eb63d8490",
+    "type": "split",
+    "children": [
+      {
+        "id": "fc8a2ab66901eefa",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "92c889c0b14aeb9e",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "101682af971294b0",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "e77494e0604c6d81",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "markdown-importer:Open format converter": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "c36087b0287230bf",
+  "lastOpenFiles": [
+    "specs/2025-08-24-orchestr8-integration-completion/sub-specs/tests.md",
+    "specs/2025-08-24-orchestr8-integration-completion/sub-specs/technical-spec.md",
+    "specs/2025-08-24-ollama-service-enhancement/sub-specs/tests.md",
+    "specs/2025-08-24-ollama-service-enhancement/sub-specs/technical-spec.md",
+    "specs/2025-08-24-ollama-service-enhancement/sub-specs/api-spec.md",
+    "specs/2025-08-24-filesystem-orchestr8-integration/sub-specs/tests.md",
+    "specs/2025-08-24-filesystem-orchestr8-integration/sub-specs/technical-spec.md",
+    "specs/2025-08-24-filesystem-orchestr8-integration/sub-specs/api-spec.md",
+    "specs/2025-08-24-environment-config-enhancement/sub-specs/tests.md",
+    "specs/2025-08-24-environment-config-enhancement/sub-specs/technical-spec.md",
+    "specs/2025-08-24-environment-config-enhancement/sub-specs/api-spec.md",
+    "specs/2025-08-24-deployment-preparation/sub-specs/tests.md",
+    "specs/2025-08-24-deployment-preparation/sub-specs/technical-spec.md",
+    "specs/2025-08-24-chromadb-semantic-search/sub-specs/tests.md",
+    "specs/2025-08-24-chromadb-semantic-search/sub-specs/technical-spec.md",
+    "specs/2025-08-24-chromadb-semantic-search/sub-specs/api-spec.md",
+    "specs/2025-08-24-bun-typescript-runtime/sub-specs/technical-spec.md",
+    "specs/2025-08-24-adhd-health-monitoring/sub-specs/tests.md",
+    "specs/2025-08-24-adhd-health-monitoring/sub-specs/technical-spec.md",
+    "specs/2025-08-24-adhd-health-monitoring/sub-specs/api-spec.md",
+    "specs/2025-01-24-file-system-service/sub-specs/tests.md",
+    "specs/2025-01-24-file-system-service/sub-specs/technical-spec.md",
+    "specs/2025-01-24-file-system-service/sub-specs/api-spec.md",
+    "specs/2025-01-24-fastify-production-api/sub-specs/tests.md",
+    "specs/2025-01-24-fastify-production-api/sub-specs/technical-spec.md",
+    "specs/2025-08-24-orchestr8-integration-completion/tasks.md",
+    "specs/2025-08-24-orchestr8-integration-completion/sub-specs",
+    "specs/2025-08-24-ollama-service-enhancement/sub-specs",
+    "specs/2025-08-24-filesystem-orchestr8-integration/sub-specs",
+    "specs/2025-08-24-environment-config-enhancement/sub-specs",
+    "specs/2025-08-24-deployment-preparation/sub-specs",
+    "specs/2025-08-24-chromadb-semantic-search/sub-specs",
+    "specs/2025-08-24-bun-typescript-runtime/sub-specs",
+    "specs/2025-08-24-adhd-health-monitoring/sub-specs",
+    "specs/2025-01-24-file-system-service/sub-specs",
+    "specs/2025-01-24-fastify-production-api/sub-specs"
+  ]
+}

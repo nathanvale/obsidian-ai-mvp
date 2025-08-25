@@ -1,156 +1,177 @@
 # Product Roadmap
 
-> Last Updated: 2025-08-23
+> Last Updated: 2025-08-24
 > Version: 1.0.0
-> Status: Planning
+> Status: Active Development
 
-## Phase 1: Core MVP Infrastructure (2 weeks)
+## Phase 0: Check if Already Completed Infrastructure ✅
 
-**Goal:** Establish foundational infrastructure for local AI-powered knowledge processing
-**Success Criteria:** Basic API server running with ChromaDB integration and Ollama connectivity
+The following foundation has need to confirm the implementation exists in full:
 
-### Must-Have Features
+- [x] **Bun + TypeScript Runtime** - Fast development environment with native TypeScript support
+- [ ] **Fastify API Server** - Production-ready REST API with CORS, Helmet, and structured routing
+- [ ] **ChromaDB Integration** - Complete CRUD operations and semantic search capabilities
+- [ ] **Ollama Service** - Local LLM with embedding generation, batch processing, and health checks
+- [ ] **File System Service** - Obsidian vault integration with file watching and scanning
+- [ ] **@orchestr8 Integration** - Structured logging with correlation IDs and resilience patterns
+- [ ] **Environment Configuration** - Comprehensive config management with validation
+- [ ] **Health Monitoring** - Service connectivity and status tracking
+- [ ] **Deployment Preparation** - Pre-commit hooks (Husky) for Prettier, ESLint, TypeScript, and tests; GitHub Actions CI workflow
 
-- [ ] Project setup with Bun and TypeScript - `S`
-- [ ] Fastify API server with basic endpoints - `M`
-- [ ] ChromaDB integration and connection management - `M`
-- [ ] Ollama integration for embedding generation - `M`
-- [ ] Basic file system access to Obsidian vault - `S`
-- [ ] Environment configuration system - `S`
+**Success Criteria Met:** ✓ API responds, ✓ Ollama connected, ✓ Structured logging active, ✓ Configuration validated
 
-### Should-Have Features
+## Phase 1: Voice Processing & Document Indexing (Week 1)
 
-- [ ] Logging infrastructure with structured output - `S`
-- [ ] Error handling and graceful failures - `M`
-- [ ] Basic API documentation - `S`
-
-### Dependencies
-
-- Ollama installed locally with nomic-embed-text model
-- ChromaDB running (Docker or standalone)
-- Access to test Obsidian vault
-
-## Phase 2: Document Processing & Indexing (2 weeks)
-
-**Goal:** Implement intelligent document processing and vector storage
-**Success Criteria:** Can process entire Obsidian vault and store searchable embeddings
+**Goal:** Transform voice memos into searchable, organized notes automatically
+**Success Criteria:** Voice memos auto-transcribe to Obsidian, semantic search operational, basic ChromaDB populated
 
 ### Must-Have Features
 
-- [ ] Markdown file parsing and content extraction - `M`
-- [ ] Intelligent text chunking algorithms - `L`
-- [ ] Batch embedding generation with progress tracking - `L`
-- [ ] Vector storage in ChromaDB with metadata - `M`
-- [ ] Incremental indexing for modified files - `L`
+- [ ] **Voice File Monitoring** - Watch ~/Library/Group Containers/\*/Recordings for .m4a files `M`
+- [ ] **Whisper Integration** - Install and configure whisper-node for transcription `M`
+- [ ] **Voice Processing Pipeline** - Auto-transcribe → generate embeddings → store in ChromaDB `M`
+- [ ] **Obsidian Note Creation** - Auto-create markdown files with transcriptions and metadata `M`
+- [ ] **Semantic Search Implementation** - Connect search endpoint to ChromaDB queries `M`
 
 ### Should-Have Features
 
-- [ ] File change detection and automatic re-indexing - `L`
-- [ ] Progress indicators for large vault processing - `M`
-- [ ] Duplicate content detection and handling - `M`
+- [ ] **Background Processing** - Queue system for async voice processing `S`
+- [ ] **Error Recovery** - Resilient processing with retry policies `S`
+- [ ] **Processing Status** - Real-time progress tracking for transcriptions `S`
 
 ### Dependencies
 
-- Phase 1 completion
-- Test vault with diverse content types
+- whisper-node package installation
+- chokidar for file monitoring
+- BullMQ + Redis for job queues (optional)
 
-## Phase 3: Semantic Search Implementation (1 week)
+## Phase 2: Email & Calendar Intelligence (Week 2)
 
-**Goal:** Provide accurate semantic search capabilities
-**Success Criteria:** Users can find relevant notes using natural language queries
+**Goal:** Automatic deadline extraction and task creation from emails and calendar events
+**Success Criteria:** Gmail emails classified for urgency, deadlines extracted, calendar events processed
 
 ### Must-Have Features
 
-- [ ] Query embedding generation - `S`
-- [ ] Vector similarity search in ChromaDB - `M`
-- [ ] Result ranking and relevance scoring - `M`
-- [ ] Search API endpoint with pagination - `M`
+- [ ] **Gmail API Integration** - OAuth2 setup and email fetching `L`
+- [ ] **Email Classification** - Use Ollama to categorize emails (urgent/school/financial/medical) `M`
+- [ ] **Deadline Extraction** - Parse dates and create actionable tasks `M`
+- [ ] **Calendar Processing** - Google Calendar API for event monitoring `L`
+- [ ] **Automatic Note Creation** - Generate Obsidian notes for important emails/events `M`
 
 ### Should-Have Features
 
-- [ ] Search result highlighting and context - `M`
-- [ ] Query suggestions and auto-completion - `L`
-- [ ] Advanced filtering options (date, tags, etc.) - `L`
+- [ ] **Pattern Recognition** - Identify recurring bills and responsibilities `M`
+- [ ] **Smart Notifications** - Context-aware reminder system `S`
+- [ ] **Email Batching** - Process emails in configurable intervals `S`
 
 ### Dependencies
 
-- Phase 2 completion
-- Indexed test vault
+- @google-cloud/local-auth for Gmail/Calendar APIs
+- Google OAuth2 credential setup
 
-## Phase 4: Interactive AI Features (2 weeks)
+## Phase 3: Raycast Dashboard & Quick Capture (Week 3)
 
-**Goal:** Enable conversational AI and quiz generation
-**Success Criteria:** Users can chat with their knowledge base and generate learning materials
+**Goal:** Zero-friction access to critical information and instant thought capture
+**Success Criteria:** Raycast extension displays urgent items, quick capture working, keyboard shortcuts active
 
 ### Must-Have Features
 
-- [ ] Conversational chat interface via API - `L`
-- [ ] Context-aware question answering - `L`
-- [ ] Quiz generation from note content - `L`
-- [ ] Multiple quiz formats (multiple choice, Q&A) - `M`
+- [ ] **Raycast Extension** - ADHD-optimized dashboard with max 3 urgent items `L`
+- [ ] **Quick Capture Interface** - Instant note creation with keyboard shortcuts `M`
+- [ ] **Semantic Search Integration** - Query ChromaDB from Raycast `M`
+- [ ] **Cognitive Load Indicator** - Visual feedback on current complexity level `M`
+- [ ] **API Integration** - Connect Raycast to existing Fastify endpoints `S`
 
 ### Should-Have Features
 
-- [ ] Chat history and conversation memory - `M`
-- [ ] Adaptive quiz difficulty based on user performance - `XL`
-- [ ] Knowledge gap identification - `L`
+- [ ] **Focus Mode Detection** - Adaptive notification deferral `S`
+- [ ] **Visual Themes** - ADHD-friendly color coding and progress indicators `S`
+- [ ] **Muscle Memory Shortcuts** - Consistent keyboard patterns across features `S`
 
 ### Dependencies
 
-- Phase 3 completion
-- Enhanced Ollama integration for text generation
+- Raycast Extension API learning
+- Node.js extension development setup
 
-## Phase 5: Advanced Features & Polish (2 weeks)
+## Phase 4: Adaptive Personalization & Medication Tracking (Week 4)
 
-**Goal:** Add advanced functionality and production readiness
-**Success Criteria:** Feature-complete MVP ready for extended use and potential distribution
+**Goal:** System learns individual patterns and adapts interface to medication cycles
+**Success Criteria:** Interface complexity adapts to time of day, notification timing optimized, cognitive load tracking active
 
 ### Must-Have Features
 
-- [ ] Real-time file system monitoring - `L`
-- [ ] Performance optimization and caching - `M`
-- [ ] Comprehensive error handling and recovery - `M`
-- [ ] Configuration management interface - `M`
+- [ ] **Medication Cycle Tracking** - Time-based interface adaptation `M`
+- [ ] **Cognitive Load Monitoring** - Track interaction patterns and adjust complexity `M`
+- [ ] **Adaptive Notifications** - Adjust frequency and intensity based on context `M`
+- [ ] **Pattern Learning** - Store and analyze user behavior in ChromaDB metadata `M`
+- [ ] **Task Complexity Scheduling** - Auto-schedule challenging work for peak periods `M`
 
 ### Should-Have Features
 
-- [ ] Note relationship discovery and mapping - `XL`
-- [ ] Export functionality for search results and quizzes - `M`
-- [ ] Basic web interface for non-technical users - `XL`
-- [ ] Integration hooks for future Obsidian plugin development - `L`
+- [ ] **Apple Health Integration** - Medication reminder sync `M`
+- [ ] **Advanced Analytics** - Cognitive pattern insights and recommendations `L`
+- [ ] **Seasonal Adjustments** - Account for longer-term behavioral patterns `S`
 
 ### Dependencies
 
-- All previous phases completed
-- Performance testing with large vaults
-- User feedback integration
+- Extended usage data collection
+- Apple Health API integration (optional)
 
-## Future Considerations (Beyond MVP)
+## Phase 5: Advanced Features & Polish (Future)
 
-### Potential Enhancements
-- **Obsidian Plugin Development:** Native plugin integration
-- **Advanced AI Models:** Support for larger local models
-- **Collaborative Features:** Shared knowledge base capabilities
-- **Mobile Access:** API-based mobile applications
-- **Advanced Analytics:** Usage patterns and knowledge insights
+**Goal:** Complete ecosystem integration and advanced ADHD support features
+**Success Criteria:** Multi-device sync, advanced automation, comprehensive analytics
 
-### Technical Debt & Improvements
-- **Test Coverage:** Comprehensive test suite implementation
-- **Documentation:** Complete API and user documentation
-- **Performance:** Benchmarking and optimization
-- **Security:** Enhanced file system permissions and validation
+### Must-Have Features
 
-### Integration Opportunities
-- **Other Note-Taking Apps:** Logseq, Roam Research compatibility
-- **Knowledge Management Tools:** Integration with Zotero, Mendeley
-- **Workflow Tools:** Automation with Zapier, IFTTT
-- **Development Tools:** IDE plugins and extensions
+- [ ] **Apple Shortcuts Integration** - Automation workflow building `L`
+- [ ] **Advanced NLP** - Complex query understanding and context awareness `XL`
+- [ ] **Multi-Device Sync** - End-to-end encrypted data synchronization `L`
+- [ ] **Comprehensive Analytics** - Detailed cognitive insights and trend analysis `M`
 
----
+### Should-Have Features
 
-**Effort Scale:**
-- XS: 1 day
-- S: 2-3 days  
-- M: 1 week
-- L: 2 weeks
-- XL: 3+ weeks
+- [ ] **Plugin Architecture** - Extensible system for custom ADHD tools `XL`
+- [ ] **Community Features** - Anonymous pattern sharing (privacy-preserving) `L`
+
+## Success Metrics
+
+### Phase 1 Metrics
+
+- Voice transcription accuracy >95%
+- Time from voice memo to indexed note <60 seconds
+- Semantic search relevance score >85%
+
+### Phase 2 Metrics
+
+- Email classification precision >90%
+- Deadline extraction accuracy >85%
+- Calendar processing latency <30 seconds
+
+### Phase 3 Metrics
+
+- Quick capture time <10 seconds
+- Daily Raycast usage >5 interactions
+- Keyboard shortcut adoption >80%
+
+### Phase 4 Metrics
+
+- Medication cycle adaptation accuracy >90%
+- Cognitive load prediction precision >85%
+- User satisfaction with adaptive timing >90%
+
+## Risk Mitigation
+
+### High-Risk Items
+
+- **Voice transcription accuracy** → Use Whisper base model, manual correction option
+- **Gmail API rate limits** → Implement backoff with @orchestr8/resilience
+- **ChromaDB performance** → Optimize collections and batch operations
+- **Raycast extension complexity** → Start minimal, iterate based on usage
+
+### Mitigation Strategies
+
+- Extensive structured logging for debugging
+- Graceful degradation when services unavailable
+- Manual fallbacks for all automated processes
+- Regular user testing with actual ADHD workflows

@@ -1,12 +1,72 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Bash(git branch:*)",
       "Bash(git push:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(bun:*)",
+      "Bash(export PATH=\"$HOME/.bun/bin:$PATH\")",
+      "Bash(npx tsc:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm test)",
+      "Bash(npm test:*)",
+      "Bash(npm run test:*)",
+      "Bash(npx vitest run:*)",
+      "Bash(timeout 30s bun run test)",
+      "Bash(timeout 15s bun run test)",
+      "Bash(npm install:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm view:*)",
+      "Bash(npm outdated)",
+      "Bash(npm run check-node:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm run lint:*)",
+      "Bash(pnpm check:*)",
+      "Bash(node:*)",
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(rm:*)",
+      "Bash(afplay:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh api:*)",
+      "Bash(~/.claude-code-project-index/scripts/project-index-helper.sh:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "mcp__context7__resolve-library-id",
+      "mcp__filesystem__create_directory",
+      "mcp__filesystem__get_file_info",
+      "mcp__filesystem__write_file",
+      "mcp__filesystem__edit_file",
+      "Read(//Users/nathanvale/code/@orchestr8/packages/**)",
+      "Read(//Users/nathanvale/code/@orchestr8/packages/resilience/**)",
+      "Read(//Users/nathanvale/.agent-os/instructions/**)",
+      "WebSearch",
+      "Bash(npx eslint:*)",
+      "Bash(pnpm format:*)",
+      "Bash(prettier --write .)",
+      "Bash(pnpm prettier:*)",
+      "Bash(git checkout:*)",
+      "Bash(git rebase:*)"
     ],
-    "deny": [],
-    "ask": []
-  }
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Write(.env)",
+      "Write(.env.*)",
+      "Write(production.config.*)",
+      "Write(chroma_data/**)",
+      "Read(/Users/nathanvale/Library/**)",
+      "Write(/Users/nathanvale/Library/**)"
+    ],
+    "ask": [
+      "Write(package.json)",
+      "Write(tsconfig.json)",
+      "Write(bun.lockb)",
+      "Bash(rm -rf:*)",
+      "Bash(sudo:*)"
+    ]
+  },
+  "model": "claude-sonnet-4-20250514"
 }

@@ -1,138 +1,113 @@
-// Load environment variables
-import { existsSync, readFileSync } from 'fs';
-if (existsSync('.env.local')) {
-  const envContent = readFileSync('.env.local', 'utf8');
-  const lines = envContent.split('\n');
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (trimmed && !trimmed.startsWith('#')) {
-      const [key, value] = trimmed.split('=');
-      if (key && value && !process.env[key]) {
-        process.env[key] = value;
-      }
-    }
-  }
-}
-
-import Fastify from 'fastify'
-import { config } from '@/config/environment'
-import { registerRoutes } from '@/controllers'
-import { chromaClient } from '@/integrations/chromadb'
-import { ollamaClient } from '@/integrations/ollama'
-import { fileProcessor } from '@/utils/file-processor'
+import Fastify from 'fastify';
+import cors from '@fastify/cors';
+import helmet from '@fastify/helmet';
+import { config } from './config/environment.js';
+import { setupRoutes } from './routes/index.js';
+import { initializeLogger } from './services/logger.js';
+import errorHandlerPlugin from './middleware/error-handler.js';
+import requestLoggingPlugin from './middleware/request-logging.js';
+import securityPlugin from './middleware/security.js';
+import performancePlugin from './middleware/performance.js';
+import enhancedHealthPlugin from './middleware/enhanced-health.js';
 
 const server = Fastify({
   logger: {
-    level: config.LOG_LEVEL,
     transport: {
       target: 'pino-pretty',
       options: {
         colorize: true,
-        translateTime: 'HH:MM:ss Z',
-        ignore: 'pid,hostname'
-      }
-    }
+      },
+    },
   },
-  trustProxy: true
 });
 
-async function registerPlugins(fastify: typeof server): Promise<void> {
-  // Register CORS
-  await fastify.register(import('@fastify/cors'), {
-    origin: config.CORS_ORIGINS.split(','),
-    credentials: true
-  });
-
-  // Register Helmet for security
-  await fastify.register(import('@fastify/helmet'), {
-    global: true
-  });
-}
-
-async function initializeServices(): Promise<void> {
-  console.log('🔄 Initializing services...')
-
+async function start() {
   try {
-    // Validate vault path
-    const vaultValidation = await fileProcessor.validateVaultPath()
-    if (!vaultValidation.valid) {
-      throw new Error(`Vault validation failed: ${vaultValidation.error}`)
-    }
-    console.log(`✅ Vault path validated: ${fileProcessor.getVaultPath()}`)
+    // Initialize @orchestr8/logger before registering plugins
+    await initializeLogger();
 
-    // Try to connect to ChromaDB (non-blocking)
-    try {
-      await chromaClient.connect()
-    } catch (error) {
-      console.warn('⚠️ ChromaDB connection failed:', error instanceof Error ? error.message : error)
-      console.warn('⚠️ ChromaDB integration will not be available')
-    }
+    // Register request logging plugin first for correlation tracking
+    await server.register(requestLoggingPlugin, {
+      logRequestBody: config.isDevelopment,
+      logResponseBody: config.isDevelopment,
+      excludePaths: ['/health', '/favicon.ico'],
+    });
 
-    // Check Ollama health (non-blocking)
-    try {
-      const ollamaHealth = await ollamaClient.healthCheck()
-      if (ollamaHealth.status !== 'healthy') {
-        console.warn('⚠️ Ollama health check failed:', ollamaHealth.details)
-        console.warn('⚠️ Ollama integration will not be available')
-      } else {
-        console.log(`✅ Ollama connected: ${ollamaClient.getModelName()}`)
-      }
-    } catch (error) {
-      console.warn('⚠️ Ollama health check failed:', error instanceof Error ? error.message : error)
-      console.warn('⚠️ Ollama integration will not be available')
-    }
+    // Register enhanced security plugin with comprehensive protection
+    await server.register(securityPlugin, {
+      rateLimit: {
+        max: config.security.rateLimit.max,
+        windowMs: config.security.rateLimit.windowMs,
+        skipOnSuccess: config.security.rateLimit.skipOnSuccess,
+        whitelist: config.isDevelopment ? ['127.0.0.1', '::1'] : undefined,
+      },
+      requestTimeout: config.security.requestTimeout,
+      enhancedHeaders: true,
+      trustProxy: !config.isDevelopment,
+      contentSecurityPolicy: {
+        enabled: config.security.csp.enabled,
+        reportOnly: config.security.csp.reportOnly,
+        reportUri: '/api/csp-report',
+      },
+      corsValidation: {
+        enabled: config.security.cors.validationEnabled,
+        allowedOrigins: config.allowedOrigins,
+        allowCredentials: false,
+      },
+    });
 
-    console.log('✅ Services initialized successfully')
+    // Register performance optimization plugin
+    await server.register(performancePlugin, {
+      compression: {
+        threshold: config.performance.compression.threshold,
+        quality: config.performance.compression.quality,
+        encodings: ['gzip', 'deflate', 'br'],
+      },
+      backPressure: config.performance.backPressure,
+      enableMetrics: true,
+    });
+
+    // Register enhanced health monitoring and graceful shutdown
+    await server.register(enhancedHealthPlugin, {
+      enableDetailedHealthCheck: true,
+      checkExternalServices: true,
+      gracefulShutdownTimeout: 10000,
+      healthCheckInterval: 30000,
+    });
+
+    // Register error handler plugin last to catch all errors
+    await server.register(errorHandlerPlugin, {
+      hideInternalErrors: config.isProduction,
+      includeStackTrace: config.isDevelopment,
+    });
+
+    await server.register(helmet, {
+      global: true,
+    });
+
+    // CORS is now handled by the security middleware with proper validation
+    // Remove the permissive CORS configuration
+    await server.register(cors, {
+      origin: false, // Disable automatic CORS - security middleware handles it
+      credentials: false,
+    });
+
+    await setupRoutes(server);
+
+    const address = await server.listen({
+      port: config.port,
+      host: config.host,
+    });
+
+    server.log.info(`Server listening at ${address}`);
   } catch (error) {
-    console.error('❌ Service initialization failed:', error)
-    throw error
+    server.log.error(error);
+    process.exit(1);
   }
 }
 
-async function startServer(): Promise<void> {
-  try {
-    // Register plugins
-    await registerPlugins(server)
-    
-    // Register routes
-    await registerRoutes(server)
-    
-    // Initialize services
-    await initializeServices()
-    
-    // Start server
-    const address = await server.listen({ 
-      port: config.PORT, 
-      host: config.HOST 
-    })
-    
-    console.log(`🚀 Server running at ${address}`)
-  } catch (error) {
-    server.log.error(error)
-    process.exit(1)
-  }
+if (import.meta.main) {
+  start();
 }
 
-// Graceful shutdown
-async function shutdown(): Promise<void> {
-  console.log('📴 Shutting down server...')
-  
-  try {
-    // Disconnect from ChromaDB
-    await chromaClient.disconnect()
-    
-    // Close server
-    await server.close()
-    
-    console.log('✅ Server shut down successfully')
-    process.exit(0)
-  } catch (error) {
-    console.error('❌ Error during shutdown:', error)
-    process.exit(1)
-  }
-}
-
-process.on('SIGINT', shutdown)
-process.on('SIGTERM', shutdown)
-
-startServer();
+export { server };
