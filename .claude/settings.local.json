@@ -47,7 +47,8 @@
       "Bash(pnpm format:*)",
       "Bash(prettier --write .)",
       "Bash(pnpm prettier:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(git rebase:*)"
     ],
     "deny": [
       "Read(.env)",
