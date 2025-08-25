@@ -256,7 +256,7 @@ export class FileProcessor {
     try {
       const fullPath = join(this.vaultPath, relativePath)
       return await this.readMarkdownFile(fullPath)
-    } catch (error) {
+    } catch {
       console.warn(`File not found: ${relativePath}`)
       return null
     }

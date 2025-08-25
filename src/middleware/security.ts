@@ -458,9 +458,9 @@ async function securityPlugin(
   }
 
   // Add enhanced security helper methods to request
-  fastify.decorateRequest('security', null)
+  fastify.decorateRequest('security')
   fastify.addHook('onRequest', async (request: FastifyRequest) => {
-    (
+    ;(
       request as FastifyRequest & {
         security: {
           isRateLimited: boolean

@@ -84,9 +84,9 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 
 ```typescript
 interface ConfigValidator {
-  validateSchema(config: unknown): ValidationResult;
-  validateServices(): Promise<ServiceValidationResult>;
-  formatErrors(errors: ZodError): ADHDFriendlyError[];
+  validateSchema(config: unknown): ValidationResult
+  validateServices(): Promise<ServiceValidationResult>
+  formatErrors(errors: ZodError): ADHDFriendlyError[]
 }
 ```
 
@@ -94,10 +94,10 @@ interface ConfigValidator {
 
 ```typescript
 interface ConfigReloadManager {
-  watchConfigFiles(): void;
-  reloadConfiguration(): Promise<ReloadResult>;
-  validateBeforeReload(config: Config): ValidationResult;
-  rollbackConfiguration(): void;
+  watchConfigFiles(): void
+  reloadConfiguration(): Promise<ReloadResult>
+  validateBeforeReload(config: Config): ValidationResult
+  rollbackConfiguration(): void
 }
 ```
 
@@ -105,9 +105,9 @@ interface ConfigReloadManager {
 
 ```typescript
 interface ProfileManager {
-  getProfile(name: string): EnvironmentProfile;
-  applyProfile(profile: EnvironmentProfile): Config;
-  validateProfile(profile: EnvironmentProfile): ValidationResult;
+  getProfile(name: string): EnvironmentProfile
+  applyProfile(profile: EnvironmentProfile): Config
+  validateProfile(profile: EnvironmentProfile): ValidationResult
 }
 ```
 

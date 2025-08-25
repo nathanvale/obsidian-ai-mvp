@@ -125,7 +125,7 @@ class FileSystemService {
       const hasObsidianConfig = files.includes('.obsidian')
 
       return hasObsidianConfig
-    } catch (error) {
+    } catch {
       return false
     }
   }

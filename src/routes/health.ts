@@ -16,14 +16,14 @@ export async function healthRoutes(server: FastifyInstance) {
     try {
       await chromaClient.heartbeat()
       health.services.chromadb = 'connected'
-    } catch (error) {
+    } catch {
       health.services.chromadb = 'disconnected'
     }
 
     try {
       await ollamaClient.ping()
       health.services.ollama = 'connected'
-    } catch (error) {
+    } catch {
       health.services.ollama = 'disconnected'
     }
 

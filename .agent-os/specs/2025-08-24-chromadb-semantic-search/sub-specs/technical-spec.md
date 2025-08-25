@@ -49,20 +49,20 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 ```typescript
 interface DocumentIndexingService {
   // Primary processing methods
-  indexVault(): Promise<IndexingProgress>;
-  indexFile(filePath: string): Promise<void>;
-  reindexFile(filePath: string): Promise<void>;
-  deleteFileIndex(filePath: string): Promise<void>;
+  indexVault(): Promise<IndexingProgress>
+  indexFile(filePath: string): Promise<void>
+  reindexFile(filePath: string): Promise<void>
+  deleteFileIndex(filePath: string): Promise<void>
 
   // Document processing
   chunkDocument(
     content: string,
-    metadata: FileMetadata
-  ): Promise<DocumentChunk[]>;
-  extractMetadata(filePath: string): Promise<FileMetadata>;
+    metadata: FileMetadata,
+  ): Promise<DocumentChunk[]>
+  extractMetadata(filePath: string): Promise<FileMetadata>
 
   // Progress tracking
-  getIndexingProgress(): IndexingProgress;
+  getIndexingProgress(): IndexingProgress
 }
 ```
 
@@ -70,11 +70,9 @@ interface DocumentIndexingService {
 
 ```typescript
 interface SearchService {
-  search(query: string, options?: SearchOptions): Promise<SearchResult[]>;
-  generateQueryEmbedding(query: string): Promise<number[]>;
-  filterResultsByCognitiveLoad(
-    results: SearchResult[]
-  ): Promise<SearchResult[]>;
+  search(query: string, options?: SearchOptions): Promise<SearchResult[]>
+  generateQueryEmbedding(query: string): Promise<number[]>
+  filterResultsByCognitiveLoad(results: SearchResult[]): Promise<SearchResult[]>
 }
 ```
 

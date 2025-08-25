@@ -711,7 +711,7 @@ async function enhancedHealthPlugin(
 
       // Force close remaining connections
       for (const socket of connections) {
-        (socket as Socket).destroy()
+        ;(socket as Socket).destroy()
       }
 
       process.exit(1)
@@ -724,7 +724,7 @@ async function enhancedHealthPlugin(
       process.exit(0)
     } catch (error) {
       clearTimeout(shutdownTimeout)
-      logWithContext.error('Error during graceful shutdown', {})
+      logWithContext.error('Error during graceful shutdown', { error })
       process.exit(1)
     }
   }

@@ -105,19 +105,19 @@ src/
 ```typescript
 interface ProductionConfig {
   rateLimit: {
-    max: number; // requests per windowMs
-    windowMs: number; // time window in milliseconds
-    skipOnSuccess: boolean;
-  };
+    max: number // requests per windowMs
+    windowMs: number // time window in milliseconds
+    skipOnSuccess: boolean
+  }
   compression: {
-    threshold: number; // minimum payload size
-    encodings: string[]; // supported encodings
-  };
+    threshold: number // minimum payload size
+    encodings: string[] // supported encodings
+  }
   backPressure: {
-    maxEventLoopDelay: number;
-    maxHeapUsedBytes: number;
-    maxRssBytes: number;
-  };
-  requestTimeout: number; // milliseconds
+    maxEventLoopDelay: number
+    maxHeapUsedBytes: number
+    maxRssBytes: number
+  }
+  requestTimeout: number // milliseconds
 }
 ```

@@ -254,11 +254,11 @@ This is the API specification for the spec detailed in @.agent-os/specs/2025-08-
 ```typescript
 // In src/routes/index-routes.ts or dedicated filesystem routes file
 fastify.register(async function fileSystemRoutes(fastify) {
-  fastify.get('/health/filesystem', fileSystemHealthController.getHealth);
-  fastify.get('/metrics/filesystem', fileSystemMetricsController.getMetrics);
-  fastify.post('/filesystem/cache/clear', fileSystemCacheController.clearCache);
-  fastify.get('/filesystem/vault/status', vaultStatusController.getVaultStatus);
-});
+  fastify.get('/health/filesystem', fileSystemHealthController.getHealth)
+  fastify.get('/metrics/filesystem', fileSystemMetricsController.getMetrics)
+  fastify.post('/filesystem/cache/clear', fileSystemCacheController.clearCache)
+  fastify.get('/filesystem/vault/status', vaultStatusController.getVaultStatus)
+})
 ```
 
 ### Request Logging Integration

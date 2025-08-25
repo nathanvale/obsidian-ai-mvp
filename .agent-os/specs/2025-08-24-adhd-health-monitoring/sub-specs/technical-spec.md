@@ -85,20 +85,20 @@ This is the technical specification for the spec detailed in @.agent-os/specs/20
 ```typescript
 interface ADHDHealthMonitor {
   // Cognitive context tracking
-  medicationCycleTracker: MedicationCycleTracker;
-  cognitiveLoadAnalyzer: CognitiveLoadAnalyzer;
-  patternEngine: CognitivePatternEngine;
+  medicationCycleTracker: MedicationCycleTracker
+  cognitiveLoadAnalyzer: CognitiveLoadAnalyzer
+  patternEngine: CognitivePatternEngine
 
   // Adaptive monitoring
-  thresholdManager: AdaptiveThresholdManager;
-  priorityManager: ServicePriorityManager;
+  thresholdManager: AdaptiveThresholdManager
+  priorityManager: ServicePriorityManager
 
   // Enhanced service monitoring
-  serviceMonitors: Map<string, EnhancedServiceMonitor>;
+  serviceMonitors: Map<string, EnhancedServiceMonitor>
 
   // Predictive capabilities
-  healthPredictor: HealthPredictor;
-  alertingSystem: ADHDFriendlyAlerting;
+  healthPredictor: HealthPredictor
+  alertingSystem: ADHDFriendlyAlerting
 }
 ```
 
@@ -106,15 +106,15 @@ interface ADHDHealthMonitor {
 
 ```typescript
 interface MedicationCyclePhase {
-  phase: 'peak' | 'wearing-off' | 'baseline';
-  confidence: number;
-  timeRemaining: number;
+  phase: 'peak' | 'wearing-off' | 'baseline'
+  confidence: number
+  timeRemaining: number
   adaptiveThresholds: {
-    responseTimeWarning: number;
-    memoryUsageAlert: number;
-    retryMultiplier: number;
-    simplicityLevel: number;
-  };
+    responseTimeWarning: number
+    memoryUsageAlert: number
+    retryMultiplier: number
+    simplicityLevel: number
+  }
 }
 ```
 
@@ -129,13 +129,13 @@ interface MedicationCyclePhase {
 
 ```typescript
 interface PerformanceConstraints {
-  maxCpuUsage: 2; // Maximum 2% CPU overhead
-  maxMemoryMB: 10; // Limit monitoring to 10MB memory
+  maxCpuUsage: 2 // Maximum 2% CPU overhead
+  maxMemoryMB: 10 // Limit monitoring to 10MB memory
   adaptiveCheckFrequency: {
-    critical: 5000; // 5 seconds during wear-off
-    normal: 30000; // 30 seconds during peak
-    background: 120000; // 2 minutes during stable
-  };
+    critical: 5000 // 5 seconds during wear-off
+    normal: 30000 // 30 seconds during peak
+    background: 120000 // 2 minutes during stable
+  }
 }
 ```
 
@@ -159,12 +159,12 @@ interface PerformanceConstraints {
 
 ```typescript
 interface ADHDHealthLogContext {
-  medicationPhase: MedicationCyclePhase;
-  cognitiveLoad: CognitiveLoadLevel;
-  adaptiveThresholds: AdaptiveThresholds;
-  serviceStates: ServiceHealthStates;
-  userActivityPattern: UserActivityPattern;
-  healthPrediction: HealthPrediction;
+  medicationPhase: MedicationCyclePhase
+  cognitiveLoad: CognitiveLoadLevel
+  adaptiveThresholds: AdaptiveThresholds
+  serviceStates: ServiceHealthStates
+  userActivityPattern: UserActivityPattern
+  healthPrediction: HealthPrediction
 }
 ```
 

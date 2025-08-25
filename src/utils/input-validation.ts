@@ -174,7 +174,7 @@ export function sanitizeInput(
         sanitizedLength: sanitized.length,
         originalLength: input.length,
       })
-    } catch (logError) {
+    } catch {
       // Logger not initialized - continue without logging in test environment
       // This allows tests to run without requiring logger initialization
     }

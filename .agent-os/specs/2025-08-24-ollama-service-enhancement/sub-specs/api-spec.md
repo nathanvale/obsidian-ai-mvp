@@ -9,15 +9,15 @@
 
 ```typescript
 interface HealthResponse {
-  status: 'healthy' | 'degraded' | 'unhealthy';
-  modelAvailable: boolean;
-  lastChecked: string;
-  responseTime: number;
+  status: 'healthy' | 'degraded' | 'unhealthy'
+  modelAvailable: boolean
+  lastChecked: string
+  responseTime: number
   details?: {
-    modelName: string;
-    modelVersion: string;
-    issues?: string[];
-  };
+    modelName: string
+    modelVersion: string
+    issues?: string[]
+  }
 }
 ```
 
@@ -28,12 +28,12 @@ interface HealthResponse {
 
 ```typescript
 interface EmbeddingRequest {
-  texts: string[];
-  model?: string; // Optional model selection
+  texts: string[]
+  model?: string // Optional model selection
   options?: {
-    timeout?: number;
-    retryAttempts?: number;
-  };
+    timeout?: number
+    retryAttempts?: number
+  }
 }
 ```
 
@@ -41,10 +41,10 @@ interface EmbeddingRequest {
 
 ```typescript
 interface EmbeddingResponse {
-  embeddings: number[][];
-  processingTime: number;
-  correlationId: string;
-  warnings?: string[];
+  embeddings: number[][]
+  processingTime: number
+  correlationId: string
+  warnings?: string[]
 }
 ```
 
@@ -55,16 +55,16 @@ interface EmbeddingResponse {
 
 ```typescript
 interface ModelInfo {
-  name: string;
-  version: string;
-  size: number;
-  lastUpdated: string;
-  status: 'downloaded' | 'downloading' | 'not_available';
+  name: string
+  version: string
+  size: number
+  lastUpdated: string
+  status: 'downloaded' | 'downloading' | 'not_available'
 }
 
 interface ModelsResponse {
-  models: ModelInfo[];
-  totalModels: number;
+  models: ModelInfo[]
+  totalModels: number
 }
 ```
 
@@ -74,10 +74,10 @@ interface ModelsResponse {
 
 ```typescript
 interface ErrorResponse {
-  code: string;
-  message: string;
-  details?: any;
-  correlationId: string;
+  code: string
+  message: string
+  details?: any
+  correlationId: string
 }
 ```
 

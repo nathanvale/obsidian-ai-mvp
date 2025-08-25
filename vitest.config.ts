@@ -1,5 +1,5 @@
-import { defineConfig } from 'vitest/config';
-import { resolve } from 'path';
+import { defineConfig } from 'vitest/config'
+import { resolve } from 'path'
 
 export default defineConfig({
   test: {
@@ -87,15 +87,15 @@ export default defineConfig({
       // Force @orchestr8 packages to use built ESM files for compatibility
       '@orchestr8/logger': resolve(
         __dirname,
-        'node_modules/@orchestr8/logger/dist/esm/index.js'
+        'node_modules/@orchestr8/logger/dist/esm/index.js',
       ),
       '@orchestr8/resilience': resolve(
         __dirname,
-        'node_modules/@orchestr8/resilience/dist/esm/index.js'
+        'node_modules/@orchestr8/resilience/dist/esm/index.js',
       ),
       '@orchestr8/schema': resolve(
         __dirname,
-        'node_modules/@orchestr8/schema/dist/esm/index.js'
+        'node_modules/@orchestr8/schema/dist/esm/index.js',
       ),
       // Path alias for clean imports
       '@': resolve(__dirname, './src'),
@@ -106,4 +106,4 @@ export default defineConfig({
   esbuild: {
     target: 'es2022',
   },
-});
+})

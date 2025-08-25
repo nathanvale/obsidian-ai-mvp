@@ -288,6 +288,7 @@ function sanitizeBody(body: unknown, maxSize: number): string {
 
     return sanitizedStr
   } catch (error) {
+    logWithContext.warn('Body serialization failed', { error })
     return '[BODY_SERIALIZATION_ERROR]'
   }
 }

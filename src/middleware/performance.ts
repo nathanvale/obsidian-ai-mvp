@@ -1,9 +1,7 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import fp from 'fastify-plugin'
 import fastifyCompress from '@fastify/compress'
-import underPressure, {
-  type UnderPressureOptions,
-} from '@fastify/under-pressure'
+import underPressure from '@fastify/under-pressure'
 import type { FastifyRequestWithContext } from '../types/fastify.js'
 import { logWithContext, getCurrentCorrelationId } from '../services/logger.js'
 import { config } from '../config/environment.js'
@@ -369,7 +367,6 @@ async function performancePlugin(
 
   // Register response compression
   if (performanceConfig.compression) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await fastify.register(fastifyCompress as any, {
       threshold: performanceConfig.compression.threshold,
 
@@ -401,7 +398,7 @@ async function performancePlugin(
   // Register back-pressure monitoring
   if (performanceConfig.backPressure) {
     try {
-      const underPressureOptions: UnderPressureOptions = {
+      const underPressureOptions = {
         maxEventLoopDelay: performanceConfig.backPressure.maxEventLoopDelay,
         maxHeapUsedBytes: performanceConfig.backPressure.maxHeapUsedBytes,
         maxRssBytes: performanceConfig.backPressure.maxRssBytes,
@@ -450,7 +447,7 @@ async function performancePlugin(
 
     // Pre-handler: Start high-resolution timing
     fastify.addHook('preHandler', async (request: FastifyRequest) => {
-      (request as FastifyRequestWithContext).startTime = Date.now()
+      ;(request as FastifyRequestWithContext).startTime = Date.now()
       ;(request as { startTimeBigInt?: bigint }).startTimeBigInt =
         process.hrtime.bigint()
       ;(request as { shouldSample?: boolean }).shouldSample =
@@ -684,7 +681,7 @@ async function performancePlugin(
   }
 
   // Add ADHD-optimized performance helper methods
-  fastify.decorateRequest('performance', null)
+  fastify.decorateRequest('performance')
   fastify.addHook('onRequest', async (request: FastifyRequest) => {
     const requestWithPerf = request as FastifyRequestWithContext & {
       performance?: {

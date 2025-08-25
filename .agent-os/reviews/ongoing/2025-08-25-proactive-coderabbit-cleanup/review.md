@@ -69,14 +69,14 @@
     ```typescript
     // src/config/environment.ts:421
     if (value && value.env) {
-      return { ...value, env: '[REDACTED_PROCESS_ENV]' };
+      return { ...value, env: '[REDACTED_PROCESS_ENV]' }
     }
     // Error: Property 'env' does not exist on type '{}'
     ```
   - **Suggested Fix:**
     ```typescript
     if (value && typeof value === 'object' && 'env' in value) {
-      return { ...value, env: '[REDACTED_PROCESS_ENV]' };
+      return { ...value, env: '[REDACTED_PROCESS_ENV]' }
     }
     ```
   - **Effort:** M (1 week)
@@ -89,12 +89,12 @@
   - **Impact:** Test setup fails with "Cannot find name 'vi'" errors
   - **Current Code:**
     ```typescript
-    vi.mock('fs', () => mockImplementation);
-    vi.mock('path');
+    vi.mock('fs', () => mockImplementation)
+    vi.mock('path')
     ```
   - **Suggested Fix:**
     ```typescript
-    import { vi } from 'vitest';
+    import { vi } from 'vitest'
     // or add vitest/globals to tsconfig types
     ```
   - **Effort:** XS (1 day)
@@ -107,12 +107,12 @@
   - **Impact:** Type checking failures in schema validation logic - runtime errors possible
   - **Current Code:**
     ```typescript
-    const maxLength = schema.maxLength || 254;
+    const maxLength = schema.maxLength || 254
     // Error: Property 'maxLength' does not exist on union type
     ```
   - **Suggested Fix:**
     ```typescript
-    const maxLength = 'maxLength' in schema ? schema.maxLength : 254;
+    const maxLength = 'maxLength' in schema ? schema.maxLength : 254
     ```
   - **Effort:** S (2-3 days)
   - **Rationale:** Type safety violations can cause runtime failures in production
@@ -136,7 +136,7 @@
   - **Potential Impact:** Runtime errors due to improper error object construction and property access
   - **Current Code:**
     ```typescript
-    sanitizedError = new Error(sanitizeForLogging(error.message, maxLength));
+    sanitizedError = new Error(sanitizeForLogging(error.message, maxLength))
     // Type issues with unknown error types
     ```
   - **Suggested Fix:**
@@ -144,9 +144,9 @@
     sanitizedError = new Error(
       sanitizeForLogging(
         error instanceof Error ? error.message : String(error),
-        maxLength
-      )
-    );
+        maxLength,
+      ),
+    )
     ```
   - **Effort:** S (2-3 days)
   - **Recommended Resolution:** Add proper type guards for error handling
@@ -161,7 +161,7 @@
     await server.register(cors, {
       origin: false, // Disable automatic CORS - security middleware handles it
       credentials: false,
-    });
+    })
     ```
   - **Suggested Fix:** Remove redundant CORS registration or ensure consistent configuration
   - **Effort:** S (2-3 days)

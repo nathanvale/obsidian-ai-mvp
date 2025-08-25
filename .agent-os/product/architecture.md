@@ -74,35 +74,35 @@ The system implements **adaptive behavior patterns** that adjust to predictable 
 
 ```typescript
 // obsidian-chromadb-plugin/src/main.ts
-import { Plugin, TFile, Notice } from 'obsidian';
-import { ChromaClient } from 'chromadb';
-import { VoiceMemoProcessor } from './voice-processor';
+import { Plugin, TFile, Notice } from 'obsidian'
+import { ChromaClient } from 'chromadb'
+import { VoiceMemoProcessor } from './voice-processor'
 
 export default class ADHDSecondBrain extends Plugin {
-  private chromaClient: ChromaClient;
-  private voiceProcessor: VoiceMemoProcessor;
-  private semanticIndex: Map<string, number[]> = new Map();
+  private chromaClient: ChromaClient
+  private voiceProcessor: VoiceMemoProcessor
+  private semanticIndex: Map<string, number[]> = new Map()
 
   async onload() {
     // Initialize ChromaDB connection
     this.chromaClient = new ChromaClient({
       path: 'http://localhost:8000',
-    });
+    })
 
     // Create ADHD-optimized collections
-    await this.initializeCollections();
+    await this.initializeCollections()
 
     // Set up file watchers for real-time sync
     this.registerEvent(
-      this.app.vault.on('create', this.handleFileCreate.bind(this))
-    );
+      this.app.vault.on('create', this.handleFileCreate.bind(this)),
+    )
 
     // Initialize voice memo monitoring
     this.voiceProcessor = new VoiceMemoProcessor(
       this.app.vault,
-      this.chromaClient
-    );
-    await this.voiceProcessor.startMonitoring();
+      this.chromaClient,
+    )
+    await this.voiceProcessor.startMonitoring()
   }
 
   private async initializeCollections() {
@@ -114,7 +114,7 @@ export default class ADHDSecondBrain extends Plugin {
       'medical-reminders',
       'voice-memos',
       'daily-captures',
-    ];
+    ]
 
     for (const name of collections) {
       await this.chromaClient.getOrCreateCollection({
@@ -123,7 +123,7 @@ export default class ADHDSecondBrain extends Plugin {
           domain: name,
           indexed_at: new Date().toISOString(),
         },
-      });
+      })
     }
   }
 }
@@ -158,7 +158,7 @@ ${findRelatedNotes(transcription)}
 
 ---
 *Processed automatically at ${new Date().toISOString()}*
-`;
+`
 ```
 
 ### Voice processing pipeline
@@ -167,21 +167,21 @@ ${findRelatedNotes(transcription)}
 
 ```typescript
 // voice-processor.ts
-import chokidar from 'chokidar';
-import { WhisperProcessor } from './whisper';
-import { join } from 'path';
-import { homedir } from 'os';
+import chokidar from 'chokidar'
+import { WhisperProcessor } from './whisper'
+import { join } from 'path'
+import { homedir } from 'os'
 
 export class VoiceMemoProcessor {
-  private watcher: chokidar.FSWatcher;
-  private whisper: WhisperProcessor;
-  private processingQueue: Set<string> = new Set();
+  private watcher: chokidar.FSWatcher
+  private whisper: WhisperProcessor
+  private processingQueue: Set<string> = new Set()
 
   async startMonitoring() {
     const voiceMemoPath = join(
       homedir(),
-      'Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings'
-    );
+      'Library/Group Containers/group.com.apple.VoiceMemos.shared/Recordings',
+    )
 
     this.watcher = chokidar.watch(voiceMemoPath, {
       ignored: /(^|[\/\\])\../,
@@ -190,34 +190,34 @@ export class VoiceMemoProcessor {
         stabilityThreshold: 2000,
         pollInterval: 100,
       },
-    });
+    })
 
-    this.watcher.on('add', async filePath => {
+    this.watcher.on('add', async (filePath) => {
       if (filePath.endsWith('.m4a') && !this.processingQueue.has(filePath)) {
-        this.processingQueue.add(filePath);
-        await this.processVoiceMemo(filePath);
-        this.processingQueue.delete(filePath);
+        this.processingQueue.add(filePath)
+        await this.processVoiceMemo(filePath)
+        this.processingQueue.delete(filePath)
       }
-    });
+    })
   }
 
   private async processVoiceMemo(filePath: string) {
     // Transcribe with Whisper
-    const transcription = await this.whisper.transcribe(filePath);
+    const transcription = await this.whisper.transcribe(filePath)
 
     // Create Obsidian note automatically
     const note = voiceMemoTemplate(transcription, {
       timestamp: new Date(),
       duration: await this.getAudioDuration(filePath),
       inferredEnergyLevel: this.inferEnergyLevel(),
-    });
+    })
 
     // Save to Obsidian vault
-    const fileName = `Voice Memo - ${new Date().toISOString()}.md`;
-    await this.vault.create(`Inbox/${fileName}`, note);
+    const fileName = `Voice Memo - ${new Date().toISOString()}.md`
+    await this.vault.create(`Inbox/${fileName}`, note)
 
     // Index in ChromaDB
-    await this.indexInChroma(transcription, fileName);
+    await this.indexInChroma(transcription, fileName)
   }
 }
 ```
@@ -311,16 +311,16 @@ function getCognitiveStatusMessage(load: CognitiveLoad): string {
 
 ```typescript
 // email-classifier.ts
-import { Ollama } from 'ollama';
+import { Ollama } from 'ollama'
 
 export class ADHDEmailClassifier {
-  private ollama: Ollama;
+  private ollama: Ollama
 
   constructor() {
     this.ollama = new Ollama({
       host: 'http://localhost:11434',
       model: 'llama3.2:8b-instruct-q5_k_m', // Optimized for M4
-    });
+    })
   }
 
   async classifyEmail(email: GmailMessage): Promise<EmailClassification> {
@@ -345,22 +345,22 @@ export class ADHDEmailClassifier {
         - Important but easy-to-miss details
         
         Return JSON only.
-        `;
+        `
 
-    const response = await this.ollama.generate({ prompt });
-    const classification = JSON.parse(response.response);
+    const response = await this.ollama.generate({ prompt })
+    const classification = JSON.parse(response.response)
 
     // Process based on classification
     if (classification.priority >= 8) {
-      await this.createUrgentTask(email, classification);
+      await this.createUrgentTask(email, classification)
     }
 
-    return classification;
+    return classification
   }
 
   private async createUrgentTask(
     email: GmailMessage,
-    classification: EmailClassification
+    classification: EmailClassification,
   ) {
     // Auto-create Obsidian note for urgent items
     const note = `
@@ -371,7 +371,7 @@ export class ADHDEmailClassifier {
 **Priority**: ${classification.priority}/10
 
 ## Required Actions
-${classification.actions.map(a => `- [ ] ${a}`).join('\n')}
+${classification.actions.map((a) => `- [ ] ${a}`).join('\n')}
 
 ## Original Email
 ${email.body}
@@ -379,12 +379,12 @@ ${email.body}
 ---
 Created: ${new Date().toISOString()}
 Email ID: ${email.id}
-        `;
+        `
 
-    await this.vault.create(`Urgent/${email.subject}.md`, note);
+    await this.vault.create(`Urgent/${email.subject}.md`, note)
 
     // Schedule reminders
-    await this.scheduleADHDReminders(classification);
+    await this.scheduleADHDReminders(classification)
   }
 }
 ```
@@ -395,21 +395,21 @@ Email ID: ${email.id}
 
 ```typescript
 // job-processor.ts
-import { Queue, Worker } from 'bullmq';
-import IORedis from 'ioredis';
+import { Queue, Worker } from 'bullmq'
+import IORedis from 'ioredis'
 
 export class ADHDAutomationProcessor {
-  private queues: Map<string, Queue> = new Map();
-  private connection: IORedis;
+  private queues: Map<string, Queue> = new Map()
+  private connection: IORedis
 
   constructor() {
     this.connection = new IORedis({
       maxRetriesPerRequest: null,
-      retryStrategy: times => Math.min(Math.exp(times), 20000),
-    });
+      retryStrategy: (times) => Math.min(Math.exp(times), 20000),
+    })
 
-    this.initializeQueues();
-    this.setupWorkers();
+    this.initializeQueues()
+    this.setupWorkers()
   }
 
   private initializeQueues() {
@@ -420,9 +420,9 @@ export class ADHDAutomationProcessor {
       { name: 'email-classification', priority: 6 },
       { name: 'pattern-analysis', priority: 4 },
       { name: 'sync-operations', priority: 2 },
-    ];
+    ]
 
-    queueConfigs.forEach(config => {
+    queueConfigs.forEach((config) => {
       this.queues.set(
         config.name,
         new Queue(config.name, {
@@ -436,25 +436,25 @@ export class ADHDAutomationProcessor {
               delay: 2000,
             },
           },
-        })
-      );
-    });
+        }),
+      )
+    })
   }
 
   private setupWorkers() {
     // Adaptive reminder worker
     new Worker(
       'urgent-reminders',
-      async job => {
-        const { taskId, userId, intensity } = job.data;
+      async (job) => {
+        const { taskId, userId, intensity } = job.data
 
         // Check user context before sending
-        const context = await this.getUserContext(userId);
+        const context = await this.getUserContext(userId)
 
         if (context.inFocusMode && intensity < 8) {
           // Defer non-critical reminders during focus
-          await job.moveToDelayed(Date.now() + 30 * 60 * 1000);
-          return;
+          await job.moveToDelayed(Date.now() + 30 * 60 * 1000)
+          return
         }
 
         // Send appropriate notification based on context
@@ -462,27 +462,27 @@ export class ADHDAutomationProcessor {
           taskId,
           userId,
           modality: this.selectModality(context, intensity),
-        });
+        })
       },
       {
         connection: this.connection,
         concurrency: 5,
-      }
-    );
+      },
+    )
   }
 
   private selectModality(
     context: UserContext,
-    intensity: number
+    intensity: number,
   ): NotificationModality {
     // ADHD-friendly notification selection
     if (context.notificationFatigue > 0.7) {
-      return 'ambient'; // Subtle visual only
+      return 'ambient' // Subtle visual only
     }
     if (context.medicationWearingOff && intensity > 5) {
-      return 'persistent'; // Multiple modalities
+      return 'persistent' // Multiple modalities
     }
-    return 'gentle'; // Standard notification
+    return 'gentle' // Standard notification
   }
 }
 ```
