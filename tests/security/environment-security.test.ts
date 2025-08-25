@@ -131,17 +131,18 @@ describe('Environment Security', () => {
       expect(error.message).toContain(testMessage);
 
       // Should have debug context without exposing secrets
-      const debugContext = (error as any).debugContext;
+      const debugContext = (error as Error & { debugContext?: unknown })
+        .debugContext as { safeContext?: Record<string, unknown> };
       expect(debugContext).toBeDefined();
       expect(debugContext.safeContext).toBeDefined();
 
       // Sensitive values should be redacted
-      if (debugContext.safeContext.obsidianVaultPath) {
+      if (debugContext.safeContext?.obsidianVaultPath) {
         expect(debugContext.safeContext.obsidianVaultPath).toMatch(
           /\[REDACTED/
         );
       }
-      if (debugContext.safeContext.apiKey) {
+      if (debugContext.safeContext?.apiKey) {
         expect(debugContext.safeContext.apiKey).toMatch(/\[REDACTED/);
       }
     });

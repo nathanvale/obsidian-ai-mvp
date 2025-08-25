@@ -440,12 +440,12 @@ describe('Enhanced Schema Validation', () => {
       const customEmailSchema = createValidationSchema('email', {
         maxLength: 50,
       });
-      expect((customEmailSchema as any).maxLength).toBe(50);
+      expect((customEmailSchema as Record<string, unknown>).maxLength).toBe(50);
 
       const customSearchSchema = createValidationSchema('search', {
         minLength: 3,
       });
-      expect((customSearchSchema as any).minLength).toBe(3);
+      expect((customSearchSchema as Record<string, unknown>).minLength).toBe(3);
     });
 
     it('respects original constraints when creating custom schemas', () => {
@@ -453,13 +453,17 @@ describe('Enhanced Schema Validation', () => {
         maxLength: 500,
       });
       // Should not exceed original maxLength of 254
-      expect((customEmailSchema as any).maxLength).toBe(254);
+      expect((customEmailSchema as Record<string, unknown>).maxLength).toBe(
+        254
+      );
 
       const customMedicationSchema = createValidationSchema('medication', {
         minLength: 1,
       });
       // Should not go below original minLength of 2
-      expect((customMedicationSchema as any).minLength).toBe(2);
+      expect(
+        (customMedicationSchema as Record<string, unknown>).minLength
+      ).toBe(2);
     });
   });
 
