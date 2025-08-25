@@ -43,7 +43,10 @@
       "Read(//Users/nathanvale/code/@orchestr8/packages/resilience/**)",
       "Read(//Users/nathanvale/.agent-os/instructions/**)",
       "WebSearch",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(pnpm format:*)",
+      "Bash(prettier --write .)",
+      "Bash(pnpm prettier:*)"
     ],
     "deny": [
       "Read(.env)",
