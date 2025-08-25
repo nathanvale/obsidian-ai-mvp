@@ -48,7 +48,8 @@
       "Bash(prettier --write .)",
       "Bash(pnpm prettier:*)",
       "Bash(git checkout:*)",
-      "Bash(git rebase:*)"
+      "Bash(git rebase:*)",
+      "Bash(grep:*)"
     ],
     "deny": [
       "Read(.env)",

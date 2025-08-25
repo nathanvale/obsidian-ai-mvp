@@ -8,7 +8,7 @@ export class FileProcessor {
   private vaultPath: string
 
   constructor() {
-    this.vaultPath = config.OBSIDIAN_VAULT_PATH
+    this.vaultPath = config.obsidianVaultPath || ''
   }
 
   async validateVaultPath(): Promise<{ valid: boolean; error?: string }> {

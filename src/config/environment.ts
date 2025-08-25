@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import type { ResiliencePolicy } from '@orchestr8/schema';
+import { z } from 'zod'
+import type { ResiliencePolicy } from '@orchestr8/schema'
 
 /**
  * Comprehensive secret patterns for ADHD Digital Second Brain
@@ -30,7 +30,7 @@ const SECRET_PATTERNS = [
   /user/i,
   /home/i,
   /library/i,
-] as const;
+] as const
 
 /**
  * Redacts sensitive information from any string value
@@ -38,38 +38,38 @@ const SECRET_PATTERNS = [
  */
 function redactSensitiveValue(key: string, value: unknown): string {
   if (value === null || value === undefined) {
-    return '[undefined]';
+    return '[undefined]'
   }
 
-  const stringValue = String(value);
-  const keyLower = key.toLowerCase();
+  const stringValue = String(value)
+  const keyLower = key.toLowerCase()
 
   // Check if key matches any secret pattern
-  const isSecret = SECRET_PATTERNS.some(pattern => pattern.test(keyLower));
+  const isSecret = SECRET_PATTERNS.some((pattern) => pattern.test(keyLower))
 
   if (isSecret) {
     // For paths, show only the pattern, not the actual path
     if (keyLower.includes('path')) {
-      return '[REDACTED_PATH]';
+      return '[REDACTED_PATH]'
     }
 
     // For URLs, show protocol and hostname only
     if (keyLower.includes('url') && stringValue.startsWith('http')) {
       try {
-        const url = new URL(stringValue);
-        return `${url.protocol}//${url.hostname}:[REDACTED]`;
+        const url = new URL(stringValue)
+        return `${url.protocol}//${url.hostname}:[REDACTED]`
       } catch {
-        return '[REDACTED_URL]';
+        return '[REDACTED_URL]'
       }
     }
 
     // For other secrets, show length and type hint
     if (stringValue.length > 20) {
-      return `[REDACTED_LONG_SECRET_${stringValue.length}_CHARS]`;
+      return `[REDACTED_LONG_SECRET_${stringValue.length}_CHARS]`
     } else if (stringValue.length > 8) {
-      return `[REDACTED_SECRET_${stringValue.length}_CHARS]`;
+      return `[REDACTED_SECRET_${stringValue.length}_CHARS]`
     } else {
-      return '[REDACTED_SECRET]';
+      return '[REDACTED_SECRET]'
     }
   }
 
@@ -84,11 +84,11 @@ function redactSensitiveValue(key: string, value: unknown): string {
     // Redact personal directory paths
     return stringValue.replace(
       /(\/Users\/[^/]+|\/home\/[^/]+|\\Users\\[^\\]+|C:\\Users\\[^\\]+)/gi,
-      '/[USER_DIR]'
-    );
+      '/[USER_DIR]',
+    )
   }
 
-  return stringValue;
+  return stringValue
 }
 
 /**
@@ -96,20 +96,20 @@ function redactSensitiveValue(key: string, value: unknown): string {
  * All sensitive values are redacted while preserving structure for troubleshooting
  */
 export function createSafeEnvironmentDebugInfo(): Record<string, unknown> {
-  const safeEnv: Record<string, unknown> = {};
+  const safeEnv: Record<string, unknown> = {}
 
   // Process each environment variable safely
-  Object.keys(process.env).forEach(key => {
-    const value = process.env[key];
-    safeEnv[key] = redactSensitiveValue(key, value);
-  });
+  Object.keys(process.env).forEach((key) => {
+    const value = process.env[key]
+    safeEnv[key] = redactSensitiveValue(key, value)
+  })
 
   return {
     environment: safeEnv,
-    detectedPatterns: SECRET_PATTERNS.map(p => p.source),
+    detectedPatterns: SECRET_PATTERNS.map((p) => p.source),
     securityNote: 'All sensitive values redacted for ADHD data protection',
     timestamp: new Date().toISOString(),
-  };
+  }
 }
 
 /**
@@ -117,24 +117,24 @@ export function createSafeEnvironmentDebugInfo(): Record<string, unknown> {
  * Ensures no sensitive data leaks through Zod error messages
  */
 function createSafeConfigurationError(zodError: z.ZodError): Error {
-  const safeIssues = zodError.issues.map(issue => ({
+  const safeIssues = zodError.issues.map((issue) => ({
     path: issue.path.join('.'),
     code: issue.code,
     message: issue.message,
     // Never include the actual value that failed validation
     received: '[REDACTED_FOR_SECURITY]',
-  }));
+  }))
 
   const error = new Error(
-    'Environment configuration validation failed'
+    'Environment configuration validation failed',
   ) as Error & {
-    issues: unknown[];
-    safeDebugInfo: Record<string, unknown>;
-  };
-  error.issues = safeIssues;
-  error.safeDebugInfo = createSafeEnvironmentDebugInfo();
+    issues: unknown[]
+    safeDebugInfo: Record<string, unknown>
+  }
+  error.issues = safeIssues
+  error.safeDebugInfo = createSafeEnvironmentDebugInfo()
 
-  return error;
+  return error
 }
 
 /**
@@ -202,7 +202,7 @@ export const ENHANCED_REDACT_KEYS = [
   'process.env',
   'environment',
   'env',
-] as const;
+] as const
 
 const envSchema = z.object({
   NODE_ENV: z
@@ -211,9 +211,22 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
   HOST: z.string().default('localhost'),
   OBSIDIAN_VAULT_PATH: z.string().optional(),
+
+  // ChromaDB Configuration - support both URL and host/port formats
   CHROMADB_URL: z.string().default('http://localhost:8000'),
+  CHROMADB_HOST: z.string().default('localhost'),
+  CHROMADB_PORT: z.coerce.number().default(8000),
+  CHROMADB_COLLECTION_NAME: z.string().default('obsidian_embeddings'),
+
+  // Ollama Configuration - support both URL and host formats
   OLLAMA_URL: z.string().default('http://localhost:11434'),
+  OLLAMA_HOST: z.string().default('http://localhost:11434'),
   OLLAMA_MODEL: z.string().default('nomic-embed-text'),
+
+  // Performance Configuration
+  MAX_BATCH_SIZE: z.coerce.number().default(100),
+  MEMORY_LIMIT_MB: z.coerce.number().default(2048),
+  PARALLEL_WORKERS: z.coerce.number().default(4),
   LOG_LEVEL: z
     .enum(['trace', 'debug', 'info', 'warn', 'error'])
     .default('info'),
@@ -280,23 +293,23 @@ const envSchema = z.object({
   ADHD_STANDARD_RESPONSE_TARGET_MS: z.coerce.number().default(2000), // 2s
   ADHD_AI_PROCESSING_TARGET_MS: z.coerce.number().default(5000), // 5s for AI
   ADHD_SEARCH_TARGET_MS: z.coerce.number().default(1000), // 1s for search
-});
+})
 
 /**
  * Secure environment variable parsing with comprehensive error protection
  * Prevents sensitive data exposure through validation error messages
  */
-let env: z.infer<typeof envSchema>;
+let env: z.infer<typeof envSchema>
 try {
-  env = envSchema.parse(process.env);
+  env = envSchema.parse(process.env)
 } catch (error) {
   if (error instanceof z.ZodError) {
     // Create secure error that doesn't expose actual environment values
-    throw createSafeConfigurationError(error);
+    throw createSafeConfigurationError(error)
   }
   throw new Error(
-    'Critical environment configuration error - check your settings'
-  );
+    'Critical environment configuration error - check your settings',
+  )
 }
 
 /**
@@ -304,32 +317,32 @@ try {
  * Warns about insecure configurations that could expose ADHD data
  */
 function validateConfigurationSecurity(parsedEnv: typeof env): void {
-  const warnings: string[] = [];
+  const warnings: string[] = []
 
   // Check for development settings in production
   if (parsedEnv.NODE_ENV === 'production') {
     if (parsedEnv.LOG_LEVEL === 'debug' || parsedEnv.LOG_LEVEL === 'trace') {
       warnings.push(
-        'Verbose logging enabled in production - may expose sensitive data'
-      );
+        'Verbose logging enabled in production - may expose sensitive data',
+      )
     }
 
     if (parsedEnv.LOG_PRETTY === true) {
       warnings.push(
-        'Pretty logging enabled in production - disable for better security'
-      );
+        'Pretty logging enabled in production - disable for better security',
+      )
     }
   }
 
   // Validate Obsidian vault path security (if provided)
   if (parsedEnv.OBSIDIAN_VAULT_PATH) {
-    const vaultPath = parsedEnv.OBSIDIAN_VAULT_PATH;
+    const vaultPath = parsedEnv.OBSIDIAN_VAULT_PATH
 
     // Check for obviously insecure paths
     if (vaultPath.includes('..') || vaultPath.includes('//')) {
       warnings.push(
-        'Potentially unsafe vault path - contains directory traversal patterns'
-      );
+        'Potentially unsafe vault path - contains directory traversal patterns',
+      )
     }
 
     // Warn if vault path is in system directories (could be accidental)
@@ -340,8 +353,8 @@ function validateConfigurationSecurity(parsedEnv: typeof env): void {
       vaultPath.startsWith('/etc/')
     ) {
       warnings.push(
-        'Vault path in system directory - verify this is intentional'
-      );
+        'Vault path in system directory - verify this is intentional',
+      )
     }
   }
 
@@ -349,7 +362,7 @@ function validateConfigurationSecurity(parsedEnv: typeof env): void {
   const serviceUrls = {
     ChromaDB: parsedEnv.CHROMADB_URL,
     Ollama: parsedEnv.OLLAMA_URL,
-  };
+  }
 
   Object.entries(serviceUrls).forEach(([service, url]) => {
     if (
@@ -358,27 +371,27 @@ function validateConfigurationSecurity(parsedEnv: typeof env): void {
       !url.includes('127.0.0.1')
     ) {
       warnings.push(
-        `${service} URL uses HTTP instead of HTTPS for non-local connection`
-      );
+        `${service} URL uses HTTP instead of HTTPS for non-local connection`,
+      )
     }
-  });
+  })
 
   // Log security warnings if any (using safe redaction)
   if (warnings.length > 0) {
     // Security warnings are intentionally logged directly to ensure visibility
     // eslint-disable-next-line no-console
-    console.warn('⚠️ Environment Security Warnings:');
+    console.warn('⚠️ Environment Security Warnings:')
     // eslint-disable-next-line no-console
-    warnings.forEach(warning => console.warn(`  - ${warning}`));
+    warnings.forEach((warning) => console.warn(`  - ${warning}`))
     // eslint-disable-next-line no-console
     console.warn(
-      'Review your configuration for ADHD data protection compliance'
-    );
+      'Review your configuration for ADHD data protection compliance',
+    )
   }
 }
 
 // Perform security validation
-validateConfigurationSecurity(env);
+validateConfigurationSecurity(env)
 
 /**
  * Application configuration with enhanced security for ADHD data protection
@@ -389,17 +402,35 @@ export const config = {
   port: env.PORT,
   host: env.HOST,
   obsidianVaultPath: env.OBSIDIAN_VAULT_PATH,
+
+  // ChromaDB Configuration
   chromaDbUrl: env.CHROMADB_URL,
+  CHROMADB_HOST: env.CHROMADB_HOST,
+  CHROMADB_PORT: env.CHROMADB_PORT,
+  CHROMADB_COLLECTION_NAME: env.CHROMADB_COLLECTION_NAME,
+
+  // Ollama Configuration
   ollamaUrl: env.OLLAMA_URL,
-  ollamaModel: env.OLLAMA_MODEL,
+  OLLAMA_HOST: env.OLLAMA_HOST,
+  OLLAMA_MODEL: env.OLLAMA_MODEL,
+
+  // Performance Configuration
+  MAX_BATCH_SIZE: env.MAX_BATCH_SIZE,
+  MEMORY_LIMIT_MB: env.MEMORY_LIMIT_MB,
+  PARALLEL_WORKERS: env.PARALLEL_WORKERS,
+
+  // Logging
   logLevel: env.LOG_LEVEL,
+  LOG_LEVEL: env.LOG_LEVEL,
+
+  // Environment flags
   isDevelopment: env.NODE_ENV === 'development',
   isProduction: env.NODE_ENV === 'production',
   isTest: env.NODE_ENV === 'test',
 
   // CORS Configuration
   allowedOrigins:
-    env.ALLOWED_ORIGINS?.split(',').map(origin => origin.trim()) ||
+    env.ALLOWED_ORIGINS?.split(',').map((origin) => origin.trim()) ||
     (env.NODE_ENV === 'development'
       ? ['http://localhost:3000', 'http://127.0.0.1:3000']
       : []),
@@ -419,23 +450,23 @@ export const config = {
             env: () => '[REDACTED_ENVIRONMENT]',
             process: (value: Record<string, unknown> | null | undefined) => {
               if (value && typeof value === 'object' && 'env' in value) {
-                return { ...value, env: '[REDACTED_PROCESS_ENV]' };
+                return { ...value, env: '[REDACTED_PROCESS_ENV]' }
               }
-              return value;
+              return value
             },
 
             // Custom serializer for configuration objects
             config: (
-              configValue: Record<string, unknown> | null | undefined
+              configValue: Record<string, unknown> | null | undefined,
             ) => {
               if (typeof configValue === 'object' && configValue !== null) {
-                const safeConfig: Record<string, string> = {};
-                Object.keys(configValue).forEach(key => {
-                  safeConfig[key] = redactSensitiveValue(key, configValue[key]);
-                });
-                return safeConfig;
+                const safeConfig: Record<string, string> = {}
+                Object.keys(configValue).forEach((key) => {
+                  safeConfig[key] = redactSensitiveValue(key, configValue[key])
+                })
+                return safeConfig
               }
-              return configValue;
+              return configValue
             },
           }
         : undefined, // Disable serializers in production for performance
@@ -538,7 +569,7 @@ export const config = {
       timeout: env.FILESYSTEM_TIMEOUT_DURATION,
     } satisfies ResiliencePolicy,
   },
-};
+}
 
 /**
  * Safe configuration utilities for debugging and error reporting
@@ -550,30 +581,30 @@ export const secureConfigUtils = {
    * All sensitive values are redacted while preserving structure
    */
   getSafeConfigForDebugging(): Record<string, unknown> {
-    const safeConfig: Record<string, unknown> = {};
+    const safeConfig: Record<string, unknown> = {}
 
     Object.entries(config).forEach(([key, value]) => {
       if (typeof value === 'object' && value !== null) {
         // Handle nested configuration objects
-        const safeNestedConfig: Record<string, unknown> = {};
+        const safeNestedConfig: Record<string, unknown> = {}
         Object.entries(value).forEach(([nestedKey, nestedValue]) => {
           safeNestedConfig[nestedKey] = redactSensitiveValue(
             nestedKey,
-            nestedValue
-          );
-        });
-        safeConfig[key] = safeNestedConfig;
+            nestedValue,
+          )
+        })
+        safeConfig[key] = safeNestedConfig
       } else {
-        safeConfig[key] = redactSensitiveValue(key, value);
+        safeConfig[key] = redactSensitiveValue(key, value)
       }
-    });
+    })
 
     return {
       config: safeConfig,
       environment: config.nodeEnv,
       timestamp: new Date().toISOString(),
       securityNote: 'All sensitive values redacted for ADHD data protection',
-    };
+    }
   },
 
   /**
@@ -582,12 +613,12 @@ export const secureConfigUtils = {
    */
   createSecureConfigError(
     message: string,
-    context?: Record<string, unknown>
+    context?: Record<string, unknown>,
   ): Error {
-    const error = new Error(`Configuration Error: ${message}`);
+    const error = new Error(`Configuration Error: ${message}`)
 
     // Add safe debugging context without exposing secrets
-    (error as Error & { debugContext: Record<string, unknown> }).debugContext =
+    ;(error as Error & { debugContext: Record<string, unknown> }).debugContext =
       {
         nodeEnv: config.nodeEnv,
         timestamp: new Date().toISOString(),
@@ -597,12 +628,12 @@ export const secureConfigUtils = {
               Object.entries(context).map(([key, value]) => [
                 key,
                 redactSensitiveValue(key, value),
-              ])
+              ]),
             )
           : {},
-      };
+      }
 
-    return error;
+    return error
   },
 
   /**
@@ -610,63 +641,65 @@ export const secureConfigUtils = {
    * Returns array of security compliance issues
    */
   validateAdhdDataProtectionCompliance(): string[] {
-    const issues: string[] = [];
+    const issues: string[] = []
 
     // Check that redaction is properly configured
     if (!config.logger.redactKeys.includes('obsidianVaultPath')) {
-      issues.push('Obsidian vault path not included in log redaction keys');
+      issues.push('Obsidian vault path not included in log redaction keys')
     }
 
     if (!config.logger.redactKeys.includes('OBSIDIAN_VAULT_PATH')) {
-      issues.push('Environment vault path not included in log redaction keys');
+      issues.push('Environment vault path not included in log redaction keys')
     }
 
     // Verify service URLs are not exposed
-    const serviceUrlKeys = ['chromaDbUrl', 'ollamaUrl'];
-    serviceUrlKeys.forEach(key => {
+    const serviceUrlKeys = ['chromaDbUrl', 'ollamaUrl']
+    serviceUrlKeys.forEach((key) => {
       if (
-        !config.logger.redactKeys.some(redactKey =>
-          redactKey.toLowerCase().includes(key.toLowerCase().replace('url', ''))
+        !config.logger.redactKeys.some((redactKey) =>
+          redactKey
+            .toLowerCase()
+            .includes(key.toLowerCase().replace('url', '')),
         )
       ) {
-        issues.push(`Service URL key '${key}' may not be properly redacted`);
+        issues.push(`Service URL key '${key}' may not be properly redacted`)
       }
-    });
+    })
 
     // Check production security settings
     if (config.nodeEnv === 'production') {
       if (config.logger.level === 'debug' || config.logger.level === 'trace') {
-        issues.push('Verbose logging enabled in production environment');
+        issues.push('Verbose logging enabled in production environment')
       }
 
       if (config.logger.pretty === true) {
         issues.push(
-          'Pretty logging enabled in production - may impact performance and security'
-        );
+          'Pretty logging enabled in production - may impact performance and security',
+        )
       }
     }
 
-    return issues;
+    return issues
   },
 
   /**
    * Get environment health status with security compliance check
    */
   getSecureHealthStatus(): {
-    status: 'healthy' | 'warning' | 'error';
-    environment: string;
-    complianceIssues: string[];
-    timestamp: string;
+    status: 'healthy' | 'warning' | 'error'
+    environment: string
+    complianceIssues: string[]
+    timestamp: string
   } {
-    const complianceIssues = this.validateAdhdDataProtectionCompliance();
+    const complianceIssues = this.validateAdhdDataProtectionCompliance()
 
-    let status: 'healthy' | 'warning' | 'error' = 'healthy';
+    let status: 'healthy' | 'warning' | 'error' = 'healthy'
     if (complianceIssues.length > 0) {
       status = complianceIssues.some(
-        issue => issue.includes('production') || issue.includes('redaction')
+        (issue) => issue.includes('production') || issue.includes('redaction'),
       )
         ? 'error'
-        : 'warning';
+        : 'warning'
     }
 
     return {
@@ -674,6 +707,6 @@ export const secureConfigUtils = {
       environment: config.nodeEnv,
       complianceIssues,
       timestamp: new Date().toISOString(),
-    };
+    }
   },
-};
+}
