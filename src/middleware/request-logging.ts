@@ -194,7 +194,10 @@ function redactMedicalData(text: string): string {
 /**
  * Comprehensive sanitization for logging that protects ADHD user privacy
  */
-function sanitizeForLogging(input: unknown, maxLength: number = 2000): any {
+function sanitizeForLogging(
+  input: unknown,
+  maxLength: number = 2000
+): string | Record<string, unknown> | unknown[] | unknown {
   if (input === null || input === undefined) {
     return input;
   }
@@ -219,11 +222,11 @@ function sanitizeForLogging(input: unknown, maxLength: number = 2000): any {
       return input.map(item => sanitizeForLogging(item, maxLength));
     }
 
-    const sanitized: any = {};
+    const sanitized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(input)) {
       // Sanitize both keys and values
       const sanitizedKey = sanitizeForLogging(key, 100); // Shorter limit for keys
-      sanitized[sanitizedKey] = sanitizeForLogging(value, maxLength);
+      sanitized[String(sanitizedKey)] = sanitizeForLogging(value, maxLength);
     }
     return sanitized;
   }
@@ -251,7 +254,11 @@ function sanitizeHeaders(
 
     // For non-sensitive headers, apply general sanitization
     if (value) {
-      sanitized[key] = sanitizeForLogging(value, 500); // Shorter limit for headers
+      const sanitizedValue = sanitizeForLogging(value, 500); // Shorter limit for headers
+      sanitized[key] =
+        typeof sanitizedValue === 'string'
+          ? sanitizedValue
+          : String(sanitizedValue);
     }
   }
 
@@ -261,7 +268,7 @@ function sanitizeHeaders(
 /**
  * Sanitize request/response body with special handling for ADHD-sensitive content
  */
-function sanitizeBody(body: any, maxSize: number): string {
+function sanitizeBody(body: unknown, maxSize: number): string {
   if (!body) {
     return '[EMPTY_BODY]';
   }
@@ -270,15 +277,16 @@ function sanitizeBody(body: any, maxSize: number): string {
     const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
 
     // Apply comprehensive sanitization
-    let sanitized = sanitizeForLogging(bodyStr, maxSize);
+    const sanitized = sanitizeForLogging(bodyStr, maxSize);
+    const sanitizedStr =
+      typeof sanitized === 'string' ? sanitized : String(sanitized);
 
     // If the sanitized body is still too long, truncate safely
-    if (sanitized.length > maxSize) {
-      sanitized =
-        sanitized.substring(0, maxSize) + '...[TRUNCATED_FOR_PRIVACY]';
+    if (sanitizedStr.length > maxSize) {
+      return sanitizedStr.substring(0, maxSize) + '...[TRUNCATED_FOR_PRIVACY]';
     }
 
-    return sanitized;
+    return sanitizedStr;
   } catch (error) {
     return '[BODY_SERIALIZATION_ERROR]';
   }
@@ -435,16 +443,13 @@ async function requestLoggingPlugin(
         }
 
         // Log based on response status with enhanced security
-        const logMessage = config.enablePIIRedaction
-          ? sanitizeForLogging(
-              reply.statusCode >= 400
-                ? 'HTTP request completed with error'
-                : 'HTTP request completed successfully',
-              config.maxLogLength!
-            )
-          : reply.statusCode >= 400
+        const baseMessage =
+          reply.statusCode >= 400
             ? 'HTTP request completed with error'
             : 'HTTP request completed successfully';
+        const logMessage = config.enablePIIRedaction
+          ? String(sanitizeForLogging(baseMessage, config.maxLogLength!))
+          : baseMessage;
 
         if (reply.statusCode >= 400) {
           logWithContext.warn(logMessage, logData);
@@ -491,23 +496,26 @@ async function requestLoggingPlugin(
 
         // Sanitize error message and stack trace for PII/medical data
         const sanitizedError = config.enablePIIRedaction
-          ? new Error(sanitizeForLogging(error.message, config.maxLogLength!))
+          ? new Error(
+              String(sanitizeForLogging(error.message, config.maxLogLength!))
+            )
           : error;
 
         // Copy other error properties but sanitize them
         if (config.enablePIIRedaction && error.stack) {
-          sanitizedError.stack = sanitizeForLogging(
-            error.stack,
-            config.maxLogLength! * 2
+          sanitizedError.stack = String(
+            sanitizeForLogging(error.stack, config.maxLogLength! * 2)
           );
         } else {
           sanitizedError.stack = error.stack;
         }
 
         const logMessage = config.enablePIIRedaction
-          ? sanitizeForLogging(
-              'HTTP request failed with error',
-              config.maxLogLength!
+          ? String(
+              sanitizeForLogging(
+                'HTTP request failed with error',
+                config.maxLogLength!
+              )
             )
           : 'HTTP request failed with error';
 
@@ -530,11 +538,15 @@ async function requestLoggingPlugin(
     return {
       debug: (message: string, context?: GenericObject) => {
         const sanitizedMessage = enablePII
-          ? sanitizeForLogging(message, maxLength)
+          ? String(sanitizeForLogging(message, maxLength))
           : message;
-        const sanitizedContext = enablePII
-          ? sanitizeForLogging(context, maxLength)
-          : context;
+        const sanitizedContext =
+          enablePII && context
+            ? (sanitizeForLogging(context, maxLength) as Record<
+                string,
+                unknown
+              >)
+            : context || {};
         logWithContext.debug(sanitizedMessage, {
           ...sanitizedContext,
           correlationId,
@@ -542,11 +554,15 @@ async function requestLoggingPlugin(
       },
       info: (message: string, context?: GenericObject) => {
         const sanitizedMessage = enablePII
-          ? sanitizeForLogging(message, maxLength)
+          ? String(sanitizeForLogging(message, maxLength))
           : message;
-        const sanitizedContext = enablePII
-          ? sanitizeForLogging(context, maxLength)
-          : context;
+        const sanitizedContext =
+          enablePII && context
+            ? (sanitizeForLogging(context, maxLength) as Record<
+                string,
+                unknown
+              >)
+            : context || {};
         logWithContext.info(sanitizedMessage, {
           ...sanitizedContext,
           correlationId,
@@ -554,11 +570,15 @@ async function requestLoggingPlugin(
       },
       warn: (message: string, context?: GenericObject) => {
         const sanitizedMessage = enablePII
-          ? sanitizeForLogging(message, maxLength)
+          ? String(sanitizeForLogging(message, maxLength))
           : message;
-        const sanitizedContext = enablePII
-          ? sanitizeForLogging(context, maxLength)
-          : context;
+        const sanitizedContext =
+          enablePII && context
+            ? (sanitizeForLogging(context, maxLength) as Record<
+                string,
+                unknown
+              >)
+            : context || {};
         logWithContext.warn(sanitizedMessage, {
           ...sanitizedContext,
           correlationId,
@@ -566,21 +586,24 @@ async function requestLoggingPlugin(
       },
       error: (message: string, context?: GenericObject, error?: Error) => {
         const sanitizedMessage = enablePII
-          ? sanitizeForLogging(message, maxLength)
+          ? String(sanitizeForLogging(message, maxLength))
           : message;
-        const sanitizedContext = enablePII
-          ? sanitizeForLogging(context, maxLength)
-          : context;
+        const sanitizedContext =
+          enablePII && context
+            ? (sanitizeForLogging(context, maxLength) as Record<
+                string,
+                unknown
+              >)
+            : context || {};
 
         let sanitizedError = error;
         if (enablePII && error) {
           sanitizedError = new Error(
-            sanitizeForLogging(error.message, maxLength)
+            String(sanitizeForLogging(error.message, maxLength))
           );
           if (error.stack) {
-            sanitizedError.stack = sanitizeForLogging(
-              error.stack,
-              maxLength * 2
+            sanitizedError.stack = String(
+              sanitizeForLogging(error.stack, maxLength * 2)
             );
           }
         }

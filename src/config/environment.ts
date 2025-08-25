@@ -364,9 +364,13 @@ function validateConfigurationSecurity(parsedEnv: typeof env): void {
   });
 
   // Log security warnings if any (using safe redaction)
-  if (warnings.length > 0 && typeof console !== 'undefined') {
+  if (warnings.length > 0) {
+    // Security warnings are intentionally logged directly to ensure visibility
+    // eslint-disable-next-line no-console
     console.warn('⚠️ Environment Security Warnings:');
+    // eslint-disable-next-line no-console
     warnings.forEach(warning => console.warn(`  - ${warning}`));
+    // eslint-disable-next-line no-console
     console.warn(
       'Review your configuration for ADHD data protection compliance'
     );
