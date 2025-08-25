@@ -1,0 +1,22 @@
+reviews:
+  # Enable reviews for cleanup branches specifically
+  include_patterns:
+    - "coderabbit-cleanup"
+    - "cleanup/*" 
+    - "review/*"
+  # Keep reviews enabled for default workflows  
+  review_status: true
+  # Enable for all branches (override default behavior)
+  auto_review:
+    base_branches:
+      - main
+      - coderabbit-cleanup
+      - cleanup/*
+    enabled: true
+
+# ADHD-focused review preferences
+review_preferences:
+  # Limit review comments to avoid overwhelming ADHD users
+  max_comments_per_review: 5
+  # Focus on P0/P1 issues only  
+  focus_on_critical_issues: true
