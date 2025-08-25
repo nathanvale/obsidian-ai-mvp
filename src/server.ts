@@ -33,17 +33,27 @@ async function start() {
       excludePaths: ['/health', '/favicon.ico'],
     });
 
-    // Register security plugin with rate limiting
+    // Register enhanced security plugin with comprehensive protection
     await server.register(securityPlugin, {
       rateLimit: {
         max: config.security.rateLimit.max,
         windowMs: config.security.rateLimit.windowMs,
-        skipSuccessfulRequests: config.security.rateLimit.skipOnSuccess,
+        skipOnSuccess: config.security.rateLimit.skipOnSuccess,
         whitelist: config.isDevelopment ? ['127.0.0.1', '::1'] : undefined,
       },
       requestTimeout: config.security.requestTimeout,
       enhancedHeaders: true,
       trustProxy: !config.isDevelopment,
+      contentSecurityPolicy: {
+        enabled: config.security.csp.enabled,
+        reportOnly: config.security.csp.reportOnly,
+        reportUri: '/api/csp-report',
+      },
+      corsValidation: {
+        enabled: config.security.cors.validationEnabled,
+        allowedOrigins: config.allowedOrigins,
+        allowCredentials: false,
+      },
     });
 
     // Register performance optimization plugin
@@ -75,9 +85,11 @@ async function start() {
       global: true,
     });
 
+    // CORS is now handled by the security middleware with proper validation
+    // Remove the permissive CORS configuration
     await server.register(cors, {
-      origin: true,
-      credentials: true,
+      origin: false, // Disable automatic CORS - security middleware handles it
+      credentials: false,
     });
 
     await setupRoutes(server);

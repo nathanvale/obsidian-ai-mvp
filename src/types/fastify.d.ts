@@ -7,6 +7,17 @@ declare module 'fastify' {
     performance?: {
       getStartTime(): bigint | undefined;
       getResponseTime(): number;
+      isAdhdWorkflow(): boolean;
+      getAdhdContext(): {
+        workflowType: string;
+        medicationHour: number;
+        expectedThreshold: number;
+      };
+      checkResponseTimeTarget(): {
+        withinTarget: boolean;
+        threshold: number;
+        actual: number;
+      };
     };
   }
 }
