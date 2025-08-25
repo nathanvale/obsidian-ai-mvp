@@ -513,7 +513,10 @@ export function createValidationSchema(
     tags: TagsSchema,
   };
 
-  const schema = { ...baseSchemas[type] } as any;
+  const schema = { ...baseSchemas[type] } as Record<string, unknown> & {
+    maxLength?: number;
+    minLength?: number;
+  };
 
   if (
     options?.maxLength &&

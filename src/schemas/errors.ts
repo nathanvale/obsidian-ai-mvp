@@ -750,7 +750,8 @@ export class ErrorSchemaUtils {
    */
   static isValidErrorCode(code: string): boolean {
     return (
-      /^[A-Z_]+$/.test(code) && Object.values(ErrorCodes).includes(code as any)
+      /^[A-Z_]+$/.test(code) &&
+      (Object.values(ErrorCodes) as string[]).includes(code)
     );
   }
 

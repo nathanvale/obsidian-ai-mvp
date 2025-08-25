@@ -194,7 +194,7 @@ function redactMedicalData(text: string): string {
 /**
  * Comprehensive sanitization for logging that protects ADHD user privacy
  */
-function sanitizeForLogging(input: any, maxLength: number = 2000): any {
+function sanitizeForLogging(input: unknown, maxLength: number = 2000): any {
   if (input === null || input === undefined) {
     return input;
   }
@@ -235,8 +235,10 @@ function sanitizeForLogging(input: any, maxLength: number = 2000): any {
 /**
  * Sanitize HTTP headers with comprehensive security filtering
  */
-function sanitizeHeaders(headers: Record<string, any>): Record<string, any> {
-  const sanitized: Record<string, any> = {};
+function sanitizeHeaders(
+  headers: Record<string, string | string[] | undefined>
+): Record<string, string> {
+  const sanitized: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(headers)) {
     const lowerKey = key.toLowerCase();

@@ -183,7 +183,9 @@ export const logWithContext = {
       message: secureError.message,
       correlationId,
       timestamp: new Date().toISOString(),
-      debugContext: (secureError as any).debugContext,
+      debugContext: (
+        secureError as Error & { debugContext?: Record<string, unknown> }
+      ).debugContext,
       originalError: error
         ? {
             name: error.name,

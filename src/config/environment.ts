@@ -125,9 +125,14 @@ function createSafeConfigurationError(zodError: z.ZodError): Error {
     received: '[REDACTED_FOR_SECURITY]',
   }));
 
-  const error = new Error('Environment configuration validation failed');
-  (error as any).issues = safeIssues;
-  (error as any).safeDebugInfo = createSafeEnvironmentDebugInfo();
+  const error = new Error(
+    'Environment configuration validation failed'
+  ) as Error & {
+    issues: unknown[];
+    safeDebugInfo: Record<string, unknown>;
+  };
+  error.issues = safeIssues;
+  error.safeDebugInfo = createSafeEnvironmentDebugInfo();
 
   return error;
 }
@@ -408,17 +413,19 @@ export const config = {
         ? {
             // Custom serializer for environment objects to prevent accidental exposure
             env: () => '[REDACTED_ENVIRONMENT]',
-            process: (value: any) => {
-              if (value && value.env) {
+            process: (value: Record<string, unknown> | null | undefined) => {
+              if (value && typeof value === 'object' && 'env' in value) {
                 return { ...value, env: '[REDACTED_PROCESS_ENV]' };
               }
               return value;
             },
 
             // Custom serializer for configuration objects
-            config: (configValue: any) => {
+            config: (
+              configValue: Record<string, unknown> | null | undefined
+            ) => {
               if (typeof configValue === 'object' && configValue !== null) {
-                const safeConfig: any = {};
+                const safeConfig: Record<string, string> = {};
                 Object.keys(configValue).forEach(key => {
                   safeConfig[key] = redactSensitiveValue(key, configValue[key]);
                 });
@@ -576,19 +583,20 @@ export const secureConfigUtils = {
     const error = new Error(`Configuration Error: ${message}`);
 
     // Add safe debugging context without exposing secrets
-    (error as any).debugContext = {
-      nodeEnv: config.nodeEnv,
-      timestamp: new Date().toISOString(),
-      correlationId: context?.correlationId || 'config-error-' + Date.now(),
-      safeContext: context
-        ? Object.fromEntries(
-            Object.entries(context).map(([key, value]) => [
-              key,
-              redactSensitiveValue(key, value),
-            ])
-          )
-        : {},
-    };
+    (error as Error & { debugContext: Record<string, unknown> }).debugContext =
+      {
+        nodeEnv: config.nodeEnv,
+        timestamp: new Date().toISOString(),
+        correlationId: context?.correlationId || 'config-error-' + Date.now(),
+        safeContext: context
+          ? Object.fromEntries(
+              Object.entries(context).map(([key, value]) => [
+                key,
+                redactSensitiveValue(key, value),
+              ])
+            )
+          : {},
+      };
 
     return error;
   },
