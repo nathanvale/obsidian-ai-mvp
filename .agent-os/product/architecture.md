@@ -1,4 +1,4 @@
-1# ADHD-Optimized Digital Second Brain: Complete Architecture Document
+# ADHD-Optimized Digital Second Brain: Complete Architecture Document
 
 ## Executive summary shapes the vision
 
