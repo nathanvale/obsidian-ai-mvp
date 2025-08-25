@@ -190,11 +190,13 @@ bun run dev
 ### Common Node.js Version Issues
 
 **Problem:** `@orchestr8` packages fail to install
+
 ```bash
 Error: Unsupported Node.js version
 ```
 
 **Solution:**
+
 ```bash
 # Check current Node.js version
 node --version
@@ -211,11 +213,13 @@ bun install
 ### Bun Runtime Issues
 
 **Problem:** Bun not found or version conflicts
+
 ```bash
 Command 'bun' not found
 ```
 
 **Solution:**
+
 ```bash
 # Reinstall Bun
 curl -fsSL https://bun.sh/install | bash
@@ -230,11 +234,13 @@ source ~/.bashrc  # or ~/.zshrc
 ### @orchestr8 Package Compatibility
 
 **Problem:** Package installation failures
+
 ```bash
 npm ERR! peer dep missing: node@>=22.11.0
 ```
 
 **Solution:**
+
 ```bash
 # Verify Node.js version meets requirements
 node --version  # Must be >=22.11.0
@@ -252,6 +258,7 @@ npm install --force
 **Problem:** Slow startup or reload times (>3s startup, >1s reload)
 
 **Solution:**
+
 ```bash
 # Check system resources
 top -pid $(pgrep ollama)  # Ollama memory usage
@@ -270,6 +277,7 @@ bun run dev:debug
 **Problem:** Ollama or ChromaDB connection failures
 
 **Solution:**
+
 ```bash
 # Check service status
 bun run health:ollama

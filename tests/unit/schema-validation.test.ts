@@ -51,7 +51,9 @@ describe('Enhanced Schema Validation', () => {
 
       invalidEmails.forEach(email => {
         const regex = new RegExp(EmailSchema.pattern);
-        const isValidLength = email.length >= EmailSchema.minLength && email.length <= EmailSchema.maxLength;
+        const isValidLength =
+          email.length >= EmailSchema.minLength &&
+          email.length <= EmailSchema.maxLength;
         const isValid = regex.test(email) && isValidLength;
         expect(isValid).toBe(false);
       });
@@ -89,7 +91,9 @@ describe('Enhanced Schema Validation', () => {
 
       invalidUrls.forEach(url => {
         const regex = new RegExp(UrlSchema.pattern);
-        const isValidLength = url.length >= UrlSchema.minLength && url.length <= UrlSchema.maxLength;
+        const isValidLength =
+          url.length >= UrlSchema.minLength &&
+          url.length <= UrlSchema.maxLength;
         expect(regex.test(url) && isValidLength).toBe(false);
       });
     });
@@ -111,8 +115,12 @@ describe('Enhanced Schema Validation', () => {
       validMedications.forEach(medication => {
         const regex = new RegExp(MedicationNameSchema.pattern);
         expect(regex.test(medication)).toBe(true);
-        expect(medication.length).toBeGreaterThanOrEqual(MedicationNameSchema.minLength);
-        expect(medication.length).toBeLessThanOrEqual(MedicationNameSchema.maxLength);
+        expect(medication.length).toBeGreaterThanOrEqual(
+          MedicationNameSchema.minLength
+        );
+        expect(medication.length).toBeLessThanOrEqual(
+          MedicationNameSchema.maxLength
+        );
       });
     });
 
@@ -128,7 +136,9 @@ describe('Enhanced Schema Validation', () => {
 
       invalidMedications.forEach(medication => {
         const regex = new RegExp(MedicationNameSchema.pattern);
-        const isValidLength = medication.length >= MedicationNameSchema.minLength && medication.length <= MedicationNameSchema.maxLength;
+        const isValidLength =
+          medication.length >= MedicationNameSchema.minLength &&
+          medication.length <= MedicationNameSchema.maxLength;
         expect(regex.test(medication) && isValidLength).toBe(false);
       });
     });
@@ -149,9 +159,10 @@ describe('Enhanced Schema Validation', () => {
       const invalidDosages = [0, -5, 1001, 0.05]; // Below min, negative, above max, wrong precision
 
       invalidDosages.forEach(dosage => {
-        const isValid = dosage >= MedicationDosageSchema.minimum && 
-                       dosage <= MedicationDosageSchema.maximum &&
-                       dosage % MedicationDosageSchema.multipleOf < 0.01;
+        const isValid =
+          dosage >= MedicationDosageSchema.minimum &&
+          dosage <= MedicationDosageSchema.maximum &&
+          dosage % MedicationDosageSchema.multipleOf < 0.01;
         expect(isValid).toBe(false);
       });
     });
@@ -198,7 +209,9 @@ describe('Enhanced Schema Validation', () => {
       const validSeverities = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
       validSeverities.forEach(severity => {
-        expect(severity).toBeGreaterThanOrEqual(AdhdSymptomSeveritySchema.minimum);
+        expect(severity).toBeGreaterThanOrEqual(
+          AdhdSymptomSeveritySchema.minimum
+        );
         expect(severity).toBeLessThanOrEqual(AdhdSymptomSeveritySchema.maximum);
         expect(Number.isInteger(severity)).toBe(true);
       });
@@ -208,9 +221,11 @@ describe('Enhanced Schema Validation', () => {
       const invalidSeverities = [0, -1, 11, 2.5, 'five'];
 
       invalidSeverities.forEach(severity => {
-        const isValid = Number.isInteger(severity) && 
-                       severity >= AdhdSymptomSeveritySchema.minimum && 
-                       severity <= AdhdSymptomSeveritySchema.maximum;
+        const isValid =
+          Number.isInteger(severity) &&
+          typeof severity === 'number' &&
+          severity >= AdhdSymptomSeveritySchema.minimum &&
+          severity <= AdhdSymptomSeveritySchema.maximum;
         expect(isValid).toBe(false);
       });
     });
@@ -221,7 +236,7 @@ describe('Enhanced Schema Validation', () => {
       const validTranscripts = [
         'This is a normal voice memo transcript.',
         'Um, I need to remember to pick up milk and, uh, call the doctor.',
-        'Meeting at 2 PM with John about the Q3 budget - don\'t forget the spreadsheet!',
+        "Meeting at 2 PM with John about the Q3 budget - don't forget the spreadsheet!",
         'Medication taken at 8:00 AM. Feeling focused today.',
         'Ideas for weekend: 1) Grocery shopping 2) Clean garage 3) Call mom',
       ];
@@ -229,8 +244,12 @@ describe('Enhanced Schema Validation', () => {
       validTranscripts.forEach(transcript => {
         const regex = new RegExp(VoiceTranscriptSchema.pattern);
         expect(regex.test(transcript)).toBe(true);
-        expect(transcript.length).toBeGreaterThanOrEqual(VoiceTranscriptSchema.minLength);
-        expect(transcript.length).toBeLessThanOrEqual(VoiceTranscriptSchema.maxLength);
+        expect(transcript.length).toBeGreaterThanOrEqual(
+          VoiceTranscriptSchema.minLength
+        );
+        expect(transcript.length).toBeLessThanOrEqual(
+          VoiceTranscriptSchema.maxLength
+        );
       });
     });
 
@@ -243,8 +262,9 @@ describe('Enhanced Schema Validation', () => {
 
       invalidTranscripts.forEach(transcript => {
         const regex = new RegExp(VoiceTranscriptSchema.pattern);
-        const isValidLength = transcript.length >= VoiceTranscriptSchema.minLength && 
-                             transcript.length <= VoiceTranscriptSchema.maxLength;
+        const isValidLength =
+          transcript.length >= VoiceTranscriptSchema.minLength &&
+          transcript.length <= VoiceTranscriptSchema.maxLength;
         expect(regex.test(transcript) && isValidLength).toBe(false);
       });
     });
@@ -284,12 +304,16 @@ describe('Enhanced Schema Validation', () => {
       invalidTagArrays.forEach(tags => {
         let isValid = tags.length <= TagsSchema.maxItems;
         isValid = isValid && new Set(tags).size === tags.length; // Unique check
-        isValid = isValid && tags.every(tag => {
-          const regex = new RegExp(TagsSchema.items.pattern);
-          return regex.test(tag) && 
-                 tag.length >= TagsSchema.items.minLength && 
-                 tag.length <= TagsSchema.items.maxLength;
-        });
+        isValid =
+          isValid &&
+          tags.every(tag => {
+            const regex = new RegExp(TagsSchema.items.pattern);
+            return (
+              regex.test(tag) &&
+              tag.length >= TagsSchema.items.minLength &&
+              tag.length <= TagsSchema.items.maxLength
+            );
+          });
         expect(isValid).toBe(false);
       });
     });
@@ -345,7 +369,9 @@ describe('Enhanced Schema Validation', () => {
       validQueries.forEach(query => {
         const regex = new RegExp(SearchQuerySchema.pattern);
         expect(regex.test(query)).toBe(true);
-        expect(query.length).toBeGreaterThanOrEqual(SearchQuerySchema.minLength);
+        expect(query.length).toBeGreaterThanOrEqual(
+          SearchQuerySchema.minLength
+        );
         expect(query.length).toBeLessThanOrEqual(SearchQuerySchema.maxLength);
       });
     });
@@ -361,8 +387,9 @@ describe('Enhanced Schema Validation', () => {
 
       maliciousQueries.forEach(query => {
         const regex = new RegExp(SearchQuerySchema.pattern);
-        const isValidLength = query.length >= SearchQuerySchema.minLength && 
-                             query.length <= SearchQuerySchema.maxLength;
+        const isValidLength =
+          query.length >= SearchQuerySchema.minLength &&
+          query.length <= SearchQuerySchema.maxLength;
         expect(regex.test(query) && isValidLength).toBe(false);
       });
     });
@@ -400,8 +427,9 @@ describe('Enhanced Schema Validation', () => {
 
       invalidPaths.forEach(path => {
         const regex = new RegExp(VaultPathSchema.pattern);
-        const isValidLength = path.length >= VaultPathSchema.minLength && 
-                             path.length <= VaultPathSchema.maxLength;
+        const isValidLength =
+          path.length >= VaultPathSchema.minLength &&
+          path.length <= VaultPathSchema.maxLength;
         expect(regex.test(path) && isValidLength).toBe(false);
       });
     });
@@ -409,21 +437,29 @@ describe('Enhanced Schema Validation', () => {
 
   describe('Schema Factory Function', () => {
     it('creates custom validation schemas', () => {
-      const customEmailSchema = createValidationSchema('email', { maxLength: 50 });
-      expect(customEmailSchema.maxLength).toBe(50);
+      const customEmailSchema = createValidationSchema('email', {
+        maxLength: 50,
+      });
+      expect((customEmailSchema as any).maxLength).toBe(50);
 
-      const customSearchSchema = createValidationSchema('search', { minLength: 3 });
-      expect(customSearchSchema.minLength).toBe(3);
+      const customSearchSchema = createValidationSchema('search', {
+        minLength: 3,
+      });
+      expect((customSearchSchema as any).minLength).toBe(3);
     });
 
     it('respects original constraints when creating custom schemas', () => {
-      const customEmailSchema = createValidationSchema('email', { maxLength: 500 });
+      const customEmailSchema = createValidationSchema('email', {
+        maxLength: 500,
+      });
       // Should not exceed original maxLength of 254
-      expect(customEmailSchema.maxLength).toBe(254);
+      expect((customEmailSchema as any).maxLength).toBe(254);
 
-      const customMedicationSchema = createValidationSchema('medication', { minLength: 1 });
+      const customMedicationSchema = createValidationSchema('medication', {
+        minLength: 1,
+      });
       // Should not go below original minLength of 2
-      expect(customMedicationSchema.minLength).toBe(2);
+      expect((customMedicationSchema as any).minLength).toBe(2);
     });
   });
 
@@ -431,12 +467,16 @@ describe('Enhanced Schema Validation', () => {
     it('provides helpful error messages', () => {
       expect(ValidationErrorMessages.INVALID_EMAIL).toContain('example.com');
       expect(ValidationErrorMessages.INVALID_TIME_FORMAT).toContain('08:00');
-      expect(ValidationErrorMessages.INVALID_SEVERITY_SCALE).toContain('1 and 10');
+      expect(ValidationErrorMessages.INVALID_SEVERITY_SCALE).toContain(
+        '1 and 10'
+      );
       expect(ValidationErrorMessages.INVALID_SEARCH_QUERY).toContain('HTML');
     });
 
     it('includes ADHD-friendly explanations', () => {
-      expect(ValidationErrorMessages.INVALID_MEDICATION_NAME).toContain('letters, numbers');
+      expect(ValidationErrorMessages.INVALID_MEDICATION_NAME).toContain(
+        'letters, numbers'
+      );
       expect(ValidationErrorMessages.TOO_MANY_TAGS).toContain('20 tags');
       expect(ValidationErrorMessages.INVALID_PRIORITY).toContain('urgent');
     });

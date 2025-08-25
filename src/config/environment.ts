@@ -13,19 +13,19 @@ const SECRET_PATTERNS = [
   /token/i,
   /auth/i,
   /credential/i,
-  
+
   // ADHD-specific sensitive patterns
   /vault[_-]?path/i,
   /obsidian/i,
   /medical/i,
   /health/i,
-  
+
   // Service configuration that could expose setup
   /url$/i,
   /endpoint/i,
   /connection/i,
   /database/i,
-  
+
   // Personal information patterns
   /user/i,
   /home/i,
@@ -37,20 +37,22 @@ const SECRET_PATTERNS = [
  * Specifically designed for ADHD data protection
  */
 function redactSensitiveValue(key: string, value: unknown): string {
-  if (value == null) return '[undefined]';
-  
+  if (value === null || value === undefined) {
+    return '[undefined]';
+  }
+
   const stringValue = String(value);
   const keyLower = key.toLowerCase();
-  
+
   // Check if key matches any secret pattern
   const isSecret = SECRET_PATTERNS.some(pattern => pattern.test(keyLower));
-  
+
   if (isSecret) {
     // For paths, show only the pattern, not the actual path
     if (keyLower.includes('path')) {
       return '[REDACTED_PATH]';
     }
-    
+
     // For URLs, show protocol and hostname only
     if (keyLower.includes('url') && stringValue.startsWith('http')) {
       try {
@@ -60,7 +62,7 @@ function redactSensitiveValue(key: string, value: unknown): string {
         return '[REDACTED_URL]';
       }
     }
-    
+
     // For other secrets, show length and type hint
     if (stringValue.length > 20) {
       return `[REDACTED_LONG_SECRET_${stringValue.length}_CHARS]`;
@@ -70,21 +72,22 @@ function redactSensitiveValue(key: string, value: unknown): string {
       return '[REDACTED_SECRET]';
     }
   }
-  
+
   // Non-secret values - still check for potential personal info in paths
-  if (typeof value === 'string' && (
-    stringValue.includes('/Users/') ||
-    stringValue.includes('/home/') ||
-    stringValue.includes('\\Users\\') ||
-    stringValue.includes('C:\\')
-  )) {
+  if (
+    typeof value === 'string' &&
+    (stringValue.includes('/Users/') ||
+      stringValue.includes('/home/') ||
+      stringValue.includes('\\Users\\') ||
+      stringValue.includes('C:\\'))
+  ) {
     // Redact personal directory paths
     return stringValue.replace(
-      /(\/Users\/[^\/]+|\/home\/[^\/]+|\\Users\\[^\\]+|C:\\Users\\[^\\]+)/gi,
+      /(\/Users\/[^/]+|\/home\/[^/]+|\\Users\\[^\\]+|C:\\Users\\[^\\]+)/gi,
       '/[USER_DIR]'
     );
   }
-  
+
   return stringValue;
 }
 
@@ -94,13 +97,13 @@ function redactSensitiveValue(key: string, value: unknown): string {
  */
 export function createSafeEnvironmentDebugInfo(): Record<string, unknown> {
   const safeEnv: Record<string, unknown> = {};
-  
+
   // Process each environment variable safely
   Object.keys(process.env).forEach(key => {
     const value = process.env[key];
     safeEnv[key] = redactSensitiveValue(key, value);
   });
-  
+
   return {
     environment: safeEnv,
     detectedPatterns: SECRET_PATTERNS.map(p => p.source),
@@ -121,11 +124,11 @@ function createSafeConfigurationError(zodError: z.ZodError): Error {
     // Never include the actual value that failed validation
     received: '[REDACTED_FOR_SECURITY]',
   }));
-  
+
   const error = new Error('Environment configuration validation failed');
   (error as any).issues = safeIssues;
   (error as any).safeDebugInfo = createSafeEnvironmentDebugInfo();
-  
+
   return error;
 }
 
@@ -135,27 +138,65 @@ function createSafeConfigurationError(zodError: z.ZodError): Error {
  */
 export const ENHANCED_REDACT_KEYS = [
   // Standard security keys
-  'apiKey', 'api_key', 'token', 'password', 'secret', 'authorization', 'auth',
-  'credential', 'credentials', 'key', 'privateKey', 'private_key',
-  
-  // ADHD-specific sensitive keys  
-  'obsidianVaultPath', 'obsidian_vault_path', 'OBSIDIAN_VAULT_PATH',
-  'vaultPath', 'vault_path', 'medicalPath', 'medical_path',
-  'healthPath', 'health_path', 'personalPath', 'personal_path',
-  
+  'apiKey',
+  'api_key',
+  'token',
+  'password',
+  'secret',
+  'authorization',
+  'auth',
+  'credential',
+  'credentials',
+  'key',
+  'privateKey',
+  'private_key',
+
+  // ADHD-specific sensitive keys
+  'obsidianVaultPath',
+  'obsidian_vault_path',
+  'OBSIDIAN_VAULT_PATH',
+  'vaultPath',
+  'vault_path',
+  'medicalPath',
+  'medical_path',
+  'healthPath',
+  'health_path',
+  'personalPath',
+  'personal_path',
+
   // Service configuration
-  'chromaDbUrl', 'chromadb_url', 'CHROMADB_URL',
-  'ollamaUrl', 'ollama_url', 'OLLAMA_URL',
-  'databaseUrl', 'database_url', 'DATABASE_URL',
-  'connectionString', 'connection_string', 'CONNECTION_STRING',
-  
+  'chromaDbUrl',
+  'chromadb_url',
+  'CHROMADB_URL',
+  'ollamaUrl',
+  'ollama_url',
+  'OLLAMA_URL',
+  'databaseUrl',
+  'database_url',
+  'DATABASE_URL',
+  'connectionString',
+  'connection_string',
+  'CONNECTION_STRING',
+
   // Personal identifiers that could appear in logs
-  'username', 'user', 'userId', 'user_id', 'email', 'phone',
-  'address', 'location', 'home', 'userDir', 'user_dir',
-  
+  'username',
+  'user',
+  'userId',
+  'user_id',
+  'email',
+  'phone',
+  'address',
+  'location',
+  'home',
+  'userDir',
+  'user_dir',
+
   // Nested object paths that might contain sensitive data
-  'config.obsidianVaultPath', 'env.OBSIDIAN_VAULT_PATH',
-  'process.env', 'environment', 'env',
+  'config.obsidianVaultPath',
+  'env.OBSIDIAN_VAULT_PATH',
+  'process.env',
+  'environment',
+  'env',
 ] as const;
 
 const envSchema = z.object({
@@ -196,11 +237,11 @@ const envSchema = z.object({
   RATE_LIMIT_MAX: z.coerce.number().default(100),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60000),
   RATE_LIMIT_SKIP_ON_SUCCESS: z.coerce.boolean().default(true),
-  
+
   // Security Configuration - Content Security Policy
   CSP_ENABLED: z.coerce.boolean().default(true),
   CSP_REPORT_ONLY: z.coerce.boolean().optional(),
-  
+
   // Security Configuration - Enhanced CORS
   CORS_VALIDATION_ENABLED: z.coerce.boolean().default(true),
 
@@ -233,7 +274,7 @@ const envSchema = z.object({
   ADHD_AI_WORKLOAD_MONITORING: z.coerce.boolean().default(true),
   ADHD_STANDARD_RESPONSE_TARGET_MS: z.coerce.number().default(2000), // 2s
   ADHD_AI_PROCESSING_TARGET_MS: z.coerce.number().default(5000), // 5s for AI
-  ADHD_SEARCH_TARGET_MS: z.coerce.number().default(1000) // 1s for search
+  ADHD_SEARCH_TARGET_MS: z.coerce.number().default(1000), // 1s for search
 });
 
 /**
@@ -248,7 +289,9 @@ try {
     // Create secure error that doesn't expose actual environment values
     throw createSafeConfigurationError(error);
   }
-  throw new Error('Critical environment configuration error - check your settings');
+  throw new Error(
+    'Critical environment configuration error - check your settings'
+  );
 }
 
 /**
@@ -257,51 +300,71 @@ try {
  */
 function validateConfigurationSecurity(parsedEnv: typeof env): void {
   const warnings: string[] = [];
-  
+
   // Check for development settings in production
   if (parsedEnv.NODE_ENV === 'production') {
     if (parsedEnv.LOG_LEVEL === 'debug' || parsedEnv.LOG_LEVEL === 'trace') {
-      warnings.push('Verbose logging enabled in production - may expose sensitive data');
+      warnings.push(
+        'Verbose logging enabled in production - may expose sensitive data'
+      );
     }
-    
+
     if (parsedEnv.LOG_PRETTY === true) {
-      warnings.push('Pretty logging enabled in production - disable for better security');
+      warnings.push(
+        'Pretty logging enabled in production - disable for better security'
+      );
     }
   }
-  
+
   // Validate Obsidian vault path security (if provided)
   if (parsedEnv.OBSIDIAN_VAULT_PATH) {
     const vaultPath = parsedEnv.OBSIDIAN_VAULT_PATH;
-    
+
     // Check for obviously insecure paths
     if (vaultPath.includes('..') || vaultPath.includes('//')) {
-      warnings.push('Potentially unsafe vault path - contains directory traversal patterns');
+      warnings.push(
+        'Potentially unsafe vault path - contains directory traversal patterns'
+      );
     }
-    
+
     // Warn if vault path is in system directories (could be accidental)
-    if (vaultPath.startsWith('/System/') || vaultPath.startsWith('/usr/') || 
-        vaultPath.startsWith('/bin/') || vaultPath.startsWith('/etc/')) {
-      warnings.push('Vault path in system directory - verify this is intentional');
+    if (
+      vaultPath.startsWith('/System/') ||
+      vaultPath.startsWith('/usr/') ||
+      vaultPath.startsWith('/bin/') ||
+      vaultPath.startsWith('/etc/')
+    ) {
+      warnings.push(
+        'Vault path in system directory - verify this is intentional'
+      );
     }
   }
-  
+
   // Check service URLs for security
   const serviceUrls = {
     ChromaDB: parsedEnv.CHROMADB_URL,
     Ollama: parsedEnv.OLLAMA_URL,
   };
-  
+
   Object.entries(serviceUrls).forEach(([service, url]) => {
-    if (url.startsWith('http://') && !url.includes('localhost') && !url.includes('127.0.0.1')) {
-      warnings.push(`${service} URL uses HTTP instead of HTTPS for non-local connection`);
+    if (
+      url.startsWith('http://') &&
+      !url.includes('localhost') &&
+      !url.includes('127.0.0.1')
+    ) {
+      warnings.push(
+        `${service} URL uses HTTP instead of HTTPS for non-local connection`
+      );
     }
   });
-  
+
   // Log security warnings if any (using safe redaction)
   if (warnings.length > 0 && typeof console !== 'undefined') {
     console.warn('⚠️ Environment Security Warnings:');
     warnings.forEach(warning => console.warn(`  - ${warning}`));
-    console.warn('Review your configuration for ADHD data protection compliance');
+    console.warn(
+      'Review your configuration for ADHD data protection compliance'
+    );
   }
 }
 
@@ -338,30 +401,33 @@ export const config = {
     pretty: env.LOG_PRETTY ?? env.NODE_ENV === 'development',
     redactKeys: [...ENHANCED_REDACT_KEYS],
     maxFieldSize: env.LOG_MAX_FIELD_SIZE,
-    
+
     // Additional security serializers for ADHD data protection (if supported by logger)
-    serializers: env.NODE_ENV === 'development' ? {
-      // Custom serializer for environment objects to prevent accidental exposure
-      env: () => '[REDACTED_ENVIRONMENT]',
-      process: (value: any) => {
-        if (value && value.env) {
-          return { ...value, env: '[REDACTED_PROCESS_ENV]' };
-        }
-        return value;
-      },
-      
-      // Custom serializer for configuration objects
-      config: (configValue: any) => {
-        if (typeof configValue === 'object' && configValue !== null) {
-          const safeConfig: any = {};
-          Object.keys(configValue).forEach(key => {
-            safeConfig[key] = redactSensitiveValue(key, configValue[key]);
-          });
-          return safeConfig;
-        }
-        return configValue;
-      },
-    } : undefined, // Disable serializers in production for performance
+    serializers:
+      env.NODE_ENV === 'development'
+        ? {
+            // Custom serializer for environment objects to prevent accidental exposure
+            env: () => '[REDACTED_ENVIRONMENT]',
+            process: (value: any) => {
+              if (value && value.env) {
+                return { ...value, env: '[REDACTED_PROCESS_ENV]' };
+              }
+              return value;
+            },
+
+            // Custom serializer for configuration objects
+            config: (configValue: any) => {
+              if (typeof configValue === 'object' && configValue !== null) {
+                const safeConfig: any = {};
+                Object.keys(configValue).forEach(key => {
+                  safeConfig[key] = redactSensitiveValue(key, configValue[key]);
+                });
+                return safeConfig;
+              }
+              return configValue;
+            },
+          }
+        : undefined, // Disable serializers in production for performance
   },
 
   // Security Configuration
@@ -474,20 +540,23 @@ export const secureConfigUtils = {
    */
   getSafeConfigForDebugging(): Record<string, unknown> {
     const safeConfig: Record<string, unknown> = {};
-    
+
     Object.entries(config).forEach(([key, value]) => {
       if (typeof value === 'object' && value !== null) {
         // Handle nested configuration objects
         const safeNestedConfig: Record<string, unknown> = {};
         Object.entries(value).forEach(([nestedKey, nestedValue]) => {
-          safeNestedConfig[nestedKey] = redactSensitiveValue(nestedKey, nestedValue);
+          safeNestedConfig[nestedKey] = redactSensitiveValue(
+            nestedKey,
+            nestedValue
+          );
         });
         safeConfig[key] = safeNestedConfig;
       } else {
         safeConfig[key] = redactSensitiveValue(key, value);
       }
     });
-    
+
     return {
       config: safeConfig,
       environment: config.nodeEnv,
@@ -501,25 +570,26 @@ export const secureConfigUtils = {
    * Never exposes actual configuration values but provides debugging context
    */
   createSecureConfigError(
-    message: string, 
+    message: string,
     context?: Record<string, unknown>
   ): Error {
     const error = new Error(`Configuration Error: ${message}`);
-    
+
     // Add safe debugging context without exposing secrets
     (error as any).debugContext = {
       nodeEnv: config.nodeEnv,
       timestamp: new Date().toISOString(),
       correlationId: context?.correlationId || 'config-error-' + Date.now(),
-      safeContext: context ? 
-        Object.fromEntries(
-          Object.entries(context).map(([key, value]) => [
-            key, 
-            redactSensitiveValue(key, value)
-          ])
-        ) : {},
+      safeContext: context
+        ? Object.fromEntries(
+            Object.entries(context).map(([key, value]) => [
+              key,
+              redactSensitiveValue(key, value),
+            ])
+          )
+        : {},
     };
-    
+
     return error;
   },
 
@@ -529,36 +599,41 @@ export const secureConfigUtils = {
    */
   validateAdhdDataProtectionCompliance(): string[] {
     const issues: string[] = [];
-    
+
     // Check that redaction is properly configured
     if (!config.logger.redactKeys.includes('obsidianVaultPath')) {
       issues.push('Obsidian vault path not included in log redaction keys');
     }
-    
+
     if (!config.logger.redactKeys.includes('OBSIDIAN_VAULT_PATH')) {
       issues.push('Environment vault path not included in log redaction keys');
     }
-    
+
     // Verify service URLs are not exposed
     const serviceUrlKeys = ['chromaDbUrl', 'ollamaUrl'];
     serviceUrlKeys.forEach(key => {
-      if (!config.logger.redactKeys.some(redactKey => 
-        redactKey.toLowerCase().includes(key.toLowerCase().replace('url', '')))) {
+      if (
+        !config.logger.redactKeys.some(redactKey =>
+          redactKey.toLowerCase().includes(key.toLowerCase().replace('url', ''))
+        )
+      ) {
         issues.push(`Service URL key '${key}' may not be properly redacted`);
       }
     });
-    
+
     // Check production security settings
     if (config.nodeEnv === 'production') {
       if (config.logger.level === 'debug' || config.logger.level === 'trace') {
         issues.push('Verbose logging enabled in production environment');
       }
-      
+
       if (config.logger.pretty === true) {
-        issues.push('Pretty logging enabled in production - may impact performance and security');
+        issues.push(
+          'Pretty logging enabled in production - may impact performance and security'
+        );
       }
     }
-    
+
     return issues;
   },
 
@@ -572,14 +647,16 @@ export const secureConfigUtils = {
     timestamp: string;
   } {
     const complianceIssues = this.validateAdhdDataProtectionCompliance();
-    
+
     let status: 'healthy' | 'warning' | 'error' = 'healthy';
     if (complianceIssues.length > 0) {
-      status = complianceIssues.some(issue => 
-        issue.includes('production') || issue.includes('redaction')
-      ) ? 'error' : 'warning';
+      status = complianceIssues.some(
+        issue => issue.includes('production') || issue.includes('redaction')
+      )
+        ? 'error'
+        : 'warning';
     }
-    
+
     return {
       status,
       environment: config.nodeEnv,

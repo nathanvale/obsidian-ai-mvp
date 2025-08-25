@@ -36,28 +36,29 @@ const DANGEROUS_PATTERNS = [
   /<iframe[\s\S]*?<\/iframe>/gi,
   /on\w+\s*=/gi, // Event handlers like onclick=, onload=, etc.
   /<\s*\/?\s*[a-z][a-z0-9]*[^>]*>/gi, // HTML tags
-  
+
   // SQL injection patterns - only match obvious SQL commands
   /;\s*(drop|delete|truncate|insert|update|alter|create|exec|execute)\s+/gi,
   /union\s+select/gi,
   /'\s*or\s+'1'\s*=\s*'1/gi, // Classic SQL injection
   /--\s*$/gm, // SQL comments at end of line
-  
+
   // Command injection patterns - be more specific to avoid false positives
   /[;&|`]\s*(rm|del|format|curl|wget|nc|netcat|bash|sh|cmd|powershell)/gi,
   /\$\(\s*[a-z]/gi, // Command substitution like $(command)
   /`[^`]*`/g, // Backtick command execution
-  
+
   // Path traversal (including URL encoded)
-  /\.\.[\/\\]/g,
-  /%2e%2e[\/\\%2f]/gi, // URL encoded ../
-  
+  /\.\.[/\\]/g,
+  /%2e%2e[/\\%2f]/gi, // URL encoded ../
+
   // Control characters (including null bytes)
+  // eslint-disable-next-line no-control-regex
   /[\x00-\x1f\x7f-\x9f]/g,
-  
+
   // Excessive special characters (potential buffer overflow)
   /(.)\1{50,}/g, // Same character repeated 50+ times
-  
+
   // Repeated suspicious characters that could be used to bypass validation
   /[;"]{2,}/g, // Multiple semicolons (2 or more is suspicious)
   /['"]{4,}/g, // Multiple quotes (4 or more)
@@ -101,7 +102,7 @@ export interface ValidationResult {
  * Converts dangerous characters to their HTML entity equivalents
  */
 export function escapeHtml(input: string): string {
-  return input.replace(/[&<>"'`=\/]/g, (char) => HTML_ENTITIES[char] || char);
+  return input.replace(/[&<>"'`=/]/g, char => HTML_ENTITIES[char] || char);
 }
 
 /**
@@ -118,7 +119,9 @@ export function sanitizeInput(
 
   // Check length limits first
   if (sanitized.length > config.maxLength) {
-    violations.push(`Input exceeds maximum length of ${config.maxLength} characters`);
+    violations.push(
+      `Input exceeds maximum length of ${config.maxLength} characters`
+    );
     sanitized = sanitized.substring(0, config.maxLength);
     wasModified = true;
   }
@@ -136,7 +139,7 @@ export function sanitizeInput(
     const matches = sanitized.match(pattern);
     if (matches && matches.length > 0) {
       violations.push(`Dangerous pattern detected: ${pattern.toString()}`);
-      
+
       // Remove the dangerous content
       sanitized = sanitized.replace(pattern, '');
       wasModified = true;
@@ -191,20 +194,20 @@ export function sanitizeInput(
  */
 export function validateSearchQuery(query: string): ValidationResult {
   const result = sanitizeInput(query, ValidationDefaults.SEARCH_QUERY);
-  
+
   // Additional search-specific validation - check for empty or whitespace-only after sanitization
   if (result.sanitized.trim().length < 1) {
     result.violations.push('Search query cannot be empty after sanitization');
     result.isValid = false;
   }
-  
+
   // Check for excessively complex queries that could cause DoS
   const wordCount = result.sanitized.split(/\s+/).length;
   if (wordCount > 50) {
     result.violations.push('Search query contains too many words (maximum 50)');
     result.isValid = false;
   }
-  
+
   return result;
 }
 
@@ -214,13 +217,15 @@ export function validateSearchQuery(query: string): ValidationResult {
  */
 export function validateTopicName(topic: string): ValidationResult {
   const result = sanitizeInput(topic, ValidationDefaults.TOPIC_NAME);
-  
+
   // Additional topic-specific validation
   if (result.sanitized.trim().length < 2) {
-    result.violations.push('Topic name must be at least 2 characters after sanitization');
+    result.violations.push(
+      'Topic name must be at least 2 characters after sanitization'
+    );
     result.isValid = false;
   }
-  
+
   // Check if the topic is just HTML entities (like "&lt;&gt;" from "<>")
   // This catches cases where dangerous input becomes "valid" HTML entities
   const htmlEntityOnlyPattern = /^(&[a-zA-Z0-9]+;|\s)*$/;
@@ -228,14 +233,14 @@ export function validateTopicName(topic: string): ValidationResult {
     result.violations.push('Topic name contains only HTML entities');
     result.isValid = false;
   }
-  
+
   // Topics should be reasonable educational subjects - allow HTML entities from escaping
   const allowedTopicPattern = /^[a-zA-Z0-9\s\-_.,&()#;]+$/;
   if (result.sanitized.trim() && !allowedTopicPattern.test(result.sanitized)) {
     result.violations.push('Topic name contains invalid characters');
     result.isValid = false;
   }
-  
+
   return result;
 }
 
@@ -260,10 +265,11 @@ export function createSecurityErrorResponse(
   timestamp: string;
 } {
   // Don't expose the actual violation details to prevent information leakage
-  const publicMessage = violations.length > 1 
-    ? 'Input validation failed: Multiple security policy violations'
-    : 'Input validation failed: Security policy violation';
-  
+  const publicMessage =
+    violations.length > 1
+      ? 'Input validation failed: Multiple security policy violations'
+      : 'Input validation failed: Security policy violation';
+
   return {
     success: false,
     error: {
@@ -293,7 +299,7 @@ export const SecureSchemas = {
     pattern: '^[^<>\\x00-\\x1f\\x7f-\\x9f]*$', // No control characters or HTML brackets
     description: 'Search query (max 500 chars, no HTML or control characters)',
   },
-  
+
   /**
    * Schema for topic names with educational content validation
    */
@@ -302,9 +308,10 @@ export const SecureSchemas = {
     minLength: 2,
     maxLength: 100,
     pattern: '^[a-zA-Z0-9\\s\\-_.,&()]+$',
-    description: 'Topic name for quiz generation (alphanumeric, spaces, and basic punctuation only)',
+    description:
+      'Topic name for quiz generation (alphanumeric, spaces, and basic punctuation only)',
   },
-  
+
   /**
    * Schema for general string inputs with security constraints
    */

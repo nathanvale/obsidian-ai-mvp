@@ -1,14 +1,14 @@
 // Test setup file for ADHD Digital Second Brain
 // Configures testing environment for local AI processing and structured logging
 
-import { beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
+import { beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
 
 // Global test configuration
 beforeAll(async () => {
   // Set test environment variables
   process.env.NODE_ENV = 'test';
   process.env.LOG_LEVEL = 'warn'; // Reduce log noise during tests
-  
+
   // Disable external service calls during testing unless explicitly needed
   if (!process.env.TEST_WITH_SERVICES) {
     process.env.OLLAMA_ENABLED = 'false';
@@ -38,9 +38,9 @@ afterEach(() => {
 
 // Helper function for ADHD-optimized test timeouts
 export const adhdTimeouts = {
-  fast: 5000,      // Quick operations - 5s
-  medium: 15000,   // Local AI processing - 15s  
-  slow: 30000,     // Full service integration - 30s
+  fast: 5000, // Quick operations - 5s
+  medium: 15000, // Local AI processing - 15s
+  slow: 30000, // Full service integration - 30s
 } as const;
 
 // Test utilities for ADHD development
@@ -49,7 +49,8 @@ export const testUtils = {
   skipIfNoServices: () => {
     return process.env.TEST_WITH_SERVICES !== 'true';
   },
-  
+
   // Get timeout based on test complexity
-  getTimeout: (complexity: keyof typeof adhdTimeouts) => adhdTimeouts[complexity],
+  getTimeout: (complexity: keyof typeof adhdTimeouts) =>
+    adhdTimeouts[complexity],
 } as const;

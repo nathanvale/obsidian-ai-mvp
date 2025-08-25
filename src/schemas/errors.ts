@@ -102,7 +102,7 @@ export enum ErrorSeverity {
   INFO = 'info',
   WARNING = 'warning',
   ERROR = 'error',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 /**
@@ -182,7 +182,8 @@ export const ErrorResponseSchema = {
         code: {
           type: 'string',
           pattern: '^[A-Z_]+$',
-          description: 'Standardized error code in UPPER_SNAKE_CASE format for programmatic handling',
+          description:
+            'Standardized error code in UPPER_SNAKE_CASE format for programmatic handling',
         },
         severity: {
           type: 'string',
@@ -209,7 +210,8 @@ export const ErrorResponseSchema = {
         },
         userImpact: {
           type: 'string',
-          description: 'ADHD-friendly explanation of how this error affects the user workflow',
+          description:
+            'ADHD-friendly explanation of how this error affects the user workflow',
         },
         troubleshootingHints: {
           type: 'array',
@@ -219,7 +221,8 @@ export const ErrorResponseSchema = {
           },
           minItems: 1,
           maxItems: 3,
-          description: 'Ordered list of helpful suggestions for resolving the error',
+          description:
+            'Ordered list of helpful suggestions for resolving the error',
         },
         retryPolicy: {
           type: 'object',
@@ -253,7 +256,8 @@ export const ErrorResponseSchema = {
                 type: 'string',
               },
               maxItems: 20,
-              description: 'Sanitized stack trace frames (development/testing only)',
+              description:
+                'Sanitized stack trace frames (development/testing only)',
             },
             truncated: {
               type: 'boolean',
@@ -261,10 +265,12 @@ export const ErrorResponseSchema = {
             },
             sanitized: {
               type: 'boolean',
-              description: 'Whether sensitive information was removed from stack trace',
+              description:
+                'Whether sensitive information was removed from stack trace',
             },
           },
-          description: 'Optional stack trace information (only included in non-production environments)',
+          description:
+            'Optional stack trace information (only included in non-production environments)',
         },
         context: {
           type: 'object',
@@ -277,7 +283,8 @@ export const ErrorResponseSchema = {
               type: 'integer',
               minimum: 0,
               maximum: 23,
-              description: 'Hour of day when error occurred (for medication cycle analysis)',
+              description:
+                'Hour of day when error occurred (for medication cycle analysis)',
             },
             cognitiveLoadLevel: {
               type: 'string',
@@ -290,10 +297,12 @@ export const ErrorResponseSchema = {
                 type: 'string',
               },
               maxItems: 5,
-              description: 'Correlation IDs of related errors in the same workflow',
+              description:
+                'Correlation IDs of related errors in the same workflow',
             },
           },
-          description: 'ADHD-specific context for error analysis and optimization',
+          description:
+            'ADHD-specific context for error analysis and optimization',
         },
         details: {
           type: 'object',
@@ -302,7 +311,8 @@ export const ErrorResponseSchema = {
         relatedDocumentation: {
           type: 'string',
           format: 'uri',
-          description: 'Link to relevant documentation or troubleshooting guide',
+          description:
+            'Link to relevant documentation or troubleshooting guide',
         },
       },
     },
@@ -351,7 +361,8 @@ export const ValidationErrorResponseSchema = {
         severity: {
           type: 'string',
           const: 'warning',
-          description: 'Validation errors are typically warnings that users can fix',
+          description:
+            'Validation errors are typically warnings that users can fix',
         },
         category: {
           type: 'string',
@@ -375,7 +386,8 @@ export const ValidationErrorResponseSchema = {
             retryable: {
               type: 'boolean',
               const: true,
-              description: 'Validation errors are always retryable after fixing input',
+              description:
+                'Validation errors are always retryable after fixing input',
             },
             maxAttempts: {
               type: 'integer',
@@ -393,7 +405,8 @@ export const ValidationErrorResponseSchema = {
               field: {
                 type: 'string',
                 minLength: 1,
-                description: 'Field path that failed validation (e.g., "user.email" or "items[0].name")',
+                description:
+                  'Field path that failed validation (e.g., "user.email" or "items[0].name")',
               },
               code: {
                 type: 'string',
@@ -406,11 +419,13 @@ export const ValidationErrorResponseSchema = {
                 description: 'ADHD-friendly validation error message',
               },
               value: {
-                description: 'The invalid value that was provided (sanitized for security)',
+                description:
+                  'The invalid value that was provided (sanitized for security)',
               },
               expectedFormat: {
                 type: 'string',
-                description: 'Description of the expected format or constraints',
+                description:
+                  'Description of the expected format or constraints',
               },
               suggestion: {
                 type: 'string',
@@ -418,7 +433,8 @@ export const ValidationErrorResponseSchema = {
               },
             },
           },
-          description: 'Detailed validation failures for each problematic field',
+          description:
+            'Detailed validation failures for each problematic field',
         },
         context: {
           type: 'object',
@@ -608,7 +624,7 @@ export const ErrorCodeSeverityMap: Record<string, ErrorSeverity> = {
   [ErrorCodes.VAULT_CORRUPTION_DETECTED]: ErrorSeverity.CRITICAL,
   [ErrorCodes.SYS_OUT_OF_MEMORY]: ErrorSeverity.CRITICAL,
   [ErrorCodes.SVC_INTERNAL_ERROR]: ErrorSeverity.CRITICAL,
-  
+
   // High-priority errors that impact functionality
   [ErrorCodes.VOICE_SERVICE_UNAVAILABLE]: ErrorSeverity.ERROR,
   [ErrorCodes.SEARCH_CHROMADB_UNAVAILABLE]: ErrorSeverity.ERROR,
@@ -664,7 +680,7 @@ export const CategoryTroubleshootingHints: Record<string, string[]> = {
   ],
   validation: [
     'Double-check all required fields are filled',
-    'Verify the format matches what\'s expected',
+    "Verify the format matches what's expected",
     'Check for any special characters that might not be allowed',
   ],
   service_unavailable: [
@@ -675,7 +691,7 @@ export const CategoryTroubleshootingHints: Record<string, string[]> = {
   rate_limiting: [
     'Wait a minute before making another request',
     'Reduce the frequency of your requests',
-    'Check if you\'re hitting API limits',
+    "Check if you're hitting API limits",
   ],
   system: [
     'Check system resources and disk space',
@@ -709,13 +725,20 @@ export class ErrorSchemaUtils {
    * Get troubleshooting hints for a category
    */
   static getTroubleshootingHints(category: string): string[] {
-    return CategoryTroubleshootingHints[category] || CategoryTroubleshootingHints.unknown;
+    return (
+      CategoryTroubleshootingHints[category] ||
+      CategoryTroubleshootingHints.unknown
+    );
   }
 
   /**
    * Create standardized retry policy
    */
-  static createRetryPolicy(retryable: boolean, maxAttempts = 3, backoffMs = 1000): RetryPolicy {
+  static createRetryPolicy(
+    retryable: boolean,
+    maxAttempts = 3,
+    backoffMs = 1000
+  ): RetryPolicy {
     return {
       retryable,
       ...(retryable && { maxAttempts, backoffMs }),
@@ -726,15 +749,19 @@ export class ErrorSchemaUtils {
    * Validate error code format
    */
   static isValidErrorCode(code: string): boolean {
-    return /^[A-Z_]+$/.test(code) && Object.values(ErrorCodes).includes(code as any);
+    return (
+      /^[A-Z_]+$/.test(code) && Object.values(ErrorCodes).includes(code as any)
+    );
   }
 
   /**
    * Get ADHD-friendly message for status code
    */
   static getAdhdFriendlyMessage(statusCode: number): string {
-    return AdhdFriendlyMessages[statusCode as keyof typeof AdhdFriendlyMessages] || 
-           'Something unexpected happened';
+    return (
+      AdhdFriendlyMessages[statusCode as keyof typeof AdhdFriendlyMessages] ||
+      'Something unexpected happened'
+    );
   }
 
   /**
@@ -781,7 +808,9 @@ export class ErrorTypeGuards {
   /**
    * Check if response is a validation error response
    */
-  static isValidationErrorResponse(response: unknown): response is ValidationErrorResponse {
+  static isValidationErrorResponse(
+    response: unknown
+  ): response is ValidationErrorResponse {
     return (
       this.isErrorResponse(response) &&
       'validation' in response.error &&
@@ -813,36 +842,36 @@ export class ErrorTypeGuards {
 
 /**
  * Enhanced error schema documentation for ADHD Digital Second Brain
- * 
+ *
  * @fileoverview This module provides standardized error response schemas with:
  * - Consistent error code naming (UPPER_SNAKE_CASE with category prefixes)
  * - Stack trace handling with sanitization policies
  * - ADHD-specific error categorization and user-friendly messaging
  * - Comprehensive troubleshooting hints and retry policies
  * - Validation error details with field-level feedback
- * 
+ *
  * Error Code Naming Convention:
  * - Format: {CATEGORY}_{SPECIFIC_ERROR}
  * - Categories: VOICE_, SEARCH_, EMAIL_, VAULT_, MED_, AUTH_, VALID_, SVC_, RATE_, SYS_
  * - All codes use UPPER_SNAKE_CASE formatting
- * 
+ *
  * Stack Trace Policies:
  * - Development: Full stack traces with sanitization
  * - Production: No stack traces for security
  * - Testing: Limited stack traces without sanitization
- * 
+ *
  * ADHD-Specific Features:
  * - Medication cycle context tracking
  * - Cognitive load level awareness
  * - Workflow-specific error categorization
  * - Clear, actionable troubleshooting guidance
- * 
+ *
  * Integration with Error Handler:
  * - Error handler middleware uses these schemas for consistent formatting
  * - Automatic severity classification based on error codes
  * - Stack trace inclusion based on environment policies
  * - ADHD context extraction from request metadata
- * 
+ *
  * @example
  * ```typescript
  * // Create a standardized error response

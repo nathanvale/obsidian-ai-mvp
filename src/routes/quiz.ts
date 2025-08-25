@@ -1,6 +1,10 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { validateTopicName, createSecurityErrorResponse, SecureSchemas } from '../utils/input-validation.js';
+import {
+  validateTopicName,
+  createSecurityErrorResponse,
+  SecureSchemas,
+} from '../utils/input-validation.js';
 import { logWithContext, getCurrentCorrelationId } from '../services/logger.js';
 import { ErrorResponseSchema } from '../schemas/errors.js';
 
@@ -8,7 +12,8 @@ import { ErrorResponseSchema } from '../schemas/errors.js';
  * Zod schema with enhanced security validation for quiz generation
  */
 const generateQuizSchema = z.object({
-  topic: z.string()
+  topic: z
+    .string()
     .min(2, 'Topic must be at least 2 characters')
     .max(100, 'Topic too long (maximum 100 characters)')
     .regex(/^[a-zA-Z0-9\s\-_.,&()]+$/, 'Topic contains invalid characters'),
@@ -56,28 +61,49 @@ export async function quizRoutes(server: FastifyInstance) {
                     type: 'array',
                     items: {
                       type: 'object',
-                      required: ['id', 'question', 'options', 'correctAnswer', 'explanation'],
+                      required: [
+                        'id',
+                        'question',
+                        'options',
+                        'correctAnswer',
+                        'explanation',
+                      ],
                       properties: {
-                        id: { type: 'string', description: 'Unique question identifier' },
-                        question: { type: 'string', description: 'The quiz question text' },
-                        options: { 
-                          type: 'array', 
+                        id: {
+                          type: 'string',
+                          description: 'Unique question identifier',
+                        },
+                        question: {
+                          type: 'string',
+                          description: 'The quiz question text',
+                        },
+                        options: {
+                          type: 'array',
                           items: { type: 'string' },
                           minItems: 2,
                           maxItems: 6,
-                          description: 'Multiple choice answer options'
+                          description: 'Multiple choice answer options',
                         },
-                        correctAnswer: { 
+                        correctAnswer: {
                           type: 'number',
                           minimum: 0,
-                          description: 'Index of the correct answer (0-based)'
+                          description: 'Index of the correct answer (0-based)',
                         },
-                        explanation: { type: 'string', description: 'Explanation of the correct answer' },
+                        explanation: {
+                          type: 'string',
+                          description: 'Explanation of the correct answer',
+                        },
                       },
                     },
                   },
-                  topic: { type: 'string', description: 'Quiz topic (sanitized)' },
-                  difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'] },
+                  topic: {
+                    type: 'string',
+                    description: 'Quiz topic (sanitized)',
+                  },
+                  difficulty: {
+                    type: 'string',
+                    enum: ['easy', 'medium', 'hard'],
+                  },
                   numQuestions: { type: 'number', minimum: 1, maximum: 20 },
                 },
               },
@@ -99,17 +125,17 @@ export async function quizRoutes(server: FastifyInstance) {
     },
     async (request, reply) => {
       const correlationId = getCurrentCorrelationId() || 'quiz-generate';
-      
+
       try {
         // First, validate using Zod schema (catches basic format issues)
         const parseResult = generateQuizSchema.safeParse(request.body);
-        
+
         if (!parseResult.success) {
           logWithContext.warn('Quiz generation request failed Zod validation', {
             errors: parseResult.error.errors,
             body: request.body,
           });
-          
+
           return reply.status(400).send({
             success: false,
             error: {
@@ -132,7 +158,7 @@ export async function quizRoutes(server: FastifyInstance) {
 
         // Second, perform deep security validation on the topic
         const topicValidation = validateTopicName(topic);
-        
+
         if (!topicValidation.isValid) {
           // Log the security violation (violations are already logged in validateTopicName)
           logWithContext.error('Quiz topic failed security validation', {
@@ -146,25 +172,28 @@ export async function quizRoutes(server: FastifyInstance) {
           });
 
           const securityError = createSecurityErrorResponse(
-            topicValidation.violations, 
+            topicValidation.violations,
             correlationId
           );
-          
+
           return reply.status(400).send(securityError);
         }
 
         // Use the sanitized topic for processing
         const sanitizedTopic = topicValidation.sanitized;
-        
+
         // Additional validation - prevent resource exhaustion attacks
         if (numQuestions > 10 && difficulty === 'hard') {
-          logWithContext.warn('High complexity quiz generation attempt blocked', {
-            numQuestions,
-            difficulty,
-            topic: sanitizedTopic,
-            clientIp: request.ip,
-          });
-          
+          logWithContext.warn(
+            'High complexity quiz generation attempt blocked',
+            {
+              numQuestions,
+              difficulty,
+              topic: sanitizedTopic,
+              clientIp: request.ip,
+            }
+          );
+
           return reply.status(400).send({
             success: false,
             error: {
@@ -206,7 +235,6 @@ export async function quizRoutes(server: FastifyInstance) {
           correlationId,
           timestamp: new Date().toISOString(),
         });
-
       } catch (error) {
         // Never expose internal errors to clients
         logWithContext.error('Quiz generation processing error', {

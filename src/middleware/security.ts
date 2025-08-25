@@ -76,16 +76,26 @@ function generateCSPHeader(directives: Record<string, string[]>): string {
 /**
  * Validate CORS origin against allowed origins list
  */
-function validateCORSOrigin(origin: string | undefined, allowedOrigins: string[]): boolean {
-  if (!origin) return true; // Same-origin requests have no origin header
+function validateCORSOrigin(
+  origin: string | undefined,
+  allowedOrigins: string[]
+): boolean {
+  if (!origin) {
+    return true;
+  } // Same-origin requests have no origin header
 
   // Check exact matches
-  if (allowedOrigins.includes(origin)) return true;
+  if (allowedOrigins.includes(origin)) {
+    return true;
+  }
 
   // Check localhost patterns for development
-  if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
-    return allowedOrigins.some(allowed => 
-      allowed.includes('localhost') || allowed.includes('127.0.0.1')
+  if (
+    origin.startsWith('http://localhost:') ||
+    origin.startsWith('http://127.0.0.1:')
+  ) {
+    return allowedOrigins.some(
+      allowed => allowed.includes('localhost') || allowed.includes('127.0.0.1')
     );
   }
 
@@ -110,12 +120,13 @@ async function securityPlugin(
       max: securityConfig.rateLimit.max,
       timeWindow: securityConfig.rateLimit.windowMs,
       allowList: securityConfig.rateLimit.whitelist,
-      
+
       // Enhanced key generator with IP and user agent fingerprinting
       keyGenerator: (request: FastifyRequest) => {
-        const clientIP = request.ip || request.socket.remoteAddress || 'unknown';
+        const clientIP =
+          request.ip || request.socket.remoteAddress || 'unknown';
         const userAgent = request.headers['user-agent'] || 'unknown';
-        
+
         // Create a more sophisticated key to prevent bypassing via user agent rotation
         const uaHash = Buffer.from(userAgent).toString('base64').slice(0, 16);
         return `${clientIP}:${uaHash}`;
@@ -127,7 +138,8 @@ async function securityPlugin(
         context: { max: number; after: string; ttl: number }
       ) => {
         const correlationId = getCurrentCorrelationId() || 'rate-limit-error';
-        const suspiciousPattern = context.max > 0 && request.url.includes('/api/');
+        const suspiciousPattern =
+          context.max > 0 && request.url.includes('/api/');
 
         // Enhanced logging for potential DoS attacks
         logWithContext.warn('Rate limit exceeded - potential DoS attempt', {
@@ -184,14 +196,19 @@ async function securityPlugin(
         payload: unknown
       ) => {
         // Content Security Policy - critical for XSS protection
-        if (securityConfig.contentSecurityPolicy?.enabled && securityConfig.contentSecurityPolicy.directives) {
-          const cspHeader = generateCSPHeader(securityConfig.contentSecurityPolicy.directives);
-          const headerName = securityConfig.contentSecurityPolicy.reportOnly 
+        if (
+          securityConfig.contentSecurityPolicy?.enabled &&
+          securityConfig.contentSecurityPolicy.directives
+        ) {
+          const cspHeader = generateCSPHeader(
+            securityConfig.contentSecurityPolicy.directives
+          );
+          const headerName = securityConfig.contentSecurityPolicy.reportOnly
             ? 'Content-Security-Policy-Report-Only'
             : 'Content-Security-Policy';
-          
+
           reply.header(headerName, cspHeader);
-          
+
           // Add CSP reporting endpoint
           if (securityConfig.contentSecurityPolicy.reportUri) {
             reply.header(
@@ -206,7 +223,7 @@ async function securityPlugin(
         reply.header('X-Content-Type-Options', 'nosniff');
         reply.header('X-XSS-Protection', '1; mode=block');
         reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
-        
+
         // Comprehensive permissions policy to disable unnecessary browser features
         reply.header(
           'Permissions-Policy',
@@ -280,59 +297,77 @@ async function securityPlugin(
   }
 
   // CORS validation for enhanced security
-  if (securityConfig.corsValidation?.enabled && securityConfig.corsValidation.allowedOrigins) {
-    fastify.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
-      const origin = request.headers.origin;
-      const allowedOrigins = securityConfig.corsValidation!.allowedOrigins!;
-      
-      // Validate CORS origin for cross-origin requests
-      if (origin && !validateCORSOrigin(origin, allowedOrigins)) {
-        const correlationId = getCurrentCorrelationId() || 'cors-violation';
-        
-        // Log suspicious cross-origin request
-        logWithContext.warn('CORS violation - unauthorized origin', {
-          origin,
-          allowedOrigins,
-          method: request.method,
-          url: request.url,
-          userAgent: request.headers['user-agent'],
-          ip: request.ip,
-          referer: request.headers.referer,
-        });
+  if (
+    securityConfig.corsValidation?.enabled &&
+    securityConfig.corsValidation.allowedOrigins
+  ) {
+    fastify.addHook(
+      'onRequest',
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        const origin = request.headers.origin;
+        const allowedOrigins = securityConfig.corsValidation!.allowedOrigins!;
 
-        // Block the request
-        reply.status(403).send({
-          success: false,
-          error: {
-            message: 'Cross-origin request blocked',
-            statusCode: 403,
-            code: 'CORS_VIOLATION',
-            details: {
-              origin,
-              allowedOrigins: config.isDevelopment ? allowedOrigins : ['[hidden in production]'],
+        // Validate CORS origin for cross-origin requests
+        if (origin && !validateCORSOrigin(origin, allowedOrigins)) {
+          const correlationId = getCurrentCorrelationId() || 'cors-violation';
+
+          // Log suspicious cross-origin request
+          logWithContext.warn('CORS violation - unauthorized origin', {
+            origin,
+            allowedOrigins,
+            method: request.method,
+            url: request.url,
+            userAgent: request.headers['user-agent'],
+            ip: request.ip,
+            referer: request.headers.referer,
+          });
+
+          // Block the request
+          reply.status(403).send({
+            success: false,
+            error: {
+              message: 'Cross-origin request blocked',
+              statusCode: 403,
+              code: 'CORS_VIOLATION',
+              details: {
+                origin,
+                allowedOrigins: config.isDevelopment
+                  ? allowedOrigins
+                  : ['[hidden in production]'],
+              },
             },
-          },
-          correlationId,
-          timestamp: new Date().toISOString(),
-        });
-        return;
-      }
-
-      // Set CORS headers for valid origins
-      if (origin && validateCORSOrigin(origin, allowedOrigins)) {
-        reply.header('Access-Control-Allow-Origin', origin);
-        reply.header('Access-Control-Allow-Credentials', securityConfig.corsValidation?.allowCredentials?.toString() || 'false');
-        
-        // Handle preflight requests
-        if (request.method === 'OPTIONS') {
-          reply.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-          reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-          reply.header('Access-Control-Max-Age', '86400'); // 24 hours
-          reply.status(204).send();
+            correlationId,
+            timestamp: new Date().toISOString(),
+          });
           return;
         }
+
+        // Set CORS headers for valid origins
+        if (origin && validateCORSOrigin(origin, allowedOrigins)) {
+          reply.header('Access-Control-Allow-Origin', origin);
+          reply.header(
+            'Access-Control-Allow-Credentials',
+            securityConfig.corsValidation?.allowCredentials?.toString() ||
+              'false'
+          );
+
+          // Handle preflight requests
+          if (request.method === 'OPTIONS') {
+            reply.header(
+              'Access-Control-Allow-Methods',
+              'GET, POST, PUT, DELETE, OPTIONS'
+            );
+            reply.header(
+              'Access-Control-Allow-Headers',
+              'Content-Type, Authorization, X-Requested-With'
+            );
+            reply.header('Access-Control-Max-Age', '86400'); // 24 hours
+            reply.status(204).send();
+            return;
+          }
+        }
       }
-    });
+    );
   }
 
   // Trust proxy settings for proper IP detection
@@ -381,39 +416,45 @@ async function securityPlugin(
   });
 
   // CSP Violation Reporting Endpoint
-  if (securityConfig.contentSecurityPolicy?.enabled && securityConfig.contentSecurityPolicy.reportUri) {
-    fastify.post(securityConfig.contentSecurityPolicy.reportUri, async (request: FastifyRequest, reply: FastifyReply) => {
-      const correlationId = getCurrentCorrelationId() || 'csp-report';
-      
-      try {
-        // Log CSP violations for security monitoring
-        logWithContext.warn('CSP violation reported', {
-          cspReport: request.body,
-          userAgent: request.headers['user-agent'],
-          ip: request.ip,
-          url: request.url,
-          referer: request.headers.referer,
-        });
+  if (
+    securityConfig.contentSecurityPolicy?.enabled &&
+    securityConfig.contentSecurityPolicy.reportUri
+  ) {
+    fastify.post(
+      securityConfig.contentSecurityPolicy.reportUri,
+      async (request: FastifyRequest, reply: FastifyReply) => {
+        const correlationId = getCurrentCorrelationId() || 'csp-report';
 
-        // Return success to prevent browser console errors
-        reply.status(204).send();
-      } catch (error) {
-        logWithContext.error('Failed to process CSP report', {
-          error: error instanceof Error ? error.message : 'Unknown error',
-          body: request.body,
-        });
-        reply.status(400).send({
-          success: false,
-          error: {
-            message: 'Failed to process CSP report',
-            statusCode: 400,
-            code: 'CSP_REPORT_ERROR',
-          },
-          correlationId,
-          timestamp: new Date().toISOString(),
-        });
+        try {
+          // Log CSP violations for security monitoring
+          logWithContext.warn('CSP violation reported', {
+            cspReport: request.body,
+            userAgent: request.headers['user-agent'],
+            ip: request.ip,
+            url: request.url,
+            referer: request.headers.referer,
+          });
+
+          // Return success to prevent browser console errors
+          reply.status(204).send();
+        } catch (error) {
+          logWithContext.error('Failed to process CSP report', {
+            error: error instanceof Error ? error.message : 'Unknown error',
+            body: request.body,
+          });
+          reply.status(400).send({
+            success: false,
+            error: {
+              message: 'Failed to process CSP report',
+              statusCode: 400,
+              code: 'CSP_REPORT_ERROR',
+            },
+            correlationId,
+            timestamp: new Date().toISOString(),
+          });
+        }
       }
-    });
+    );
   }
 
   // Add enhanced security helper methods to request
@@ -438,19 +479,30 @@ async function securityPlugin(
       isSuspicious: () => {
         const userAgent = (request.headers['user-agent'] as string) || '';
         const hasLowEntropyUA = !userAgent || userAgent.length < 10;
-        const isBotLike = /bot|crawler|spider|scraper|headless/i.test(userAgent);
-        const hasSuspiciousHeaders = !request.headers['accept'] || !request.headers['accept-language'];
-        
+        const isBotLike = /bot|crawler|spider|scraper|headless/i.test(
+          userAgent
+        );
+        const hasSuspiciousHeaders =
+          !request.headers['accept'] || !request.headers['accept-language'];
+
         return hasLowEntropyUA || isBotLike || hasSuspiciousHeaders;
       },
       isValidOrigin: () => {
         const origin = request.headers.origin;
-        if (!origin) return true; // Same-origin requests
-        
-        if (securityConfig.corsValidation?.enabled && securityConfig.corsValidation.allowedOrigins) {
-          return validateCORSOrigin(origin, securityConfig.corsValidation.allowedOrigins);
+        if (!origin) {
+          return true;
+        } // Same-origin requests
+
+        if (
+          securityConfig.corsValidation?.enabled &&
+          securityConfig.corsValidation.allowedOrigins
+        ) {
+          return validateCORSOrigin(
+            origin,
+            securityConfig.corsValidation.allowedOrigins
+          );
         }
-        
+
         return true; // CORS validation disabled
       },
       hasCSPViolation: () => {
@@ -458,8 +510,10 @@ async function securityPlugin(
         return false;
       },
       getRateLimitInfo: () => {
-        if (!securityConfig.rateLimit) return null;
-        
+        if (!securityConfig.rateLimit) {
+          return null;
+        }
+
         return {
           max: securityConfig.rateLimit.max || 100,
           windowMs: securityConfig.rateLimit.windowMs || 60000,

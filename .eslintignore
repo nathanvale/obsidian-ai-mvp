@@ -2,3 +2,9 @@ dist/
 node_modules/
 coverage/
 .husky/_/
+# Temporary debugging scripts
+comprehensive-security-test.js
+debug-validation.js
+security-verification.js
+quick-debug.mjs
+debug-short.mjs

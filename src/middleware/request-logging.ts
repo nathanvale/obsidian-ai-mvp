@@ -30,19 +30,23 @@ const PII_PATTERNS = {
   // IP addresses (for privacy)
   IP_ADDRESS: /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g,
   // File paths that might contain usernames
-  FILE_PATH: /\/(?:Users|home|Documents)\/[^\/\s]+/g,
+  FILE_PATH: /\/(?:Users|home|Documents)\/[^/\s]+/g,
 };
 
 // ADHD and medical-specific patterns
 const MEDICAL_PATTERNS = {
   // Common ADHD medications
-  ADHD_MEDS: /\b(?:adderall|ritalin|concerta|vyvanse|strattera|wellbutrin|focalin|daytrana|quillivant|methylphenidate|amphetamine|dextroamphetamine|lisdexamfetamine|atomoxetine|bupropion|guanfacine|clonidine|intuniv|kapvay)\b/gi,
+  ADHD_MEDS:
+    /\b(?:adderall|ritalin|concerta|vyvanse|strattera|wellbutrin|focalin|daytrana|quillivant|methylphenidate|amphetamine|dextroamphetamine|lisdexamfetamine|atomoxetine|bupropion|guanfacine|clonidine|intuniv|kapvay)\b/gi,
   // Medical terms and symptoms
-  SYMPTOMS: /\b(?:inattention|hyperactivity|impulsivity|executive function|working memory|hyperfocus|rejection sensitive dysphoria|rsd|stimming|fidgeting|procrastination|time blindness|emotional dysregulation)\b/gi,
+  SYMPTOMS:
+    /\b(?:inattention|hyperactivity|impulsivity|executive function|working memory|hyperfocus|rejection sensitive dysphoria|rsd|stimming|fidgeting|procrastination|time blindness|emotional dysregulation)\b/gi,
   // Dosage information
-  DOSAGE: /\b\d+\s*(?:mg|milligram|milligrams|ml|milliliter|milliliters|cc|tablet|tablets|pill|pills|dose|doses)\b/gi,
+  DOSAGE:
+    /\b\d+\s*(?:mg|milligram|milligrams|ml|milliliter|milliliters|cc|tablet|tablets|pill|pills|dose|doses)\b/gi,
   // Medical appointment types
-  APPOINTMENTS: /\b(?:psychiatrist|psychologist|therapist|counselor|doctor|physician|neurologist|psychopharmacologist|adhd specialist)\b/gi,
+  APPOINTMENTS:
+    /\b(?:psychiatrist|psychologist|therapist|counselor|doctor|physician|neurologist|psychopharmacologist|adhd specialist)\b/gi,
 };
 
 // Sensitive headers that should be redacted
@@ -62,11 +66,13 @@ const SENSITIVE_HEADERS = [
 // Log injection patterns
 const LOG_INJECTION_PATTERNS = {
   // ANSI escape codes
+  // eslint-disable-next-line no-control-regex
   ANSI_ESCAPE: /\x1b\[[0-9;]*[a-zA-Z]/g,
   // Control characters
+  // eslint-disable-next-line no-control-regex
   CONTROL_CHARS: /[\x00-\x1f\x7f-\x9f]/g,
   // Log format injection attempts
-  LOG_FORMAT_INJECTION: /(?:\r|\n|\t|\\r|\\n|\\t|\%0d|\%0a|\%09)/g,
+  LOG_FORMAT_INJECTION: /(?:\r|\n|\t|\\r|\\n|\\t|%0d|%0a|%09)/g,
 };
 
 const defaultOptions: RequestLoggingOptions = {
@@ -82,7 +88,7 @@ const defaultOptions: RequestLoggingOptions = {
 /**
  * Sanitize string to prevent log injection attacks and remove control characters.
  * Protects against ANSI escape codes, control characters, and log format injection.
- * 
+ *
  * @param input - The string to sanitize
  * @param maxLength - Maximum length before truncation (default: 2000)
  * @returns Sanitized string safe for logging
@@ -96,12 +102,15 @@ function preventLogInjection(input: string, maxLength: number = 2000): string {
 
   // Remove ANSI escape codes
   sanitized = sanitized.replace(LOG_INJECTION_PATTERNS.ANSI_ESCAPE, '');
-  
+
   // Remove control characters
   sanitized = sanitized.replace(LOG_INJECTION_PATTERNS.CONTROL_CHARS, '');
-  
+
   // Remove log format injection attempts
-  sanitized = sanitized.replace(LOG_INJECTION_PATTERNS.LOG_FORMAT_INJECTION, ' ');
+  sanitized = sanitized.replace(
+    LOG_INJECTION_PATTERNS.LOG_FORMAT_INJECTION,
+    ' '
+  );
 
   // Limit length to prevent log flooding
   if (sanitized.length > maxLength) {
@@ -114,7 +123,7 @@ function preventLogInjection(input: string, maxLength: number = 2000): string {
 /**
  * Redact personally identifiable information (PII) from text using comprehensive patterns.
  * Removes emails, phone numbers, credit cards, SSNs, IP addresses, and file paths.
- * 
+ *
  * @param text - The text to sanitize
  * @returns Text with PII redacted using placeholder tokens
  */
@@ -127,19 +136,19 @@ function redactPII(text: string): string {
 
   // Redact email addresses
   redacted = redacted.replace(PII_PATTERNS.EMAIL, '[EMAIL_REDACTED]');
-  
+
   // Redact phone numbers
   redacted = redacted.replace(PII_PATTERNS.PHONE, '[PHONE_REDACTED]');
-  
+
   // Redact credit card numbers
   redacted = redacted.replace(PII_PATTERNS.CREDIT_CARD, '[CC_REDACTED]');
-  
+
   // Redact SSNs
   redacted = redacted.replace(PII_PATTERNS.SSN, '[SSN_REDACTED]');
-  
+
   // Redact IP addresses for privacy
   redacted = redacted.replace(PII_PATTERNS.IP_ADDRESS, '[IP_REDACTED]');
-  
+
   // Redact file paths that might contain usernames
   redacted = redacted.replace(PII_PATTERNS.FILE_PATH, '/[USER_PATH_REDACTED]');
 
@@ -150,7 +159,7 @@ function redactPII(text: string): string {
  * Redact ADHD and medical-specific sensitive data from text.
  * Protects medication names, symptoms, dosages, and healthcare provider references.
  * Critical for ADHD users who may include sensitive medical information in voice memos.
- * 
+ *
  * @param text - The text to sanitize
  * @returns Text with medical/ADHD sensitive data redacted
  */
@@ -162,16 +171,22 @@ function redactMedicalData(text: string): string {
   let redacted = text;
 
   // Redact ADHD medication names
-  redacted = redacted.replace(MEDICAL_PATTERNS.ADHD_MEDS, '[MEDICATION_REDACTED]');
-  
+  redacted = redacted.replace(
+    MEDICAL_PATTERNS.ADHD_MEDS,
+    '[MEDICATION_REDACTED]'
+  );
+
   // Redact medical symptoms and terms
   redacted = redacted.replace(MEDICAL_PATTERNS.SYMPTOMS, '[SYMPTOM_REDACTED]');
-  
+
   // Redact dosage information
   redacted = redacted.replace(MEDICAL_PATTERNS.DOSAGE, '[DOSAGE_REDACTED]');
-  
+
   // Redact appointment types
-  redacted = redacted.replace(MEDICAL_PATTERNS.APPOINTMENTS, '[PROVIDER_REDACTED]');
+  redacted = redacted.replace(
+    MEDICAL_PATTERNS.APPOINTMENTS,
+    '[PROVIDER_REDACTED]'
+  );
 
   return redacted;
 }
@@ -186,16 +201,16 @@ function sanitizeForLogging(input: any, maxLength: number = 2000): any {
 
   if (typeof input === 'string') {
     let sanitized = input;
-    
+
     // Apply PII redaction
     sanitized = redactPII(sanitized);
-    
+
     // Apply medical data redaction
     sanitized = redactMedicalData(sanitized);
-    
+
     // Apply log injection protection
     sanitized = preventLogInjection(sanitized, maxLength);
-    
+
     return sanitized;
   }
 
@@ -225,7 +240,7 @@ function sanitizeHeaders(headers: Record<string, any>): Record<string, any> {
 
   for (const [key, value] of Object.entries(headers)) {
     const lowerKey = key.toLowerCase();
-    
+
     // Redact sensitive headers entirely
     if (SENSITIVE_HEADERS.includes(lowerKey)) {
       sanitized[key] = '[REDACTED]';
@@ -251,13 +266,14 @@ function sanitizeBody(body: any, maxSize: number): string {
 
   try {
     const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
-    
+
     // Apply comprehensive sanitization
     let sanitized = sanitizeForLogging(bodyStr, maxSize);
-    
+
     // If the sanitized body is still too long, truncate safely
     if (sanitized.length > maxSize) {
-      sanitized = sanitized.substring(0, maxSize) + '...[TRUNCATED_FOR_PRIVACY]';
+      sanitized =
+        sanitized.substring(0, maxSize) + '...[TRUNCATED_FOR_PRIVACY]';
     }
 
     return sanitized;
@@ -331,13 +347,13 @@ async function requestLoggingPlugin(
       await executeWithCorrelation(correlationId, async () => {
         const logData: GenericObject = {
           method: request.method,
-          url: config.enablePIIRedaction 
-            ? sanitizeForLogging(request.url, 500) 
+          url: config.enablePIIRedaction
+            ? sanitizeForLogging(request.url, 500)
             : request.url,
-          userAgent: config.enablePIIRedaction 
+          userAgent: config.enablePIIRedaction
             ? sanitizeForLogging(request.headers['user-agent'], 200)
             : request.headers['user-agent'],
-          ip: config.enablePIIRedaction 
+          ip: config.enablePIIRedaction
             ? sanitizeIPAddress(request.ip)
             : request.ip,
           contentLength: request.headers['content-length'],
@@ -345,7 +361,7 @@ async function requestLoggingPlugin(
 
         // Include headers if configured with comprehensive sanitization
         if (config.logHeaders) {
-          logData.headers = config.enablePIIRedaction 
+          logData.headers = config.enablePIIRedaction
             ? sanitizeHeaders(request.headers)
             : {
                 authorization: request.headers.authorization
@@ -360,7 +376,10 @@ async function requestLoggingPlugin(
         // Include request body if configured with comprehensive sanitization
         if (config.logRequestBody && request.body) {
           if (config.enablePIIRedaction) {
-            logData.requestBody = sanitizeBody(request.body, config.maxBodySize!);
+            logData.requestBody = sanitizeBody(
+              request.body,
+              config.maxBodySize!
+            );
           } else {
             const bodyStr = JSON.stringify(request.body);
             logData.requestBody =
@@ -392,7 +411,7 @@ async function requestLoggingPlugin(
 
         const logData: GenericObject = {
           method: request.method,
-          url: config.enablePIIRedaction 
+          url: config.enablePIIRedaction
             ? sanitizeForLogging(request.url, 500)
             : request.url,
           statusCode: reply.statusCode,
@@ -416,12 +435,12 @@ async function requestLoggingPlugin(
         // Log based on response status with enhanced security
         const logMessage = config.enablePIIRedaction
           ? sanitizeForLogging(
-              reply.statusCode >= 400 
+              reply.statusCode >= 400
                 ? 'HTTP request completed with error'
                 : 'HTTP request completed successfully',
               config.maxLogLength!
             )
-          : reply.statusCode >= 400 
+          : reply.statusCode >= 400
             ? 'HTTP request completed with error'
             : 'HTTP request completed successfully';
 
@@ -452,7 +471,7 @@ async function requestLoggingPlugin(
         const duration = startTime ? Date.now() - startTime : undefined;
 
         // Sanitize error context data for ADHD privacy protection
-        const errorContext = config.enablePIIRedaction 
+        const errorContext = config.enablePIIRedaction
           ? {
               method: request.method,
               url: sanitizeForLogging(request.url, 500),
@@ -469,19 +488,25 @@ async function requestLoggingPlugin(
             };
 
         // Sanitize error message and stack trace for PII/medical data
-        const sanitizedError = config.enablePIIRedaction 
+        const sanitizedError = config.enablePIIRedaction
           ? new Error(sanitizeForLogging(error.message, config.maxLogLength!))
           : error;
-        
+
         // Copy other error properties but sanitize them
         if (config.enablePIIRedaction && error.stack) {
-          sanitizedError.stack = sanitizeForLogging(error.stack, config.maxLogLength! * 2);
+          sanitizedError.stack = sanitizeForLogging(
+            error.stack,
+            config.maxLogLength! * 2
+          );
         } else {
           sanitizedError.stack = error.stack;
         }
 
         const logMessage = config.enablePIIRedaction
-          ? sanitizeForLogging('HTTP request failed with error', config.maxLogLength!)
+          ? sanitizeForLogging(
+              'HTTP request failed with error',
+              config.maxLogLength!
+            )
           : 'HTTP request failed with error';
 
         logWithContext.error(logMessage, errorContext, sanitizedError);
@@ -502,33 +527,67 @@ async function requestLoggingPlugin(
 
     return {
       debug: (message: string, context?: GenericObject) => {
-        const sanitizedMessage = enablePII ? sanitizeForLogging(message, maxLength) : message;
-        const sanitizedContext = enablePII ? sanitizeForLogging(context, maxLength) : context;
-        logWithContext.debug(sanitizedMessage, { ...sanitizedContext, correlationId });
+        const sanitizedMessage = enablePII
+          ? sanitizeForLogging(message, maxLength)
+          : message;
+        const sanitizedContext = enablePII
+          ? sanitizeForLogging(context, maxLength)
+          : context;
+        logWithContext.debug(sanitizedMessage, {
+          ...sanitizedContext,
+          correlationId,
+        });
       },
       info: (message: string, context?: GenericObject) => {
-        const sanitizedMessage = enablePII ? sanitizeForLogging(message, maxLength) : message;
-        const sanitizedContext = enablePII ? sanitizeForLogging(context, maxLength) : context;
-        logWithContext.info(sanitizedMessage, { ...sanitizedContext, correlationId });
+        const sanitizedMessage = enablePII
+          ? sanitizeForLogging(message, maxLength)
+          : message;
+        const sanitizedContext = enablePII
+          ? sanitizeForLogging(context, maxLength)
+          : context;
+        logWithContext.info(sanitizedMessage, {
+          ...sanitizedContext,
+          correlationId,
+        });
       },
       warn: (message: string, context?: GenericObject) => {
-        const sanitizedMessage = enablePII ? sanitizeForLogging(message, maxLength) : message;
-        const sanitizedContext = enablePII ? sanitizeForLogging(context, maxLength) : context;
-        logWithContext.warn(sanitizedMessage, { ...sanitizedContext, correlationId });
+        const sanitizedMessage = enablePII
+          ? sanitizeForLogging(message, maxLength)
+          : message;
+        const sanitizedContext = enablePII
+          ? sanitizeForLogging(context, maxLength)
+          : context;
+        logWithContext.warn(sanitizedMessage, {
+          ...sanitizedContext,
+          correlationId,
+        });
       },
       error: (message: string, context?: GenericObject, error?: Error) => {
-        const sanitizedMessage = enablePII ? sanitizeForLogging(message, maxLength) : message;
-        const sanitizedContext = enablePII ? sanitizeForLogging(context, maxLength) : context;
-        
+        const sanitizedMessage = enablePII
+          ? sanitizeForLogging(message, maxLength)
+          : message;
+        const sanitizedContext = enablePII
+          ? sanitizeForLogging(context, maxLength)
+          : context;
+
         let sanitizedError = error;
         if (enablePII && error) {
-          sanitizedError = new Error(sanitizeForLogging(error.message, maxLength));
+          sanitizedError = new Error(
+            sanitizeForLogging(error.message, maxLength)
+          );
           if (error.stack) {
-            sanitizedError.stack = sanitizeForLogging(error.stack, maxLength * 2);
+            sanitizedError.stack = sanitizeForLogging(
+              error.stack,
+              maxLength * 2
+            );
           }
         }
-        
-        logWithContext.error(sanitizedMessage, { ...sanitizedContext, correlationId }, sanitizedError);
+
+        logWithContext.error(
+          sanitizedMessage,
+          { ...sanitizedContext, correlationId },
+          sanitizedError
+        );
       },
     };
   });

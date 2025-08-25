@@ -77,18 +77,18 @@ class OllamaService {
 
     try {
       const startTime = Date.now();
-      
+
       const result = await resilienceService.applyOllamaPolicy(
         async (signal?: AbortSignal) => {
           const response = await fetch(`${this.baseUrl}/api/tags`, {
             signal,
             headers: { 'Content-Type': 'application/json' },
           });
-          
+
           if (!response.ok) {
             throw new Error(`Ollama ping failed: HTTP ${response.status}`);
           }
-          
+
           return response.ok;
         },
         undefined,
@@ -96,7 +96,7 @@ class OllamaService {
       );
 
       const responseTime = Date.now() - startTime;
-      
+
       this.healthStatus = {
         available: result,
         modelLoaded: false, // Will be checked separately
@@ -112,8 +112,9 @@ class OllamaService {
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown ping error';
-      
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown ping error';
+
       this.healthStatus = {
         available: false,
         modelLoaded: false,
@@ -143,9 +144,10 @@ class OllamaService {
 
     // ADHD consideration: Truncate very long text to prevent processing delays
     const maxTextLength = 8192; // Reasonable limit for local processing
-    const processedText = text.length > maxTextLength 
-      ? text.substring(0, maxTextLength) + '...[truncated]'
-      : text;
+    const processedText =
+      text.length > maxTextLength
+        ? text.substring(0, maxTextLength) + '...[truncated]'
+        : text;
 
     const correlationId = getCurrentCorrelationId();
     const context: Partial<ResilienceInvocationContext> = {
@@ -161,7 +163,7 @@ class OllamaService {
 
     try {
       const startTime = Date.now();
-      
+
       const result = await resilienceService.applyOllamaPolicy(
         async (signal?: AbortSignal) => {
           logWithContext.debug('Generating embedding', {
@@ -181,24 +183,36 @@ class OllamaService {
           });
 
           if (!response.ok) {
-            const errorText = await response.text().catch(() => 'Unable to read error response');
-            const error = new Error(`Ollama embedding API error: HTTP ${response.status} - ${errorText}`);
-            
+            const errorText = await response
+              .text()
+              .catch(() => 'Unable to read error response');
+            const error = new Error(
+              `Ollama embedding API error: HTTP ${response.status} - ${errorText}`
+            );
+
             // Log specific error details for troubleshooting
-            logWithContext.error('Embedding generation failed', {
-              httpStatus: response.status,
-              errorText: errorText.substring(0, 200), // Limit error text length
-              model: this.model,
-              textLength: processedText.length,
-              component: 'OllamaService',
-            }, error);
-            
+            logWithContext.error(
+              'Embedding generation failed',
+              {
+                httpStatus: response.status,
+                errorText: errorText.substring(0, 200), // Limit error text length
+                model: this.model,
+                textLength: processedText.length,
+                component: 'OllamaService',
+              },
+              error
+            );
+
             throw error;
           }
 
-          const embeddingResponse: OllamaEmbeddingResponse = await response.json();
-          
-          if (!embeddingResponse.embedding || !Array.isArray(embeddingResponse.embedding)) {
+          const embeddingResponse: OllamaEmbeddingResponse =
+            await response.json();
+
+          if (
+            !embeddingResponse.embedding ||
+            !Array.isArray(embeddingResponse.embedding)
+          ) {
             throw new Error('Invalid embedding response format from Ollama');
           }
 
@@ -209,7 +223,7 @@ class OllamaService {
       );
 
       const processingTime = Date.now() - startTime;
-      
+
       logWithContext.debug('Embedding generated successfully', {
         textLength: processedText.length,
         embeddingDimensions: result.length,
@@ -220,18 +234,27 @@ class OllamaService {
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown embedding generation error';
-      
-      logWithContext.error('Critical: Embedding generation failed', {
-        error: errorMessage,
-        model: this.model,
-        textLength: processedText.length,
-        component: 'OllamaService',
-        adhdImpact: 'Voice memo or search functionality may be impaired',
-      }, error instanceof Error ? error : undefined);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unknown embedding generation error';
+
+      logWithContext.error(
+        'Critical: Embedding generation failed',
+        {
+          error: errorMessage,
+          model: this.model,
+          textLength: processedText.length,
+          component: 'OllamaService',
+          adhdImpact: 'Voice memo or search functionality may be impaired',
+        },
+        error instanceof Error ? error : undefined
+      );
 
       // Re-throw with enhanced context for ADHD workflows
-      throw new Error(`Local AI embedding generation failed: ${errorMessage}. This affects voice memo processing and semantic search.`);
+      throw new Error(
+        `Local AI embedding generation failed: ${errorMessage}. This affects voice memo processing and semantic search.`
+      );
     }
   }
 
@@ -244,7 +267,6 @@ class OllamaService {
       return [];
     }
 
-    const correlationId = getCurrentCorrelationId();
     const embeddings: number[][] = [];
     const errors: Array<{ index: number; text: string; error: string }> = [];
 
@@ -256,11 +278,11 @@ class OllamaService {
 
     for (let i = 0; i < texts.length; i++) {
       const text = texts[i];
-      
+
       try {
         const embedding = await this.generateEmbedding(text);
         embeddings.push(embedding);
-        
+
         // ADHD consideration: Log progress for longer operations
         if (texts.length > 10 && (i + 1) % 10 === 0) {
           logWithContext.info('Batch embedding progress', {
@@ -271,7 +293,8 @@ class OllamaService {
           });
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
         errors.push({
           index: i,
           text: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
@@ -302,7 +325,8 @@ class OllamaService {
       logWithContext.warn('Some embeddings failed in batch operation', {
         failures: errors,
         successRate: `${Math.round(((texts.length - errors.length) / texts.length) * 100)}%`,
-        adhdNote: 'Partial embedding generation - some voice memos or documents may not be searchable',
+        adhdNote:
+          'Partial embedding generation - some voice memos or documents may not be searchable',
         component: 'OllamaService',
       });
     }
@@ -324,7 +348,6 @@ class OllamaService {
 
     // ADHD consideration: Adjust batch size based on text complexity and system resources
     const adaptiveBatchSize = this.calculateOptimalBatchSize(texts, batchSize);
-    const correlationId = getCurrentCorrelationId();
     const results: number[][] = [];
 
     logWithContext.info('Starting advanced batch embedding generation', {
@@ -368,28 +391,38 @@ class OllamaService {
 
         // Memory management: Pause between batches to prevent overwhelming local AI
         if (i + adaptiveBatchSize < texts.length) {
-          const pauseDuration = this.calculatePauseDuration(batchEmbeddings.length, adaptiveBatchSize);
-          
-          logWithContext.debug('Pausing between batches for memory management', {
-            pauseDuration,
-            nextBatchStart: i + adaptiveBatchSize,
-            component: 'OllamaService',
-          });
+          const pauseDuration = this.calculatePauseDuration(
+            batchEmbeddings.length
+          );
+
+          logWithContext.debug(
+            'Pausing between batches for memory management',
+            {
+              pauseDuration,
+              nextBatchStart: i + adaptiveBatchSize,
+              component: 'OllamaService',
+            }
+          );
 
           await new Promise(resolve => setTimeout(resolve, pauseDuration));
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown batch error';
-        
-        logWithContext.error('Batch processing failed', {
-          batchNumber,
-          totalBatches,
-          batchSize: batch.length,
-          error: errorMessage,
-          processedSoFar: results.length,
-          component: 'OllamaService',
-          adhdImpact: 'Large-scale voice memo processing interrupted',
-        }, error instanceof Error ? error : undefined);
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown batch error';
+
+        logWithContext.error(
+          'Batch processing failed',
+          {
+            batchNumber,
+            totalBatches,
+            batchSize: batch.length,
+            error: errorMessage,
+            processedSoFar: results.length,
+            component: 'OllamaService',
+            adhdImpact: 'Large-scale voice memo processing interrupted',
+          },
+          error instanceof Error ? error : undefined
+        );
 
         // For ADHD workflows, we attempt to continue with smaller batches
         if (adaptiveBatchSize > 1) {
@@ -400,26 +433,39 @@ class OllamaService {
           });
 
           // Retry with smaller batch size
-          for (let j = i; j < Math.min(i + adaptiveBatchSize, texts.length); j++) {
+          for (
+            let j = i;
+            j < Math.min(i + adaptiveBatchSize, texts.length);
+            j++
+          ) {
             try {
               const singleResult = await this.generateEmbeddings([texts[j]]);
               results.push(...singleResult);
             } catch (singleError) {
-              logWithContext.warn('Individual text processing failed during batch retry', {
-                textIndex: j,
-                error: singleError instanceof Error ? singleError.message : 'Unknown error',
-                component: 'OllamaService',
-              });
+              logWithContext.warn(
+                'Individual text processing failed during batch retry',
+                {
+                  textIndex: j,
+                  error:
+                    singleError instanceof Error
+                      ? singleError.message
+                      : 'Unknown error',
+                  component: 'OllamaService',
+                }
+              );
               results.push([]); // Push empty array as placeholder
             }
           }
         } else {
           // If already processing single items, skip this batch entirely
-          logWithContext.error('Skipping batch entirely due to persistent failures', {
-            skippedTexts: batch.length,
-            component: 'OllamaService',
-          });
-          
+          logWithContext.error(
+            'Skipping batch entirely due to persistent failures',
+            {
+              skippedTexts: batch.length,
+              component: 'OllamaService',
+            }
+          );
+
           // Add empty placeholders for skipped texts
           for (let k = 0; k < batch.length; k++) {
             results.push([]);
@@ -428,7 +474,9 @@ class OllamaService {
       }
     }
 
-    const successfulResults = results.filter(embedding => embedding.length > 0).length;
+    const successfulResults = results.filter(
+      embedding => embedding.length > 0
+    ).length;
     const successRate = Math.round((successfulResults / texts.length) * 100);
 
     logWithContext.info('Batch embedding generation completed', {
@@ -437,7 +485,10 @@ class OllamaService {
       failed: texts.length - successfulResults,
       successRate: `${successRate}%`,
       component: 'OllamaService',
-      adhdNote: successRate < 90 ? 'Some voice memos may not be searchable due to processing errors' : 'Batch processing completed successfully',
+      adhdNote:
+        successRate < 90
+          ? 'Some voice memos may not be searchable due to processing errors'
+          : 'Batch processing completed successfully',
     });
 
     return results;
@@ -447,9 +498,13 @@ class OllamaService {
    * Calculate optimal batch size based on text complexity and system resources
    * ADHD optimization: Prevents overwhelming local processing
    */
-  private calculateOptimalBatchSize(texts: string[], requestedBatchSize: number): number {
-    const averageTextLength = texts.reduce((sum, text) => sum + text.length, 0) / texts.length;
-    
+  private calculateOptimalBatchSize(
+    texts: string[],
+    requestedBatchSize: number
+  ): number {
+    const averageTextLength =
+      texts.reduce((sum, text) => sum + text.length, 0) / texts.length;
+
     // Adjust batch size based on text complexity
     if (averageTextLength > 5000) {
       // Large texts: smaller batches to prevent timeouts
@@ -467,7 +522,7 @@ class OllamaService {
    * Calculate pause duration between batches for memory management
    * ADHD optimization: Prevents system overload while maintaining progress feedback
    */
-  private calculatePauseDuration(processedItems: number, batchSize: number): number {
+  private calculatePauseDuration(processedItems: number): number {
     // Base pause of 100ms plus additional time for larger batches
     const basePause = 100;
     const additionalPause = Math.min(500, processedItems * 20); // Max 500ms additional
@@ -499,7 +554,7 @@ class OllamaService {
           }
 
           const listResponse: OllamaListResponse = await response.json();
-          
+
           if (!listResponse.models || !Array.isArray(listResponse.models)) {
             throw new Error('Invalid model list response format from Ollama');
           }
@@ -519,13 +574,19 @@ class OllamaService {
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown model listing error';
-      
-      logWithContext.error('Failed to list Ollama models', {
-        error: errorMessage,
-        component: 'OllamaService',
-        adhdNote: 'Unable to verify available AI models - check Ollama installation',
-      }, error instanceof Error ? error : undefined);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown model listing error';
+
+      logWithContext.error(
+        'Failed to list Ollama models',
+        {
+          error: errorMessage,
+          component: 'OllamaService',
+          adhdNote:
+            'Unable to verify available AI models - check Ollama installation',
+        },
+        error instanceof Error ? error : undefined
+      );
 
       throw new Error(`Failed to list Ollama models: ${errorMessage}`);
     }
@@ -539,12 +600,14 @@ class OllamaService {
     try {
       const models = await this.listModels();
       const isAvailable = models.some(model => model.name.includes(this.model));
-      
+
       this.healthStatus = {
         ...this.healthStatus,
         modelLoaded: isAvailable,
         lastChecked: new Date(),
-        error: isAvailable ? undefined : `Required model '${this.model}' not found`,
+        error: isAvailable
+          ? undefined
+          : `Required model '${this.model}' not found`,
       };
 
       if (isAvailable) {
@@ -559,14 +622,18 @@ class OllamaService {
           requiredModel: this.model,
           availableModels: models.map(m => m.name),
           component: 'OllamaService',
-          adhdImpact: 'Voice memo transcription and semantic search will not work',
+          adhdImpact:
+            'Voice memo transcription and semantic search will not work',
         });
       }
 
       return isAvailable;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown model availability check error';
-      
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unknown model availability check error';
+
       this.healthStatus = {
         ...this.healthStatus,
         modelLoaded: false,
@@ -592,7 +659,7 @@ class OllamaService {
   async pullModel(modelName?: string): Promise<void> {
     const model = modelName || this.model;
     const correlationId = getCurrentCorrelationId();
-    
+
     // Use custom policy with extended timeout for model downloads
     const extendedTimeoutPolicy = {
       ...config.resilience.ollama,
@@ -625,8 +692,12 @@ class OllamaService {
           });
 
           if (!response.ok) {
-            const errorText = await response.text().catch(() => 'Unable to read error response');
-            throw new Error(`Failed to pull model: HTTP ${response.status} - ${errorText}`);
+            const errorText = await response
+              .text()
+              .catch(() => 'Unable to read error response');
+            throw new Error(
+              `Failed to pull model: HTTP ${response.status} - ${errorText}`
+            );
           }
 
           // Note: Ollama pull returns streaming responses, but we just wait for completion
@@ -648,17 +719,25 @@ class OllamaService {
       // Update health status after successful pull
       await this.checkModelAvailability();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown model pull error';
-      
-      logWithContext.error('Failed to pull model', {
-        model,
-        error: errorMessage,
-        component: 'OllamaService',
-        adhdImpact: 'Local AI processing will not work until model is available',
-        troubleshooting: 'Check Ollama service and internet connection',
-      }, error instanceof Error ? error : undefined);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown model pull error';
 
-      throw new Error(`Failed to pull model '${model}': ${errorMessage}. Check Ollama service and internet connection.`);
+      logWithContext.error(
+        'Failed to pull model',
+        {
+          model,
+          error: errorMessage,
+          component: 'OllamaService',
+          adhdImpact:
+            'Local AI processing will not work until model is available',
+          troubleshooting: 'Check Ollama service and internet connection',
+        },
+        error instanceof Error ? error : undefined
+      );
+
+      throw new Error(
+        `Failed to pull model '${model}': ${errorMessage}. Check Ollama service and internet connection.`
+      );
     }
   }
 
@@ -686,8 +765,7 @@ class OllamaService {
    */
   async performDiagnostics(): Promise<ServiceDiagnostics> {
     const startTime = Date.now();
-    const correlationId = getCurrentCorrelationId();
-    
+
     logWithContext.info('Performing Ollama service diagnostics', {
       component: 'OllamaService',
       operation: 'performDiagnostics',
@@ -701,12 +779,12 @@ class OllamaService {
       // Test basic connectivity
       const pingSuccess = await this.ping();
       responseTime = Date.now() - startTime;
-      
+
       if (pingSuccess) {
         // Test model availability
         const modelAvailable = await this.checkModelAvailability();
         connectivity = modelAvailable ? 'available' : 'degraded';
-        
+
         if (!modelAvailable) {
           lastError = `Required model '${this.model}' not available`;
         }
@@ -717,7 +795,8 @@ class OllamaService {
     } catch (error) {
       connectivity = 'unavailable';
       responseTime = Date.now() - startTime;
-      lastError = error instanceof Error ? error.message : 'Unknown diagnostic error';
+      lastError =
+        error instanceof Error ? error.message : 'Unknown diagnostic error';
     }
 
     // Get circuit breaker state
@@ -739,9 +818,10 @@ class OllamaService {
     logWithContext.info('Service diagnostics completed', {
       ...diagnostics,
       component: 'OllamaService',
-      adhdNote: connectivity === 'available' 
-        ? 'All AI processing systems operational'
-        : 'AI processing issues detected - check Ollama service',
+      adhdNote:
+        connectivity === 'available'
+          ? 'All AI processing systems operational'
+          : 'AI processing issues detected - check Ollama service',
     });
 
     return diagnostics;
@@ -762,23 +842,30 @@ class OllamaService {
       // Check basic connectivity
       const pingSuccess = await this.ping();
       if (!pingSuccess) {
-        logWithContext.error('Ollama service initialization failed - service not available', {
-          component: 'OllamaService',
-          adhdImpact: 'Voice memo transcription and semantic search will not work',
-          troubleshooting: 'Start Ollama service: `ollama serve`',
-        });
+        logWithContext.error(
+          'Ollama service initialization failed - service not available',
+          {
+            component: 'OllamaService',
+            adhdImpact:
+              'Voice memo transcription and semantic search will not work',
+            troubleshooting: 'Start Ollama service: `ollama serve`',
+          }
+        );
         return false;
       }
 
       // Check model availability
       const modelAvailable = await this.checkModelAvailability();
       if (!modelAvailable) {
-        logWithContext.warn('Ollama service partially initialized - model not available', {
-          requiredModel: this.model,
-          component: 'OllamaService',
-          adhdNote: 'AI model needs to be downloaded',
-          troubleshooting: `Run: ollama pull ${this.model}`,
-        });
+        logWithContext.warn(
+          'Ollama service partially initialized - model not available',
+          {
+            requiredModel: this.model,
+            component: 'OllamaService',
+            adhdNote: 'AI model needs to be downloaded',
+            troubleshooting: `Run: ollama pull ${this.model}`,
+          }
+        );
         // Return true but log that model needs to be pulled
       }
 
@@ -791,22 +878,30 @@ class OllamaService {
         });
         return true;
       } catch (error) {
-        logWithContext.warn('Ollama service connectivity good but embedding test failed', {
-          error: error instanceof Error ? error.message : 'Unknown error',
-          component: 'OllamaService',
-          adhdNote: 'May need to pull the embedding model',
-        });
+        logWithContext.warn(
+          'Ollama service connectivity good but embedding test failed',
+          {
+            error: error instanceof Error ? error.message : 'Unknown error',
+            component: 'OllamaService',
+            adhdNote: 'May need to pull the embedding model',
+          }
+        );
         return modelAvailable; // Return based on model availability check
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown initialization error';
-      
-      logWithContext.error('Ollama service initialization failed', {
-        error: errorMessage,
-        component: 'OllamaService',
-        adhdImpact: 'Local AI processing completely unavailable',
-        troubleshooting: 'Check Ollama installation and service status',
-      }, error instanceof Error ? error : undefined);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown initialization error';
+
+      logWithContext.error(
+        'Ollama service initialization failed',
+        {
+          error: errorMessage,
+          component: 'OllamaService',
+          adhdImpact: 'Local AI processing completely unavailable',
+          troubleshooting: 'Check Ollama installation and service status',
+        },
+        error instanceof Error ? error : undefined
+      );
 
       return false;
     }

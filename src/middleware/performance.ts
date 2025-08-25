@@ -95,11 +95,15 @@ class PerformanceSampler {
   private readonly maxSamples = 1000; // Keep last 1000 samples for percentile calculation
 
   constructor(
-    private readonly config: Required<NonNullable<PerformanceOptions['sampling']>>
+    private readonly config: Required<
+      NonNullable<PerformanceOptions['sampling']>
+    >
   ) {}
 
   shouldSample(request: FastifyRequest): boolean {
-    if (!this.config.enabled) return true; // Sample all if disabled
+    if (!this.config.enabled) {
+      return true;
+    } // Sample all if disabled
 
     const url = request.url;
 
@@ -116,8 +120,15 @@ class PerformanceSampler {
     // Adaptive sampling based on request type
     if (this.config.adaptiveSampling) {
       // Higher sampling for AI workloads during performance analysis
-      if (url.includes('/api/ai') || url.includes('/api/search') || url.includes('/api/voice')) {
-        return this.sampleCounter % Math.max(1, Math.floor(this.config.rate / 2)) === 0;
+      if (
+        url.includes('/api/ai') ||
+        url.includes('/api/search') ||
+        url.includes('/api/voice')
+      ) {
+        return (
+          this.sampleCounter % Math.max(1, Math.floor(this.config.rate / 2)) ===
+          0
+        );
       }
     }
 
@@ -130,7 +141,7 @@ class PerformanceSampler {
 
   addSample(responseTime: number): void {
     this.responseTimes.push(responseTime);
-    
+
     // Keep only the most recent samples to prevent memory leak
     if (this.responseTimes.length > this.maxSamples) {
       this.responseTimes = this.responseTimes.slice(-this.maxSamples);
@@ -167,7 +178,9 @@ class HeapMonitor {
   private lastGcCheck = Date.now();
 
   constructor(
-    private readonly config: Required<NonNullable<PerformanceOptions['heapMonitoring']>>
+    private readonly config: Required<
+      NonNullable<PerformanceOptions['heapMonitoring']>
+    >
   ) {
     if (this.config.gcMonitoring && global.gc) {
       // Monitor GC events if available
@@ -179,15 +192,15 @@ class HeapMonitor {
     // Note: This requires --expose-gc flag to be meaningful
     // In production, we'll estimate GC activity through heap changes
     setInterval(() => {
-      const currentTime = Date.now();
       const memBefore = process.memoryUsage().heapUsed;
-      
+
       // Check if heap dropped significantly (likely GC event)
       setTimeout(() => {
         const memAfter = process.memoryUsage().heapUsed;
         const diff = memBefore - memAfter;
-        
-        if (diff > 10 * 1024 * 1024) { // 10MB+ reduction suggests GC
+
+        if (diff > 10 * 1024 * 1024) {
+          // 10MB+ reduction suggests GC
           this.gcEvents++;
           logWithContext.debug('Potential GC event detected', {
             heapReduction: `${Math.round(diff / 1024 / 1024)}MB`,
@@ -198,10 +211,14 @@ class HeapMonitor {
     }, 30000); // Check every 30 seconds
   }
 
-  checkHeapHealth(): { status: 'healthy' | 'warning' | 'critical'; usage: number; maxUsage: number } {
+  checkHeapHealth(): {
+    status: 'healthy' | 'warning' | 'critical';
+    usage: number;
+    maxUsage: number;
+  } {
     const memUsage = process.memoryUsage();
     const heapUsedMB = memUsage.heapUsed / 1024 / 1024;
-    
+
     // Update max usage tracking
     if (heapUsedMB > this.maxHeapUsed) {
       this.maxHeapUsed = heapUsedMB;
@@ -294,9 +311,13 @@ class AdhdPerformanceAnalyzer {
 
     // Sort to find performance patterns
     performanceTimes.sort((a, b) => a.avgTime - b.avgTime);
-    
-    const peakHours = performanceTimes.slice(0, Math.ceil(performanceTimes.length * 0.3)).map(p => p.hour);
-    const lowPerformanceHours = performanceTimes.slice(-Math.ceil(performanceTimes.length * 0.3)).map(p => p.hour);
+
+    const peakHours = performanceTimes
+      .slice(0, Math.ceil(performanceTimes.length * 0.3))
+      .map(p => p.hour);
+    const lowPerformanceHours = performanceTimes
+      .slice(-Math.ceil(performanceTimes.length * 0.3))
+      .map(p => p.hour);
 
     return {
       hourlyPerformance: hourlyAvg,
@@ -309,21 +330,27 @@ class AdhdPerformanceAnalyzer {
     return {
       voiceProcessing: {
         count: this.workloadMetrics.voiceProcessing.count,
-        avgTime: this.workloadMetrics.voiceProcessing.count > 0
-          ? this.workloadMetrics.voiceProcessing.totalTime / this.workloadMetrics.voiceProcessing.count
-          : 0,
+        avgTime:
+          this.workloadMetrics.voiceProcessing.count > 0
+            ? this.workloadMetrics.voiceProcessing.totalTime /
+              this.workloadMetrics.voiceProcessing.count
+            : 0,
       },
       semanticSearch: {
         count: this.workloadMetrics.semanticSearch.count,
-        avgTime: this.workloadMetrics.semanticSearch.count > 0
-          ? this.workloadMetrics.semanticSearch.totalTime / this.workloadMetrics.semanticSearch.count
-          : 0,
+        avgTime:
+          this.workloadMetrics.semanticSearch.count > 0
+            ? this.workloadMetrics.semanticSearch.totalTime /
+              this.workloadMetrics.semanticSearch.count
+            : 0,
       },
       emailProcessing: {
         count: this.workloadMetrics.emailProcessing.count,
-        avgTime: this.workloadMetrics.emailProcessing.count > 0
-          ? this.workloadMetrics.emailProcessing.totalTime / this.workloadMetrics.emailProcessing.count
-          : 0,
+        avgTime:
+          this.workloadMetrics.emailProcessing.count > 0
+            ? this.workloadMetrics.emailProcessing.totalTime /
+              this.workloadMetrics.emailProcessing.count
+            : 0,
       },
     };
   }
@@ -405,7 +432,7 @@ async function performancePlugin(
       ...defaultOptions.sampling!,
       ...performanceConfig.sampling,
     } as Required<NonNullable<PerformanceOptions['sampling']>>;
-    
+
     const heapConfig = {
       ...defaultOptions.heapMonitoring!,
       ...performanceConfig.heapMonitoring,
@@ -414,7 +441,7 @@ async function performancePlugin(
     const sampler = new PerformanceSampler(samplingConfig);
     const heapMonitor = new HeapMonitor(heapConfig);
     const adhdAnalyzer = new AdhdPerformanceAnalyzer();
-    
+
     // Core metrics with efficient collection
     let requestCount = 0;
     let sampledRequests = 0;
@@ -424,9 +451,11 @@ async function performancePlugin(
     // Pre-handler: Start high-resolution timing
     fastify.addHook('preHandler', async (request: FastifyRequest) => {
       (request as FastifyRequestWithContext).startTime = Date.now();
-      (request as { startTimeBigInt?: bigint }).startTimeBigInt = process.hrtime.bigint();
-      (request as { shouldSample?: boolean }).shouldSample = sampler.shouldSample(request);
-      
+      (request as { startTimeBigInt?: bigint }).startTimeBigInt =
+        process.hrtime.bigint();
+      (request as { shouldSample?: boolean }).shouldSample =
+        sampler.shouldSample(request);
+
       requestCount++;
       if ((request as { shouldSample?: boolean }).shouldSample) {
         sampledRequests++;
@@ -441,17 +470,20 @@ async function performancePlugin(
         reply: FastifyReply,
         payload: unknown
       ) => {
-        const startTimeBigInt = (request as { startTimeBigInt?: bigint }).startTimeBigInt;
-        const shouldSample = (request as { shouldSample?: boolean }).shouldSample;
-        
+        const startTimeBigInt = (request as { startTimeBigInt?: bigint })
+          .startTimeBigInt;
+        const shouldSample = (request as { shouldSample?: boolean })
+          .shouldSample;
+
         if (startTimeBigInt) {
-          const duration = Number(process.hrtime.bigint() - startTimeBigInt) / 1e6; // Convert to milliseconds
-          
+          const duration =
+            Number(process.hrtime.bigint() - startTimeBigInt) / 1e6; // Convert to milliseconds
+
           // Update metrics based on sampling strategy
           if (shouldSample) {
             totalResponseTime += duration;
             sampler.addSample(duration);
-            
+
             // ADHD-specific performance analysis
             if (performanceConfig.adhdOptimizations?.enabled) {
               adhdAnalyzer.analyzeRequest(request, duration);
@@ -459,19 +491,27 @@ async function performancePlugin(
           }
 
           // ADHD response time monitoring - check against targets
-          const targets = performanceConfig.adhdOptimizations?.responseTimeTargets || defaultOptions.adhdOptimizations!.responseTimeTargets!;
+          const targets =
+            performanceConfig.adhdOptimizations?.responseTimeTargets ||
+            defaultOptions.adhdOptimizations!.responseTimeTargets!;
           let threshold = targets.standard;
-          
+
           // Adjust threshold based on request type
-          if (request.url.includes('/api/search') || request.url.includes('/semantic')) {
+          if (
+            request.url.includes('/api/search') ||
+            request.url.includes('/semantic')
+          ) {
             threshold = targets.search;
-          } else if (request.url.includes('/api/voice') || request.url.includes('/ai')) {
+          } else if (
+            request.url.includes('/api/voice') ||
+            request.url.includes('/ai')
+          ) {
             threshold = targets.aiProcessing;
           }
 
           // Log slow requests with ADHD-specific context
           if (duration > threshold!) {
-            const severity = duration > (threshold! * 2) ? 'error' : 'warn';
+            const severity = duration > threshold! * 2 ? 'error' : 'warn';
             logWithContext[severity]('ADHD workflow performance concern', {
               method: request.method,
               url: request.url,
@@ -480,27 +520,37 @@ async function performancePlugin(
               statusCode: reply.statusCode,
               userAgent: request.headers['user-agent'],
               adhdContext: {
-                workflowType: request.url.includes('/api/voice') ? 'voice-processing' :
-                             request.url.includes('/api/search') ? 'semantic-search' :
-                             request.url.includes('/api/email') ? 'email-processing' : 'standard',
+                workflowType: request.url.includes('/api/voice')
+                  ? 'voice-processing'
+                  : request.url.includes('/api/search')
+                    ? 'semantic-search'
+                    : request.url.includes('/api/email')
+                      ? 'email-processing'
+                      : 'standard',
                 medicationHour: new Date().getHours(),
-                impactLevel: duration > (threshold! * 2) ? 'high' : 'medium',
+                impactLevel: duration > threshold! * 2 ? 'high' : 'medium',
               },
             });
           }
 
           // Always add performance headers for ADHD user awareness
           reply.header('x-response-time', `${duration.toFixed(2)}ms`);
-          reply.header('x-process-memory', `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`);
-          
+          reply.header(
+            'x-process-memory',
+            `${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`
+          );
+
           // Add ADHD-specific headers
           if (shouldSample) {
             const heapStatus = heapMonitor.checkHeapHealth();
-            reply.header('x-adhd-performance', JSON.stringify({
-              medicationHour: new Date().getHours(),
-              heapStatus: heapStatus.status,
-              workflowOptimal: duration <= threshold!,
-            }));
+            reply.header(
+              'x-adhd-performance',
+              JSON.stringify({
+                medicationHour: new Date().getHours(),
+                heapStatus: heapStatus.status,
+                workflowOptimal: duration <= threshold!,
+              })
+            );
           }
         }
 
@@ -509,25 +559,33 @@ async function performancePlugin(
     );
 
     // Error counting with ADHD context
-    fastify.addHook('onError', async (request: FastifyRequest, reply: FastifyReply, error: Error) => {
-      errorCount++;
-      
-      // Log errors with ADHD workflow context
-      if (request.url.includes('/api/voice') || request.url.includes('/api/search') || request.url.includes('/api/email')) {
-        logWithContext.error('ADHD workflow error detected', {
-          url: request.url,
-          error: error.message,
-          medicationHour: new Date().getHours(),
-          potentialUserImpact: 'Cognitive support workflow disrupted',
-        });
+    fastify.addHook(
+      'onError',
+      async (request: FastifyRequest, reply: FastifyReply, error: Error) => {
+        errorCount++;
+
+        // Log errors with ADHD workflow context
+        if (
+          request.url.includes('/api/voice') ||
+          request.url.includes('/api/search') ||
+          request.url.includes('/api/email')
+        ) {
+          logWithContext.error('ADHD workflow error detected', {
+            url: request.url,
+            error: error.message,
+            medicationHour: new Date().getHours(),
+            potentialUserImpact: 'Cognitive support workflow disrupted',
+          });
+        }
       }
-    });
+    );
 
     // Enhanced metrics endpoint with ADHD insights
     fastify.get('/api/system/metrics', async () => {
       const memUsage = process.memoryUsage();
       const uptime = process.uptime();
-      const avgResponseTime = sampledRequests > 0 ? totalResponseTime / sampledRequests : 0;
+      const avgResponseTime =
+        sampledRequests > 0 ? totalResponseTime / sampledRequests : 0;
       const percentiles = sampler.getPercentiles();
       const heapMetrics = heapMonitor.getMetrics();
       const workloadMetrics = adhdAnalyzer.getWorkloadMetrics();
@@ -542,7 +600,10 @@ async function performancePlugin(
             sampledRequests,
             samplingEfficiency: `${((sampledRequests / Math.max(requestCount, 1)) * 100).toFixed(1)}%`,
             errorCount,
-            errorRate: requestCount > 0 ? `${((errorCount / requestCount) * 100).toFixed(2)}%` : '0%',
+            errorRate:
+              requestCount > 0
+                ? `${((errorCount / requestCount) * 100).toFixed(2)}%`
+                : '0%',
             avgResponseTime: `${avgResponseTime.toFixed(2)}ms`,
           },
           performance: {
@@ -554,7 +615,8 @@ async function performancePlugin(
             samplingStats: {
               totalSamples: sampler.getSampleCount(),
               samplingRate: performanceConfig.sampling?.rate || 10,
-              adaptiveSampling: performanceConfig.sampling?.adaptiveSampling || false,
+              adaptiveSampling:
+                performanceConfig.sampling?.adaptiveSampling || false,
             },
           },
           memory: {
@@ -589,8 +651,8 @@ async function performancePlugin(
             challengingHours: medicationInsights.lowPerformanceHours,
             currentHour: new Date().getHours(),
             hourlyAverages: Object.fromEntries(
-              Array.from(medicationInsights.hourlyPerformance.entries()).map(([hour, avg]) => 
-                [hour.toString(), `${avg.toFixed(2)}ms`]
+              Array.from(medicationInsights.hourlyPerformance.entries()).map(
+                ([hour, avg]) => [hour.toString(), `${avg.toFixed(2)}ms`]
               )
             ),
           },
@@ -613,7 +675,8 @@ async function performancePlugin(
         logWithContext.error('Critical heap usage during ADHD session', {
           currentUsage: `${Math.round(heapStatus.usage)}MB`,
           maxUsage: `${Math.round(heapStatus.maxUsage)}MB`,
-          recommendation: 'Consider restarting services to maintain ADHD cognitive support',
+          recommendation:
+            'Consider restarting services to maintain ADHD cognitive support',
           medicationHour: new Date().getHours(),
         });
       }
@@ -642,12 +705,13 @@ async function performancePlugin(
       startTimeBigInt?: bigint;
     };
 
-    const adhdConfig = performanceConfig.adhdOptimizations || defaultOptions.adhdOptimizations!;
+    const adhdConfig =
+      performanceConfig.adhdOptimizations || defaultOptions.adhdOptimizations!;
     const targets = adhdConfig.responseTimeTargets!;
 
     requestWithPerf.performance = {
       getStartTime: () => requestWithPerf.startTimeBigInt,
-      
+
       getResponseTime: () => {
         const startTimeBigInt = requestWithPerf.startTimeBigInt;
         return startTimeBigInt
@@ -657,11 +721,13 @@ async function performancePlugin(
 
       isAdhdWorkflow: () => {
         const url = requestWithPerf.url;
-        return url.includes('/api/voice') || 
-               url.includes('/api/search') || 
-               url.includes('/api/email') ||
-               url.includes('/transcribe') ||
-               url.includes('/semantic');
+        return (
+          url.includes('/api/voice') ||
+          url.includes('/api/search') ||
+          url.includes('/api/email') ||
+          url.includes('/transcribe') ||
+          url.includes('/semantic')
+        );
       },
 
       getAdhdContext: () => {
@@ -690,7 +756,7 @@ async function performancePlugin(
       checkResponseTimeTarget: () => {
         const context = requestWithPerf.performance!.getAdhdContext();
         const actual = requestWithPerf.performance!.getResponseTime();
-        
+
         return {
           withinTarget: actual <= context.expectedThreshold,
           threshold: context.expectedThreshold,

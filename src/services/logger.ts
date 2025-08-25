@@ -15,11 +15,14 @@ export async function initializeLogger(): Promise<Logger> {
     redactKeys: config.logger.redactKeys,
     maxFieldSize: config.logger.maxFieldSize,
     // Note: serializers will be configured at pino level if supported
-    ...(config.logger.serializers && { serializers: config.logger.serializers }),
+    ...(config.logger.serializers && {
+      serializers: config.logger.serializers,
+    }),
   });
 
   // Perform ADHD data protection compliance check on logger initialization
-  const complianceIssues = secureConfigUtils.validateAdhdDataProtectionCompliance();
+  const complianceIssues =
+    secureConfigUtils.validateAdhdDataProtectionCompliance();
   if (complianceIssues.length > 0) {
     loggerInstance.warn('Logger security compliance issues detected', {
       issues: complianceIssues,
@@ -89,16 +92,20 @@ export const logger: Logger = new Proxy({} as Logger, {
  * Secure context sanitization for ADHD data protection
  * Ensures no sensitive information leaks through log context
  */
-function sanitizeLogContext(context: Record<string, unknown>): Record<string, unknown> {
+function sanitizeLogContext(
+  context: Record<string, unknown>
+): Record<string, unknown> {
   const sanitizedContext: Record<string, unknown> = {};
-  
+
   Object.entries(context).forEach(([key, value]) => {
     // Use the environment redaction function for consistent security
     const { redactSensitiveValue } = require('../config/environment.js');
-    sanitizedContext[key] = typeof redactSensitiveValue === 'function' ? 
-      redactSensitiveValue(key, value) : value;
+    sanitizedContext[key] =
+      typeof redactSensitiveValue === 'function'
+        ? redactSensitiveValue(key, value)
+        : value;
   });
-  
+
   return sanitizedContext;
 }
 
@@ -107,7 +114,7 @@ export const logWithContext = {
   debug: (message: string, context: Record<string, unknown>) => {
     const correlationId = getCurrentCorrelationId();
     const sanitizedContext = sanitizeLogContext(context);
-    
+
     logger.debug(message, {
       ...sanitizedContext,
       correlationId,
@@ -118,7 +125,7 @@ export const logWithContext = {
   info: (message: string, context: Record<string, unknown>) => {
     const correlationId = getCurrentCorrelationId();
     const sanitizedContext = sanitizeLogContext(context);
-    
+
     logger.info(message, {
       ...sanitizedContext,
       correlationId,
@@ -129,7 +136,7 @@ export const logWithContext = {
   warn: (message: string, context: Record<string, unknown>) => {
     const correlationId = getCurrentCorrelationId();
     const sanitizedContext = sanitizeLogContext(context);
-    
+
     logger.warn(message, {
       ...sanitizedContext,
       correlationId,
@@ -140,7 +147,7 @@ export const logWithContext = {
   error: (message: string, context: Record<string, unknown>, error?: Error) => {
     const correlationId = getCurrentCorrelationId();
     const sanitizedContext = sanitizeLogContext(context);
-    
+
     logger.error(message, {
       ...sanitizedContext,
       correlationId,
@@ -149,7 +156,9 @@ export const logWithContext = {
         ? {
             name: error.name,
             message: error.message,
-            stack: config.isDevelopment ? error.stack : '[REDACTED_IN_PRODUCTION]',
+            stack: config.isDevelopment
+              ? error.stack
+              : '[REDACTED_IN_PRODUCTION]',
           }
         : undefined,
     });
@@ -159,24 +168,32 @@ export const logWithContext = {
    * Enhanced security logging for configuration errors
    * Uses secure config utilities to prevent data exposure
    */
-  configError: (message: string, context?: Record<string, unknown>, error?: Error) => {
+  configError: (
+    message: string,
+    context?: Record<string, unknown>,
+    error?: Error
+  ) => {
     const correlationId = getCurrentCorrelationId();
     const secureError = secureConfigUtils.createSecureConfigError(message, {
       ...context,
       correlationId,
     });
-    
+
     logger.error('Configuration error detected', {
       message: secureError.message,
       correlationId,
       timestamp: new Date().toISOString(),
       debugContext: (secureError as any).debugContext,
-      originalError: error ? {
-        name: error.name,
-        message: error.message,
-        // Never log stack traces for config errors in production
-        stack: config.isDevelopment ? error.stack : '[REDACTED_CONFIG_STACK]',
-      } : undefined,
+      originalError: error
+        ? {
+            name: error.name,
+            message: error.message,
+            // Never log stack traces for config errors in production
+            stack: config.isDevelopment
+              ? error.stack
+              : '[REDACTED_CONFIG_STACK]',
+          }
+        : undefined,
     });
   },
 
@@ -186,7 +203,7 @@ export const logWithContext = {
   securityAudit: (event: string, context: Record<string, unknown>) => {
     const correlationId = getCurrentCorrelationId();
     const sanitizedContext = sanitizeLogContext(context);
-    
+
     logger.info('Security audit event', {
       auditEvent: event,
       ...sanitizedContext,

@@ -13,7 +13,8 @@ const EMAIL_PATTERN = '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$';
  * URL validation pattern supporting http/https/file protocols
  * Optimized for ADHD workflow context (including local file references)
  */
-const URL_PATTERN = '^(?:https?:\/\/|file:\/\/|\/)[\\w\\-._~:/?#[\\]@!$&\'()*+,;=%]+$';
+const URL_PATTERN =
+  "^(?:https?://|file://|/)[\\w\\-._~:/?#[\\]@!$&'()*+,;=%]+$";
 
 /**
  * ADHD medication name pattern - allows common medication formats
@@ -25,13 +26,15 @@ const MEDICATION_NAME_PATTERN = '^[a-zA-Z][a-zA-Z0-9\\s\\-().]*$';
  * Time format pattern for medication schedules (24-hour and 12-hour)
  * Examples: "08:00", "2:30 PM", "14:15"
  */
-const TIME_PATTERN = '^(?:(?:[01]?\\d|2[0-3]):[0-5]\\d(?:\\s?[AaPp][Mm])?|(?:0?[1-9]|1[0-2]):[0-5]\\d\\s?[AaPp][Mm])$';
+const TIME_PATTERN =
+  '^(?:(?:[01]?\\d|2[0-3]):[0-5]\\d(?:\\s?[AaPp][Mm])?|(?:0?[1-9]|1[0-2]):[0-5]\\d\\s?[AaPp][Mm])$';
 
 /**
  * Voice memo transcript pattern - flexible for speech-to-text variations
  * Allows common speech patterns and filler words but excludes HTML tags
  */
-const VOICE_TRANSCRIPT_PATTERN = '^[\\w\\s\\-.,!?\'":;()\\[\\]{}/@#$%&*+=~`|\\n\\r\\t]*$';
+const VOICE_TRANSCRIPT_PATTERN =
+  '^[\\w\\s\\-.,!?\'":;()\\[\\]{}/@#$%&*+=~`|\\n\\r\\t]*$';
 
 export const CorrelationIdSchema = {
   type: 'string',
@@ -175,7 +178,8 @@ export const UrlSchema = {
   pattern: URL_PATTERN,
   description: 'Valid URL (http/https/file protocols supported)',
   errorMessage: {
-    pattern: 'Please provide a valid URL (e.g., https://example.com or file:///path/to/file)',
+    pattern:
+      'Please provide a valid URL (e.g., https://example.com or file:///path/to/file)',
     minLength: 'URL must be at least 3 characters long',
     maxLength: 'URL cannot exceed 2048 characters',
   },
@@ -188,7 +192,8 @@ export const MedicationNameSchema = {
   pattern: MEDICATION_NAME_PATTERN,
   description: 'ADHD medication name (brand name, generic, or abbreviation)',
   errorMessage: {
-    pattern: 'Medication name can only contain letters, numbers, spaces, hyphens, periods, and parentheses',
+    pattern:
+      'Medication name can only contain letters, numbers, spaces, hyphens, periods, and parentheses',
     minLength: 'Medication name must be at least 2 characters long',
     maxLength: 'Medication name cannot exceed 100 characters',
   },
@@ -202,7 +207,8 @@ export const MedicationDosageSchema = {
   description: 'Medication dosage in milligrams',
   errorMessage: {
     minimum: 'Dosage must be at least 0.1mg',
-    maximum: 'Dosage cannot exceed 1000mg (please verify with healthcare provider)',
+    maximum:
+      'Dosage cannot exceed 1000mg (please verify with healthcare provider)',
   },
 } as const;
 
@@ -211,7 +217,8 @@ export const TimeSchema = {
   pattern: TIME_PATTERN,
   description: 'Time in 24-hour (HH:MM) or 12-hour (H:MM AM/PM) format',
   errorMessage: {
-    pattern: 'Please provide time in format like "08:00", "2:30 PM", or "14:15"',
+    pattern:
+      'Please provide time in format like "08:00", "2:30 PM", or "14:15"',
   },
 } as const;
 
@@ -309,7 +316,8 @@ export const DateTimeSchema = {
   format: 'date-time',
   description: 'ISO 8601 datetime string',
   errorMessage: {
-    format: 'Please provide a valid ISO 8601 datetime (e.g., "2023-12-25T10:30:00Z")',
+    format:
+      'Please provide a valid ISO 8601 datetime (e.g., "2023-12-25T10:30:00Z")',
   },
 } as const;
 
@@ -342,7 +350,8 @@ export const SearchQuerySchema = {
   transform: ['trim'],
   description: 'Search query for semantic search (max 500 chars, no HTML)',
   errorMessage: {
-    pattern: 'Search query contains invalid characters (HTML tags and control characters not allowed)',
+    pattern:
+      'Search query contains invalid characters (HTML tags and control characters not allowed)',
     minLength: 'Search query cannot be empty',
     maxLength: 'Search query cannot exceed 500 characters',
   },
@@ -405,7 +414,13 @@ export interface MedicationInfo {
 }
 
 export interface AdhdSymptomTracking {
-  symptom: 'focus' | 'hyperactivity' | 'impulsivity' | 'organization' | 'time_management' | 'emotional_regulation';
+  symptom:
+    | 'focus'
+    | 'hyperactivity'
+    | 'impulsivity'
+    | 'organization'
+    | 'time_management'
+    | 'emotional_regulation';
   severity: number; // 1-10 scale
   timestamp: string;
   context?: string;
@@ -424,7 +439,14 @@ export interface VoiceMemoMetadata {
 
 export interface EmailClassification {
   emailId: string;
-  category: 'urgent' | 'medical' | 'financial' | 'school' | 'work' | 'family' | 'other';
+  category:
+    | 'urgent'
+    | 'medical'
+    | 'financial'
+    | 'school'
+    | 'work'
+    | 'family'
+    | 'other';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   extractedDeadlines?: string[];
   actionRequired: boolean;
@@ -451,12 +473,16 @@ export interface TaskData {
  * Validation utility functions with enhanced error messaging
  */
 export const ValidationErrorMessages = {
-  INVALID_EMAIL: 'Please provide a valid email address (e.g., user@example.com)',
+  INVALID_EMAIL:
+    'Please provide a valid email address (e.g., user@example.com)',
   INVALID_URL: 'Please provide a valid URL (e.g., https://example.com)',
-  INVALID_MEDICATION_NAME: 'Medication name can only contain letters, numbers, spaces, hyphens, and parentheses',
-  INVALID_TIME_FORMAT: 'Please provide time in format like "08:00", "2:30 PM", or "14:15"',
+  INVALID_MEDICATION_NAME:
+    'Medication name can only contain letters, numbers, spaces, hyphens, and parentheses',
+  INVALID_TIME_FORMAT:
+    'Please provide time in format like "08:00", "2:30 PM", or "14:15"',
   INVALID_SEVERITY_SCALE: 'Severity rating must be between 1 and 10',
-  INVALID_SEARCH_QUERY: 'Search query contains invalid characters (HTML tags not allowed)',
+  INVALID_SEARCH_QUERY:
+    'Search query contains invalid characters (HTML tags not allowed)',
   CONTENT_TOO_LONG: 'Content exceeds maximum allowed length',
   CONTENT_EMPTY: 'Content cannot be empty',
   INVALID_FILE_PATH: 'File path contains invalid characters or is malformed',
@@ -469,11 +495,14 @@ export const ValidationErrorMessages = {
 /**
  * Comprehensive validation schema factory for creating context-aware validators
  */
-export function createValidationSchema(type: 'email' | 'url' | 'medication' | 'time' | 'search' | 'content' | 'tags', options?: {
-  maxLength?: number;
-  minLength?: number;
-  required?: boolean;
-}) {
+export function createValidationSchema(
+  type: 'email' | 'url' | 'medication' | 'time' | 'search' | 'content' | 'tags',
+  options?: {
+    maxLength?: number;
+    minLength?: number;
+    required?: boolean;
+  }
+) {
   const baseSchemas = {
     email: EmailSchema,
     url: UrlSchema,
@@ -484,13 +513,21 @@ export function createValidationSchema(type: 'email' | 'url' | 'medication' | 't
     tags: TagsSchema,
   };
 
-  const schema = { ...baseSchemas[type] };
-  
-  if (options?.maxLength && typeof schema.maxLength !== 'undefined') {
+  const schema = { ...baseSchemas[type] } as any;
+
+  if (
+    options?.maxLength &&
+    'maxLength' in schema &&
+    typeof schema.maxLength === 'number'
+  ) {
     schema.maxLength = Math.min(schema.maxLength, options.maxLength);
   }
-  
-  if (options?.minLength && typeof schema.minLength !== 'undefined') {
+
+  if (
+    options?.minLength &&
+    'minLength' in schema &&
+    typeof schema.minLength === 'number'
+  ) {
     schema.minLength = Math.max(schema.minLength, options.minLength);
   }
 

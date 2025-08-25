@@ -1,15 +1,18 @@
 import { ChromaClient } from 'chromadb';
 import { config } from '../config/environment.js';
-import { logWithContext, createCorrelatedLogger, getCurrentCorrelationId } from './logger.js';
+import {
+  logWithContext,
+  createCorrelatedLogger,
+  getCurrentCorrelationId,
+} from './logger.js';
 import { resilienceService } from './resilience.js';
-import type { ResilienceInvocationContext } from '@orchestr8/schema';
 
 /**
  * Enhanced ChromaDB Service with comprehensive error handling and resilience patterns
  * Optimized for ADHD Digital Second Brain reliability requirements
- * 
+ *
  * Features:
- * - Circuit breaker and retry patterns for reliable ADHD workflows  
+ * - Circuit breaker and retry patterns for reliable ADHD workflows
  * - Timeout handling to prevent ADHD users from waiting indefinitely
  * - Comprehensive error recovery with meaningful diagnostics
  * - Structured logging with correlation IDs for troubleshooting
@@ -43,7 +46,8 @@ class ChromaDBService {
    * Critical for ADHD workflow reliability - must be robust and fast
    */
   async initialize(): Promise<void> {
-    const correlationId = getCurrentCorrelationId() || `chromadb-init-${Date.now()}`;
+    const correlationId =
+      getCurrentCorrelationId() || `chromadb-init-${Date.now()}`;
     const logger = createCorrelatedLogger(correlationId);
 
     try {
@@ -56,7 +60,7 @@ class ChromaDBService {
 
       // Use resilience policy for initialization
       await resilienceService.applyChromaDbPolicy(
-        async (signal) => {
+        async signal => {
           // Check if operation was cancelled
           if (signal?.aborted) {
             throw new Error('ChromaDB initialization cancelled');
@@ -81,20 +85,27 @@ class ChromaDBService {
           correlationId,
         }
       );
-
     } catch (error) {
       this.connectionAttempts++;
       this.isHealthy = false;
-      
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      const isTimeout = errorMessage.includes('timeout') || errorMessage.includes('ETIMEDOUT');
-      const isConnectionRefused = errorMessage.includes('ECONNREFUSED') || errorMessage.includes('connect');
+
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      const isTimeout =
+        errorMessage.includes('timeout') || errorMessage.includes('ETIMEDOUT');
+      const isConnectionRefused =
+        errorMessage.includes('ECONNREFUSED') ||
+        errorMessage.includes('connect');
 
       // Enhanced error context for ADHD troubleshooting
       const errorContext = {
         service: 'chromadb',
         operation: 'initialize',
-        errorType: isTimeout ? 'timeout' : isConnectionRefused ? 'connection_refused' : 'unknown',
+        errorType: isTimeout
+          ? 'timeout'
+          : isConnectionRefused
+            ? 'connection_refused'
+            : 'unknown',
         attempt: this.connectionAttempts,
         maxAttempts: this.maxConnectionAttempts,
         serviceUrl: '[REDACTED_CHROMADB_URL]',
@@ -102,23 +113,27 @@ class ChromaDBService {
         adhdImpact: 'high', // Initialization failure blocks all semantic search
       };
 
-      logWithContext.error('ChromaDB initialization failed', errorContext, error instanceof Error ? error : undefined);
+      logWithContext.error(
+        'ChromaDB initialization failed',
+        errorContext,
+        error instanceof Error ? error : undefined
+      );
 
       // Create user-friendly error for ADHD context
       if (isConnectionRefused) {
         throw new Error(
           `ChromaDB connection failed. Please ensure ChromaDB is running at the configured URL. ` +
-          `This blocks semantic search functionality crucial for ADHD memory support.`
+            `This blocks semantic search functionality crucial for ADHD memory support.`
         );
       } else if (isTimeout) {
         throw new Error(
           `ChromaDB initialization timed out after ${config.resilience.chromadb.timeout}ms. ` +
-          `The database may be overloaded or unreachable. ADHD users need fast access to their information.`
+            `The database may be overloaded or unreachable. ADHD users need fast access to their information.`
         );
       } else {
         throw new Error(
           `ChromaDB initialization failed: ${errorMessage}. ` +
-          `Semantic search will not be available, impacting ADHD memory and organization features.`
+            `Semantic search will not be available, impacting ADHD memory and organization features.`
         );
       }
     }
@@ -129,12 +144,13 @@ class ChromaDBService {
    * Essential for ADHD workflows - quick failure detection prevents user frustration
    */
   async heartbeat(): Promise<void> {
-    const correlationId = getCurrentCorrelationId() || `chromadb-heartbeat-${Date.now()}`;
+    const correlationId =
+      getCurrentCorrelationId() || `chromadb-heartbeat-${Date.now()}`;
     const logger = createCorrelatedLogger(correlationId);
 
     try {
       await resilienceService.applyChromaDbPolicy(
-        async (signal) => {
+        async signal => {
           if (signal?.aborted) {
             throw new Error('ChromaDB heartbeat cancelled');
           }
@@ -157,17 +173,21 @@ class ChromaDBService {
         healthStatus: 'healthy',
         lastCheck: this.lastHealthCheck?.toISOString(),
       });
-
     } catch (error) {
       this.isHealthy = false;
-      
-      logWithContext.error('ChromaDB heartbeat failed', {
-        service: 'chromadb',
-        operation: 'heartbeat',
-        healthStatus: 'unhealthy',
-        errorType: error instanceof Error ? error.constructor.name : 'unknown',
-        adhdImpact: 'medium', // Heartbeat failure indicates potential service issues
-      }, error instanceof Error ? error : undefined);
+
+      logWithContext.error(
+        'ChromaDB heartbeat failed',
+        {
+          service: 'chromadb',
+          operation: 'heartbeat',
+          healthStatus: 'unhealthy',
+          errorType:
+            error instanceof Error ? error.constructor.name : 'unknown',
+          adhdImpact: 'medium', // Heartbeat failure indicates potential service issues
+        },
+        error instanceof Error ? error : undefined
+      );
 
       throw error;
     }
@@ -184,7 +204,8 @@ class ChromaDBService {
     circuitBreakerState: string;
     diagnostics: Record<string, unknown>;
   }> {
-    const correlationId = getCurrentCorrelationId() || `chromadb-health-${Date.now()}`;
+    const correlationId =
+      getCurrentCorrelationId() || `chromadb-health-${Date.now()}`;
     const logger = createCorrelatedLogger(correlationId);
 
     try {
@@ -192,7 +213,7 @@ class ChromaDBService {
       await this.heartbeat();
 
       const circuitBreakerStates = resilienceService.getCircuitBreakerStates();
-      
+
       const healthInfo = {
         isHealthy: this.isHealthy,
         lastHealthCheck: this.lastHealthCheck,
@@ -201,11 +222,14 @@ class ChromaDBService {
         diagnostics: {
           service: 'chromadb',
           collectionName: this.collectionName,
-          uptime: this.lastHealthCheck ? Date.now() - this.lastHealthCheck.getTime() : null,
+          uptime: this.lastHealthCheck
+            ? Date.now() - this.lastHealthCheck.getTime()
+            : null,
           resilience: {
             maxRetries: config.resilience.chromadb.retry.maxAttempts,
             timeout: config.resilience.chromadb.timeout,
-            circuitBreakerThreshold: config.resilience.chromadb.circuitBreaker.failureThreshold,
+            circuitBreakerThreshold:
+              config.resilience.chromadb.circuitBreaker.failureThreshold,
           },
           adhdOptimization: 'enabled',
         },
@@ -217,14 +241,17 @@ class ChromaDBService {
       });
 
       return healthInfo;
-
     } catch (error) {
-      logWithContext.error('ChromaDB health check failed', {
-        service: 'chromadb',
-        operation: 'getServiceHealth',
-        connectionAttempts: this.connectionAttempts,
-        adhdImpact: 'high',
-      }, error instanceof Error ? error : undefined);
+      logWithContext.error(
+        'ChromaDB health check failed',
+        {
+          service: 'chromadb',
+          operation: 'getServiceHealth',
+          connectionAttempts: this.connectionAttempts,
+          adhdImpact: 'high',
+        },
+        error instanceof Error ? error : undefined
+      );
 
       return {
         isHealthy: false,
@@ -246,12 +273,13 @@ class ChromaDBService {
    * Critical for ADHD workflows - ensures reliable access to semantic search data
    */
   async getCollection() {
-    const correlationId = getCurrentCorrelationId() || `chromadb-collection-${Date.now()}`;
+    const correlationId =
+      getCurrentCorrelationId() || `chromadb-collection-${Date.now()}`;
     const logger = createCorrelatedLogger(correlationId);
 
     try {
       return await resilienceService.applyChromaDbPolicy(
-        async (signal) => {
+        async signal => {
           if (signal?.aborted) {
             throw new Error('ChromaDB collection access cancelled');
           }
@@ -269,7 +297,8 @@ class ChromaDBService {
           const collection = await this.client.getOrCreateCollection({
             name: this.collectionName,
             metadata: {
-              description: 'Obsidian knowledge base embeddings for ADHD Digital Second Brain',
+              description:
+                'Obsidian knowledge base embeddings for ADHD Digital Second Brain',
               created_at: new Date().toISOString(),
               adhd_optimized: true,
               last_accessed: new Date().toISOString(),
@@ -291,33 +320,38 @@ class ChromaDBService {
           correlationId,
         }
       );
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      
-      logWithContext.error('ChromaDB collection access failed', {
-        service: 'chromadb',
-        operation: 'getCollection',
-        collectionName: this.collectionName,
-        errorType: error instanceof Error ? error.constructor.name : 'unknown',
-        adhdImpact: 'high', // Collection access failure blocks all semantic operations
-      }, error instanceof Error ? error : undefined);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
+      logWithContext.error(
+        'ChromaDB collection access failed',
+        {
+          service: 'chromadb',
+          operation: 'getCollection',
+          collectionName: this.collectionName,
+          errorType:
+            error instanceof Error ? error.constructor.name : 'unknown',
+          adhdImpact: 'high', // Collection access failure blocks all semantic operations
+        },
+        error instanceof Error ? error : undefined
+      );
 
       // Provide user-friendly error context
       if (errorMessage.includes('timeout')) {
         throw new Error(
           `ChromaDB collection access timed out. The database may be overloaded. ` +
-          `ADHD users need quick access to their semantic search data.`
+            `ADHD users need quick access to their semantic search data.`
         );
       } else if (errorMessage.includes('connection')) {
         throw new Error(
           `ChromaDB connection lost during collection access. ` +
-          `Semantic search is temporarily unavailable for ADHD memory support.`
+            `Semantic search is temporarily unavailable for ADHD memory support.`
         );
       } else {
         throw new Error(
           `ChromaDB collection access failed: ${errorMessage}. ` +
-          `This impacts the ability to search and organize ADHD-related information.`
+            `This impacts the ability to search and organize ADHD-related information.`
         );
       }
     }
@@ -333,24 +367,33 @@ class ChromaDBService {
     ids: string[],
     embeddings: number[][]
   ): Promise<void> {
-    const correlationId = getCurrentCorrelationId() || `chromadb-add-${Date.now()}`;
+    const correlationId =
+      getCurrentCorrelationId() || `chromadb-add-${Date.now()}`;
     const logger = createCorrelatedLogger(correlationId);
 
     // Comprehensive input validation for ADHD data protection
     if (!Array.isArray(documents) || documents.length === 0) {
-      throw new Error('Invalid documents array: must be non-empty array for ADHD knowledge indexing');
+      throw new Error(
+        'Invalid documents array: must be non-empty array for ADHD knowledge indexing'
+      );
     }
 
     if (!Array.isArray(metadatas) || metadatas.length !== documents.length) {
-      throw new Error('Invalid metadata array: must match documents length for proper ADHD categorization');
+      throw new Error(
+        'Invalid metadata array: must match documents length for proper ADHD categorization'
+      );
     }
 
     if (!Array.isArray(ids) || ids.length !== documents.length) {
-      throw new Error('Invalid IDs array: must match documents length for ADHD memory organization');
+      throw new Error(
+        'Invalid IDs array: must match documents length for ADHD memory organization'
+      );
     }
 
     if (!Array.isArray(embeddings) || embeddings.length !== documents.length) {
-      throw new Error('Invalid embeddings array: must match documents length for semantic search functionality');
+      throw new Error(
+        'Invalid embeddings array: must match documents length for semantic search functionality'
+      );
     }
 
     const startTime = Date.now();
@@ -365,7 +408,7 @@ class ChromaDBService {
       });
 
       await resilienceService.applyChromaDbPolicy(
-        async (signal) => {
+        async signal => {
           if (signal?.aborted) {
             throw new Error('ChromaDB document addition cancelled');
           }
@@ -394,7 +437,10 @@ class ChromaDBService {
             operation: 'addDocuments',
             documentCount: documents.length,
             duration,
-            averageDocumentSize: Math.round(documents.reduce((sum, doc) => sum + doc.length, 0) / documents.length),
+            averageDocumentSize: Math.round(
+              documents.reduce((sum, doc) => sum + doc.length, 0) /
+                documents.length
+            ),
             adhdWorkflow: 'knowledge-indexing',
           });
         },
@@ -405,41 +451,46 @@ class ChromaDBService {
           correlationId,
         }
       );
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       const duration = Date.now() - startTime;
-      
-      logWithContext.error('ChromaDB document addition failed', {
-        service: 'chromadb',
-        operation: 'addDocuments',
-        documentCount: documents.length,
-        duration,
-        errorType: error instanceof Error ? error.constructor.name : 'unknown',
-        adhdImpact: 'high', // Document addition failure prevents knowledge indexing
-        adhdWorkflow: 'knowledge-indexing',
-      }, error instanceof Error ? error : undefined);
+
+      logWithContext.error(
+        'ChromaDB document addition failed',
+        {
+          service: 'chromadb',
+          operation: 'addDocuments',
+          documentCount: documents.length,
+          duration,
+          errorType:
+            error instanceof Error ? error.constructor.name : 'unknown',
+          adhdImpact: 'high', // Document addition failure prevents knowledge indexing
+          adhdWorkflow: 'knowledge-indexing',
+        },
+        error instanceof Error ? error : undefined
+      );
 
       // Provide context-aware error messages for ADHD troubleshooting
       if (errorMessage.includes('timeout')) {
         throw new Error(
           `ChromaDB document indexing timed out after ${duration}ms. ` +
-          `Large batches of ADHD notes may need to be processed in smaller chunks for reliability.`
+            `Large batches of ADHD notes may need to be processed in smaller chunks for reliability.`
         );
       } else if (errorMessage.includes('dimension')) {
         throw new Error(
           `ChromaDB embedding dimension mismatch. ` +
-          `This indicates an issue with Ollama embedding generation for ADHD content processing.`
+            `This indicates an issue with Ollama embedding generation for ADHD content processing.`
         );
       } else if (errorMessage.includes('duplicate')) {
         throw new Error(
           `ChromaDB duplicate document IDs detected. ` +
-          `ADHD note organization requires unique identifiers for each memory fragment.`
+            `ADHD note organization requires unique identifiers for each memory fragment.`
         );
       } else {
         throw new Error(
           `ChromaDB document indexing failed: ${errorMessage}. ` +
-          `This prevents new ADHD thoughts and notes from being searchable, impacting memory support.`
+            `This prevents new ADHD thoughts and notes from being searchable, impacting memory support.`
         );
       }
     }
@@ -464,22 +515,29 @@ class ChromaDBService {
       searchType: string;
     };
   }> {
-    const correlationId = getCurrentCorrelationId() || `chromadb-query-${Date.now()}`;
+    const correlationId =
+      getCurrentCorrelationId() || `chromadb-query-${Date.now()}`;
     const logger = createCorrelatedLogger(correlationId);
 
     // Comprehensive input validation for ADHD search reliability
     if (!Array.isArray(queryEmbeddings) || queryEmbeddings.length === 0) {
-      throw new Error('Invalid query embeddings: must be non-empty array for ADHD semantic search');
+      throw new Error(
+        'Invalid query embeddings: must be non-empty array for ADHD semantic search'
+      );
     }
 
     if (numResults <= 0 || numResults > 100) {
-      throw new Error('Invalid result count: must be 1-100 for optimal ADHD information processing');
+      throw new Error(
+        'Invalid result count: must be 1-100 for optimal ADHD information processing'
+      );
     }
 
     // Validate embedding dimensions
     const embeddingDim = queryEmbeddings[0]?.length;
     if (!embeddingDim || embeddingDim <= 0) {
-      throw new Error('Invalid embedding dimensions: corrupted query embeddings from Ollama service');
+      throw new Error(
+        'Invalid embedding dimensions: corrupted query embeddings from Ollama service'
+      );
     }
 
     const startTime = Date.now();
@@ -496,7 +554,7 @@ class ChromaDBService {
       });
 
       const result = await resilienceService.applyChromaDbPolicy(
-        async (signal) => {
+        async signal => {
           if (signal?.aborted) {
             throw new Error('ChromaDB semantic search cancelled');
           }
@@ -548,49 +606,55 @@ class ChromaDBService {
         logger.warn('ChromaDB search slower than ADHD optimal threshold', {
           duration: result.searchMetrics.duration,
           adhdThreshold: 5000,
-          recommendation: 'Consider indexing optimization or smaller result sets',
+          recommendation:
+            'Consider indexing optimization or smaller result sets',
           adhdImpact: 'medium',
         });
       }
 
       return result;
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       const duration = Date.now() - startTime;
-      
-      logWithContext.error('ChromaDB semantic search failed', {
-        service: 'chromadb',
-        operation: 'query',
-        duration,
-        queryCount: queryEmbeddings.length,
-        requestedResults: numResults,
-        embeddingDimensions: embeddingDim,
-        errorType: error instanceof Error ? error.constructor.name : 'unknown',
-        adhdImpact: 'critical', // Search failure blocks core ADHD memory functionality
-        adhdWorkflow: 'semantic-search',
-      }, error instanceof Error ? error : undefined);
+
+      logWithContext.error(
+        'ChromaDB semantic search failed',
+        {
+          service: 'chromadb',
+          operation: 'query',
+          duration,
+          queryCount: queryEmbeddings.length,
+          requestedResults: numResults,
+          embeddingDimensions: embeddingDim,
+          errorType:
+            error instanceof Error ? error.constructor.name : 'unknown',
+          adhdImpact: 'critical', // Search failure blocks core ADHD memory functionality
+          adhdWorkflow: 'semantic-search',
+        },
+        error instanceof Error ? error : undefined
+      );
 
       // Provide ADHD-specific error context and recovery suggestions
       if (errorMessage.includes('timeout')) {
         throw new Error(
           `ChromaDB semantic search timed out after ${duration}ms. ` +
-          `ADHD users need quick access to their memories. Try reducing result count or simplifying search terms.`
+            `ADHD users need quick access to their memories. Try reducing result count or simplifying search terms.`
         );
       } else if (errorMessage.includes('dimension')) {
         throw new Error(
           `ChromaDB embedding dimension mismatch in search query. ` +
-          `This indicates inconsistency between stored embeddings and current Ollama model configuration.`
+            `This indicates inconsistency between stored embeddings and current Ollama model configuration.`
         );
       } else if (errorMessage.includes('collection')) {
         throw new Error(
           `ChromaDB collection unavailable for semantic search. ` +
-          `ADHD knowledge base may be corrupted or not properly initialized.`
+            `ADHD knowledge base may be corrupted or not properly initialized.`
         );
       } else {
         throw new Error(
           `ChromaDB semantic search failed: ${errorMessage}. ` +
-          `This blocks ADHD memory recall and information organization capabilities.`
+            `This blocks ADHD memory recall and information organization capabilities.`
         );
       }
     }
@@ -601,7 +665,8 @@ class ChromaDBService {
    * Critical operation for ADHD data management - requires careful execution
    */
   async deleteCollection(): Promise<void> {
-    const correlationId = getCurrentCorrelationId() || `chromadb-delete-collection-${Date.now()}`;
+    const correlationId =
+      getCurrentCorrelationId() || `chromadb-delete-collection-${Date.now()}`;
     const logger = createCorrelatedLogger(correlationId);
 
     try {
@@ -614,13 +679,13 @@ class ChromaDBService {
       });
 
       await resilienceService.applyChromaDbPolicy(
-        async (signal) => {
+        async signal => {
           if (signal?.aborted) {
             throw new Error('ChromaDB collection deletion cancelled');
           }
 
           await this.client.deleteCollection({ name: this.collectionName });
-          
+
           // Reset service health state after collection deletion
           this.isHealthy = false;
           this.lastHealthCheck = null;
@@ -641,19 +706,24 @@ class ChromaDBService {
         adhdImpact: 'critical',
         recoveryAction: 'service_reset_required',
       });
-
     } catch (error) {
-      logWithContext.error('ChromaDB collection deletion failed', {
-        service: 'chromadb',
-        operation: 'deleteCollection',
-        collectionName: this.collectionName,
-        errorType: error instanceof Error ? error.constructor.name : 'unknown',
-        adhdImpact: 'medium', // Deletion failure means data is preserved
-      }, error instanceof Error ? error : undefined);
+      logWithContext.error(
+        'ChromaDB collection deletion failed',
+        {
+          service: 'chromadb',
+          operation: 'deleteCollection',
+          collectionName: this.collectionName,
+          errorType:
+            error instanceof Error ? error.constructor.name : 'unknown',
+          adhdImpact: 'medium', // Deletion failure means data is preserved
+        },
+        error instanceof Error ? error : undefined
+      );
 
       // For deletion operations, we typically want to warn rather than throw
       // since failure to delete is less critical than failure to access data
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       logger.warn('ChromaDB collection deletion incomplete', {
         reason: errorMessage,
         recommendation: 'Manual cleanup may be required',
@@ -676,14 +746,15 @@ class ChromaDBService {
       performance: Record<string, unknown>;
     };
   }> {
-    const correlationId = getCurrentCorrelationId() || `chromadb-info-${Date.now()}`;
+    const correlationId =
+      getCurrentCorrelationId() || `chromadb-info-${Date.now()}`;
     const logger = createCorrelatedLogger(correlationId);
 
     try {
       const startTime = Date.now();
 
       const result = await resilienceService.applyChromaDbPolicy(
-        async (signal) => {
+        async signal => {
           if (signal?.aborted) {
             throw new Error('ChromaDB collection info retrieval cancelled');
           }
@@ -692,7 +763,7 @@ class ChromaDBService {
           const count = await collection.count();
 
           const duration = Date.now() - startTime;
-          
+
           logger.info('ChromaDB collection info retrieved', {
             service: 'chromadb',
             operation: 'getCollectionInfo',
@@ -731,20 +802,25 @@ class ChromaDBService {
       );
 
       return result;
-
     } catch (error) {
-      logWithContext.error('ChromaDB collection info retrieval failed', {
-        service: 'chromadb',
-        operation: 'getCollectionInfo',
-        collectionName: this.collectionName,
-        errorType: error instanceof Error ? error.constructor.name : 'unknown',
-        adhdImpact: 'medium', // Info failure doesn't block core functionality
-      }, error instanceof Error ? error : undefined);
+      logWithContext.error(
+        'ChromaDB collection info retrieval failed',
+        {
+          service: 'chromadb',
+          operation: 'getCollectionInfo',
+          collectionName: this.collectionName,
+          errorType:
+            error instanceof Error ? error.constructor.name : 'unknown',
+          adhdImpact: 'medium', // Info failure doesn't block core functionality
+        },
+        error instanceof Error ? error : undefined
+      );
 
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       throw new Error(
         `ChromaDB collection information unavailable: ${errorMessage}. ` +
-        `This affects ADHD knowledge base monitoring and health diagnostics.`
+          `This affects ADHD knowledge base monitoring and health diagnostics.`
       );
     }
   }
@@ -759,24 +835,33 @@ class ChromaDBService {
     metadata: Record<string, string | number | boolean>,
     embedding: number[]
   ): Promise<void> {
-    const correlationId = getCurrentCorrelationId() || `chromadb-upsert-${Date.now()}`;
+    const correlationId =
+      getCurrentCorrelationId() || `chromadb-upsert-${Date.now()}`;
     const logger = createCorrelatedLogger(correlationId);
 
     // Comprehensive input validation for ADHD data integrity
     if (!id || typeof id !== 'string') {
-      throw new Error('Invalid document ID: must be non-empty string for ADHD memory organization');
+      throw new Error(
+        'Invalid document ID: must be non-empty string for ADHD memory organization'
+      );
     }
 
     if (!document || typeof document !== 'string') {
-      throw new Error('Invalid document content: must be non-empty string for ADHD knowledge storage');
+      throw new Error(
+        'Invalid document content: must be non-empty string for ADHD knowledge storage'
+      );
     }
 
     if (!metadata || typeof metadata !== 'object') {
-      throw new Error('Invalid metadata: must be object for ADHD categorization and context');
+      throw new Error(
+        'Invalid metadata: must be object for ADHD categorization and context'
+      );
     }
 
     if (!Array.isArray(embedding) || embedding.length === 0) {
-      throw new Error('Invalid embedding: must be non-empty array from Ollama semantic processing');
+      throw new Error(
+        'Invalid embedding: must be non-empty array from Ollama semantic processing'
+      );
     }
 
     const startTime = Date.now();
@@ -793,7 +878,7 @@ class ChromaDBService {
       });
 
       await resilienceService.applyChromaDbPolicy(
-        async (signal) => {
+        async signal => {
           if (signal?.aborted) {
             throw new Error('ChromaDB document upsert cancelled');
           }
@@ -834,38 +919,43 @@ class ChromaDBService {
           correlationId,
         }
       );
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       const duration = Date.now() - startTime;
-      
-      logWithContext.error('ChromaDB document upsert failed', {
-        service: 'chromadb',
-        operation: 'upsertDocument',
-        documentId: id,
-        duration,
-        documentLength: document.length,
-        embeddingDimensions: embedding.length,
-        errorType: error instanceof Error ? error.constructor.name : 'unknown',
-        adhdImpact: 'high', // Upsert failure prevents ADHD content updates
-        adhdWorkflow: 'knowledge-update',
-      }, error instanceof Error ? error : undefined);
+
+      logWithContext.error(
+        'ChromaDB document upsert failed',
+        {
+          service: 'chromadb',
+          operation: 'upsertDocument',
+          documentId: id,
+          duration,
+          documentLength: document.length,
+          embeddingDimensions: embedding.length,
+          errorType:
+            error instanceof Error ? error.constructor.name : 'unknown',
+          adhdImpact: 'high', // Upsert failure prevents ADHD content updates
+          adhdWorkflow: 'knowledge-update',
+        },
+        error instanceof Error ? error : undefined
+      );
 
       // Provide context-aware error messages for ADHD troubleshooting
       if (errorMessage.includes('timeout')) {
         throw new Error(
           `ChromaDB document update timed out after ${duration}ms. ` +
-          `Large ADHD documents may need optimization for faster processing.`
+            `Large ADHD documents may need optimization for faster processing.`
         );
       } else if (errorMessage.includes('dimension')) {
         throw new Error(
           `ChromaDB embedding dimension mismatch during document update. ` +
-          `Ollama model configuration may have changed, affecting ADHD content processing.`
+            `Ollama model configuration may have changed, affecting ADHD content processing.`
         );
       } else {
         throw new Error(
           `ChromaDB document update failed: ${errorMessage}. ` +
-          `This prevents ADHD note updates and semantic search improvements.`
+            `This prevents ADHD note updates and semantic search improvements.`
         );
       }
     }
@@ -876,18 +966,23 @@ class ChromaDBService {
    * Critical for ADHD content management and privacy maintenance
    */
   async deleteDocuments(ids: string[]): Promise<void> {
-    const correlationId = getCurrentCorrelationId() || `chromadb-delete-${Date.now()}`;
+    const correlationId =
+      getCurrentCorrelationId() || `chromadb-delete-${Date.now()}`;
     const logger = createCorrelatedLogger(correlationId);
 
     // Comprehensive input validation for ADHD data protection
     if (!Array.isArray(ids) || ids.length === 0) {
-      throw new Error('Invalid document IDs array: must be non-empty array for ADHD content deletion');
+      throw new Error(
+        'Invalid document IDs array: must be non-empty array for ADHD content deletion'
+      );
     }
 
     // Validate all IDs are strings
     const invalidIds = ids.filter(id => typeof id !== 'string' || !id.trim());
     if (invalidIds.length > 0) {
-      throw new Error('Invalid document IDs: all IDs must be non-empty strings for ADHD memory management');
+      throw new Error(
+        'Invalid document IDs: all IDs must be non-empty strings for ADHD memory management'
+      );
     }
 
     const startTime = Date.now();
@@ -903,7 +998,7 @@ class ChromaDBService {
       });
 
       await resilienceService.applyChromaDbPolicy(
-        async (signal) => {
+        async signal => {
           if (signal?.aborted) {
             throw new Error('ChromaDB document deletion cancelled');
           }
@@ -929,27 +1024,32 @@ class ChromaDBService {
           correlationId,
         }
       );
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       const duration = Date.now() - startTime;
-      
-      logWithContext.error('ChromaDB document deletion failed', {
-        service: 'chromadb',
-        operation: 'deleteDocuments',
-        documentCount: ids.length,
-        duration,
-        errorType: error instanceof Error ? error.constructor.name : 'unknown',
-        adhdImpact: 'medium', // Deletion failure preserves ADHD data
-        adhdWorkflow: 'content-cleanup',
-        dataPreserved: true,
-      }, error instanceof Error ? error : undefined);
+
+      logWithContext.error(
+        'ChromaDB document deletion failed',
+        {
+          service: 'chromadb',
+          operation: 'deleteDocuments',
+          documentCount: ids.length,
+          duration,
+          errorType:
+            error instanceof Error ? error.constructor.name : 'unknown',
+          adhdImpact: 'medium', // Deletion failure preserves ADHD data
+          adhdWorkflow: 'content-cleanup',
+          dataPreserved: true,
+        },
+        error instanceof Error ? error : undefined
+      );
 
       // Provide context-aware error messages for ADHD troubleshooting
       if (errorMessage.includes('timeout')) {
         throw new Error(
           `ChromaDB document deletion timed out after ${duration}ms. ` +
-          `Large batches of ADHD content may need to be deleted in smaller chunks.`
+            `Large batches of ADHD content may need to be deleted in smaller chunks.`
         );
       } else if (errorMessage.includes('not found')) {
         // For deletion, missing documents might be acceptable
@@ -962,7 +1062,7 @@ class ChromaDBService {
       } else {
         throw new Error(
           `ChromaDB document deletion failed: ${errorMessage}. ` +
-          `This affects ADHD content cleanup and privacy management capabilities.`
+            `This affects ADHD content cleanup and privacy management capabilities.`
         );
       }
     }
@@ -973,7 +1073,8 @@ class ChromaDBService {
    * Essential for ADHD application lifecycle management
    */
   async dispose(): Promise<void> {
-    const correlationId = getCurrentCorrelationId() || `chromadb-dispose-${Date.now()}`;
+    const correlationId =
+      getCurrentCorrelationId() || `chromadb-dispose-${Date.now()}`;
     const logger = createCorrelatedLogger(correlationId);
 
     try {
@@ -996,13 +1097,16 @@ class ChromaDBService {
         adhdWorkflow: 'service-cleanup',
         resourcesCleaned: true,
       });
-
     } catch (error) {
-      logWithContext.error('ChromaDB service disposal failed', {
-        service: 'chromadb',
-        operation: 'dispose',
-        adhdImpact: 'low', // Disposal failure doesn't affect ADHD functionality
-      }, error instanceof Error ? error : undefined);
+      logWithContext.error(
+        'ChromaDB service disposal failed',
+        {
+          service: 'chromadb',
+          operation: 'dispose',
+          adhdImpact: 'low', // Disposal failure doesn't affect ADHD functionality
+        },
+        error instanceof Error ? error : undefined
+      );
     }
   }
 }

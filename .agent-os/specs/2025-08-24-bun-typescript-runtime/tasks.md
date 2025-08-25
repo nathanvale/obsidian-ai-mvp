@@ -7,7 +7,7 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
 
 ## Tasks
 
-- [x] 1. Document Node.js Runtime Requirements 
+- [x] 1. Document Node.js Runtime Requirements
   - [x] 1.1 Add comprehensive Node.js 22.11.0+ setup instructions to technical spec
   - [x] 1.2 Document @orchestr8 package compatibility requirements
   - [x] 1.3 Create troubleshooting guide for Node.js version issues

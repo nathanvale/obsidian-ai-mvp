@@ -16,7 +16,7 @@ describe('Performance Middleware - Smoke Test', () => {
         highPriorityPaths: ['/api/search'],
       },
     };
-    
+
     expect(mockPerformanceOptions.enableMetrics).toBe(true);
     expect(typeof mockPerformanceOptions.sampling.rate).toBe('number');
   });
@@ -54,9 +54,9 @@ describe('Performance Middleware - Smoke Test', () => {
 
   it('should validate ADHD response time targets', () => {
     const targets = {
-      standard: 2000,      // 2s for standard ADHD workflows  
-      aiProcessing: 5000,  // 5s for AI processing
-      search: 1000,        // 1s for semantic search
+      standard: 2000, // 2s for standard ADHD workflows
+      aiProcessing: 5000, // 5s for AI processing
+      search: 1000, // 1s for semantic search
     };
 
     // ADHD-friendly response times should be reasonable
@@ -67,11 +67,11 @@ describe('Performance Middleware - Smoke Test', () => {
 
   it('should support medication cycle hour tracking', () => {
     const currentHour = new Date().getHours();
-    
+
     // Verify hour is valid range for medication tracking
     expect(currentHour).toBeGreaterThanOrEqual(0);
     expect(currentHour).toBeLessThanOrEqual(23);
-    
+
     // Typical medication effectiveness periods (9 AM - 1 PM peak)
     const isPeakMedicationHour = currentHour >= 9 && currentHour <= 13;
     expect(typeof isPeakMedicationHour).toBe('boolean');
@@ -87,7 +87,7 @@ describe('Performance Middleware - Smoke Test', () => {
 
     testUrls.forEach(({ url, expected }) => {
       let workflowType = 'standard';
-      
+
       if (url.includes('/api/voice') || url.includes('/transcribe')) {
         workflowType = 'voice-processing';
       } else if (url.includes('/api/search') || url.includes('/semantic')) {
@@ -102,8 +102,8 @@ describe('Performance Middleware - Smoke Test', () => {
 
   it('should handle memory monitoring thresholds for M4 MacBook', () => {
     const heapThresholds = {
-      warning: 150,   // 150MB warning
-      critical: 300,  // 300MB critical
+      warning: 150, // 150MB warning
+      critical: 300, // 300MB critical
     };
 
     // Reasonable thresholds for M4 MacBook (16GB+ RAM)

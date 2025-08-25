@@ -46,7 +46,7 @@ class HealthStateManager {
    * Acquire mutex lock for atomic health state operations
    */
   private async acquireLock(): Promise<void> {
-    return new Promise<void>((resolve) => {
+    return new Promise<void>(resolve => {
       if (!this.mutex.locked) {
         this.mutex.locked = true;
         resolve();
@@ -73,7 +73,7 @@ class HealthStateManager {
    */
   getCachedHealth(): HealthResult | null {
     const now = Date.now();
-    if (this.healthCache && (now - this.lastCacheTime) < this.cacheTtl) {
+    if (this.healthCache && now - this.lastCacheTime < this.cacheTtl) {
       return { ...this.healthCache }; // Return copy to prevent mutation
     }
     return null;
@@ -109,7 +109,12 @@ class HealthStateManager {
   /**
    * Get current health status for quick checks
    */
-  getCurrentStatus(): 'healthy' | 'unhealthy' | 'degraded' | 'error' | 'unknown' {
+  getCurrentStatus():
+    | 'healthy'
+    | 'unhealthy'
+    | 'degraded'
+    | 'error'
+    | 'unknown' {
     const cached = this.getCachedHealth();
     return cached?.status ?? 'unknown';
   }
@@ -118,10 +123,10 @@ class HealthStateManager {
 /**
  * Enhanced health monitoring and graceful shutdown plugin
  * Integrates with existing @orchestr8 resilience patterns
- * 
+ *
  * Key improvements:
  * - Race condition protection with mutex locks
- * - Service-specific timeouts 
+ * - Service-specific timeouts
  * - Request deduplication and caching
  * - Atomic health state management
  * - ADHD-optimized response times (under 5 seconds)
@@ -131,17 +136,24 @@ async function enhancedHealthPlugin(
   options: HealthCheckOptions = {}
 ) {
   const healthConfig = { ...defaultOptions, ...options };
-  
+
   // Initialize health state manager with race condition protection
-  const healthStateManager = new HealthStateManager(healthConfig.healthCacheTtl!);
+  const healthStateManager = new HealthStateManager(
+    healthConfig.healthCacheTtl!
+  );
 
   /**
    * Create a timeout promise that rejects after specified milliseconds
    */
-  const createTimeoutPromise = (ms: number, serviceName: string): Promise<never> => {
+  const createTimeoutPromise = (
+    ms: number,
+    serviceName: string
+  ): Promise<never> => {
     return new Promise((_, reject) => {
       setTimeout(() => {
-        reject(new Error(`${serviceName} health check timed out after ${ms}ms`));
+        reject(
+          new Error(`${serviceName} health check timed out after ${ms}ms`)
+        );
       }, ms);
     });
   };
@@ -156,7 +168,7 @@ async function enhancedHealthPlugin(
   ): Promise<T> => {
     return Promise.race([
       promise,
-      createTimeoutPromise(timeoutMs, serviceName)
+      createTimeoutPromise(timeoutMs, serviceName),
     ]);
   };
 
@@ -181,8 +193,8 @@ async function enhancedHealthPlugin(
             responseTime,
           };
         } else {
-          return { 
-            status: 'unhealthy' as const, 
+          return {
+            status: 'unhealthy' as const,
             statusCode: response.status,
             responseTime,
           };
@@ -214,8 +226,8 @@ async function enhancedHealthPlugin(
             responseTime,
           };
         } else {
-          return { 
-            status: 'unhealthy' as const, 
+          return {
+            status: 'unhealthy' as const,
             statusCode: response.status,
             responseTime,
           };
@@ -238,9 +250,9 @@ async function enhancedHealthPlugin(
             healthConfig.serviceTimeouts!.filesystem!,
             'Filesystem'
           );
-          return { 
-            status: 'healthy' as const, 
-            path: config.obsidianVaultPath 
+          return {
+            status: 'healthy' as const,
+            path: config.obsidianVaultPath,
           };
         }
         return { status: 'not_configured' as const };
@@ -332,7 +344,8 @@ async function enhancedHealthPlugin(
                 serviceName,
                 {
                   status: 'error' as const,
-                  error: error instanceof Error ? error.message : 'Check failed',
+                  error:
+                    error instanceof Error ? error.message : 'Check failed',
                 },
               ] as [string, HealthCheckResult];
             }
@@ -350,9 +363,12 @@ async function enhancedHealthPlugin(
         for (const [serviceName, result] of serviceResults) {
           healthResult.checks[serviceName] = result;
         }
-
       } catch (error) {
-        logWithContext.error('Service health checks timed out or failed', {}, error instanceof Error ? error : new Error('Unknown error'));
+        logWithContext.error(
+          'Service health checks timed out or failed',
+          {},
+          error instanceof Error ? error : new Error('Unknown error')
+        );
         // Mark all services as error if overall check fails
         for (const serviceName of Object.keys(healthCheckers)) {
           healthResult.checks[serviceName] = {
@@ -367,7 +383,7 @@ async function enhancedHealthPlugin(
       const unhealthyServices = serviceStatuses
         .filter(([, check]) => check.status === 'unhealthy')
         .map(([name]) => name);
-      
+
       const errorServices = serviceStatuses
         .filter(([, check]) => check.status === 'error')
         .map(([name]) => name);
@@ -375,7 +391,10 @@ async function enhancedHealthPlugin(
       // Status priority: error > unhealthy > degraded > healthy
       if (errorServices.length > 0) {
         healthResult.status = 'error';
-        healthResult.unhealthyServices = [...unhealthyServices, ...errorServices];
+        healthResult.unhealthyServices = [
+          ...unhealthyServices,
+          ...errorServices,
+        ];
       } else if (unhealthyServices.length > 0) {
         healthResult.status = 'degraded';
         healthResult.unhealthyServices = unhealthyServices;
@@ -389,11 +408,14 @@ async function enhancedHealthPlugin(
       const criticalErrors = errorServices.filter(service =>
         criticalServices.includes(service)
       );
-      
+
       if (criticalDown.length > 0 || criticalErrors.length > 0) {
         healthResult.status = 'unhealthy';
-        healthResult.criticalServicesDown = [...criticalDown, ...criticalErrors];
-        
+        healthResult.criticalServicesDown = [
+          ...criticalDown,
+          ...criticalErrors,
+        ];
+
         logWithContext.warn('Critical ADHD services are down', {
           criticalDown: healthResult.criticalServicesDown,
           impact: 'ADHD cognitive support features may be unavailable',
@@ -430,8 +452,15 @@ async function enhancedHealthPlugin(
    */
   const getADHDSystemGuidance = (health: HealthResult) => {
     const guidance = {
-      cognitiveSupport: 'unknown' as 'available' | 'degraded' | 'unavailable' | 'unknown',
-      medicationCycleAwareness: 'unknown' as 'available' | 'unavailable' | 'unknown',
+      cognitiveSupport: 'unknown' as
+        | 'available'
+        | 'degraded'
+        | 'unavailable'
+        | 'unknown',
+      medicationCycleAwareness: 'unknown' as
+        | 'available'
+        | 'unavailable'
+        | 'unknown',
       voiceProcessing: 'unknown' as 'available' | 'unavailable' | 'unknown',
       recommendation: '',
     };
@@ -443,14 +472,21 @@ async function enhancedHealthPlugin(
       guidance.recommendation = 'All ADHD support features operational';
     } else if (health.status === 'degraded') {
       guidance.cognitiveSupport = 'degraded';
-      guidance.medicationCycleAwareness = health.checks.filesystem?.status === 'healthy' ? 'available' : 'unavailable';
-      guidance.voiceProcessing = health.checks.ollama?.status === 'healthy' ? 'available' : 'unavailable';
+      guidance.medicationCycleAwareness =
+        health.checks.filesystem?.status === 'healthy'
+          ? 'available'
+          : 'unavailable';
+      guidance.voiceProcessing =
+        health.checks.ollama?.status === 'healthy'
+          ? 'available'
+          : 'unavailable';
       guidance.recommendation = 'Some ADHD features may be slower than usual';
     } else {
       guidance.cognitiveSupport = 'unavailable';
-      guidance.medicationCycleAwareness = 'unavailable'; 
+      guidance.medicationCycleAwareness = 'unavailable';
       guidance.voiceProcessing = 'unavailable';
-      guidance.recommendation = 'ADHD support features temporarily unavailable - consider manual organization methods';
+      guidance.recommendation =
+        'ADHD support features temporarily unavailable - consider manual organization methods';
     }
 
     return guidance;
@@ -469,7 +505,7 @@ async function enhancedHealthPlugin(
             status: currentHealth.status,
             unhealthyServices: currentHealth.unhealthyServices,
             criticalServicesDown: currentHealth.criticalServicesDown,
-            medicationCycleImpact: currentHealth.criticalServicesDown 
+            medicationCycleImpact: currentHealth.criticalServicesDown
               ? 'Adaptive interface features may be unavailable during medication transitions'
               : 'Some cognitive support features may be degraded',
           });
@@ -483,7 +519,7 @@ async function enhancedHealthPlugin(
           },
           error instanceof Error ? error : new Error('Unknown error')
         );
-        
+
         // Create error health result and cache it
         const errorHealth: HealthResult = {
           status: 'error' as const,
@@ -493,7 +529,7 @@ async function enhancedHealthPlugin(
           environment: config.nodeEnv,
           memory: {
             heapUsed: '0MB',
-            heapTotal: '0MB', 
+            heapTotal: '0MB',
             rss: '0MB',
           },
           process: {
@@ -504,7 +540,7 @@ async function enhancedHealthPlugin(
           error: error instanceof Error ? error.message : 'Health check failed',
           checks: {},
         };
-        
+
         await healthStateManager.updateHealthCache(errorHealth);
       }
     }, healthConfig.healthCheckInterval);
@@ -524,7 +560,7 @@ async function enhancedHealthPlugin(
       try {
         const healthResult = healthConfig.enableDetailedHealthCheck
           ? await performHealthCheck() // Will use caching and deduplication
-          : healthStateManager.getCachedHealth() ?? {
+          : (healthStateManager.getCachedHealth() ?? {
               status: 'unknown' as const,
               timestamp: new Date().toISOString(),
               uptime: Math.round(process.uptime()),
@@ -541,7 +577,7 @@ async function enhancedHealthPlugin(
                 platform: process.platform,
               },
               checks: {},
-            };
+            });
 
         // Set appropriate status code based on ADHD system requirements
         const statusCode = getStatusCode(healthResult.status);
@@ -583,7 +619,11 @@ async function enhancedHealthPlugin(
         uptime,
         memory: Math.round(memUsage.heapUsed / 1024 / 1024) + 'MB',
         correlationId,
-        adhdQuickStatus: 'unknown' as 'operational' | 'degraded' | 'unavailable' | 'unknown',
+        adhdQuickStatus: 'unknown' as
+          | 'operational'
+          | 'degraded'
+          | 'unavailable'
+          | 'unknown',
       };
 
       // Determine ADHD quick status based on cached health
@@ -626,12 +666,13 @@ async function enhancedHealthPlugin(
         status: currentStatus,
         timestamp: new Date().toISOString(),
         correlationId,
-        adhdSystemReady: isReady && ['healthy', 'degraded'].includes(currentStatus),
+        adhdSystemReady:
+          isReady && ['healthy', 'degraded'].includes(currentStatus),
       };
     }
   );
 
-  // Liveness endpoint for container orchestration  
+  // Liveness endpoint for container orchestration
   fastify.get('/health/live', async () => {
     const correlationId = getCurrentCorrelationId();
 
@@ -726,19 +767,25 @@ async function enhancedHealthPlugin(
 
   // Initial health check with improved error handling
   setTimeout(() => {
-    void performHealthCheck().then(result => {
-      logWithContext.info('Initial ADHD system health check completed', {
-        status: result.status,
-        adhdFeaturesAvailable: result.status === 'healthy',
-        criticalServicesOperational: !result.criticalServicesDown?.length,
-        cognitiveSupport: result.status === 'healthy' ? 'ready' : 'limited',
+    void performHealthCheck()
+      .then(result => {
+        logWithContext.info('Initial ADHD system health check completed', {
+          status: result.status,
+          adhdFeaturesAvailable: result.status === 'healthy',
+          criticalServicesOperational: !result.criticalServicesDown?.length,
+          cognitiveSupport: result.status === 'healthy' ? 'ready' : 'limited',
+        });
+      })
+      .catch(error => {
+        logWithContext.error(
+          'Initial ADHD system health check failed',
+          {
+            impact: 'System may start with degraded functionality',
+            recommendation: 'Manual service verification recommended',
+          },
+          error instanceof Error ? error : new Error('Unknown error')
+        );
       });
-    }).catch(error => {
-      logWithContext.error('Initial ADHD system health check failed', {
-        impact: 'System may start with degraded functionality',
-        recommendation: 'Manual service verification recommended',
-      }, error instanceof Error ? error : new Error('Unknown error'));
-    });
   }, 1000);
 }
 

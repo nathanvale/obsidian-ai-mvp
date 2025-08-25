@@ -32,16 +32,19 @@ class FileSystemService {
    * Validates and normalizes a file path to ensure it stays within vault boundaries
    * Prevents directory traversal attacks like ../../etc/passwd
    */
-  private validateAndNormalizePath(inputPath: string, vaultRoot: string): string {
+  private validateAndNormalizePath(
+    inputPath: string,
+    vaultRoot: string
+  ): string {
     // Remove null bytes and normalize
     const sanitized = inputPath.replace(/\0/g, '');
-    
+
     // Check for obvious traversal attempts
     if (sanitized.includes('..') || sanitized.includes('~')) {
       logWithContext.warn('Path traversal attempt detected', {
         inputPath,
         sanitized,
-        correlationId: 'security-violation'
+        correlationId: 'security-violation',
       });
       throw new Error('Invalid file path: directory traversal not allowed');
     }
@@ -51,13 +54,16 @@ class FileSystemService {
     const resolvedPath = path.resolve(normalizedVault, sanitized);
 
     // Critical security check: ensure resolved path is within vault
-    if (!resolvedPath.startsWith(normalizedVault + path.sep) && resolvedPath !== normalizedVault) {
+    if (
+      !resolvedPath.startsWith(normalizedVault + path.sep) &&
+      resolvedPath !== normalizedVault
+    ) {
       logWithContext.error('Path traversal security violation', {
         inputPath,
         sanitized,
         resolvedPath,
         normalizedVault,
-        correlationId: 'security-violation'
+        correlationId: 'security-violation',
       });
       throw new Error('Access denied: path outside vault boundary');
     }
@@ -68,22 +74,25 @@ class FileSystemService {
   setVaultPath(vaultPath: string): void {
     // Validate and normalize the vault path to prevent injection
     const sanitized = vaultPath.replace(/\0/g, '');
-    
+
     if (sanitized.includes('..')) {
-      logWithContext.error('Path traversal attempt in vault path configuration', {
-        inputPath: vaultPath,
-        correlationId: 'security-violation'
-      });
+      logWithContext.error(
+        'Path traversal attempt in vault path configuration',
+        {
+          inputPath: vaultPath,
+          correlationId: 'security-violation',
+        }
+      );
       throw new Error('Invalid vault path: directory traversal not allowed');
     }
 
     const normalizedPath = path.resolve(sanitized);
-    logWithContext.info('Vault path configured', { 
+    logWithContext.info('Vault path configured', {
       originalPath: vaultPath,
       normalizedPath,
-      correlationId: 'vault-config'
+      correlationId: 'vault-config',
     });
-    
+
     this.vaultPath = normalizedPath;
   }
 
@@ -138,13 +147,16 @@ class FileSystemService {
       // Validate current directory is within vault boundaries
       const normalizedVault = path.resolve(vaultRoot);
       const normalizedCurrent = path.resolve(currentPath);
-      
-      if (!normalizedCurrent.startsWith(normalizedVault + path.sep) && normalizedCurrent !== normalizedVault) {
+
+      if (
+        !normalizedCurrent.startsWith(normalizedVault + path.sep) &&
+        normalizedCurrent !== normalizedVault
+      ) {
         logWithContext.error('Directory traversal attempt in scan operation', {
           currentPath,
           normalizedCurrent,
           normalizedVault,
-          correlationId: 'security-violation'
+          correlationId: 'security-violation',
         });
         return;
       }
@@ -157,7 +169,7 @@ class FileSystemService {
           logWithContext.warn('Suspicious file/directory name detected', {
             entryName: entry.name,
             currentPath,
-            correlationId: 'security-violation'
+            correlationId: 'security-violation',
           });
           continue;
         }
@@ -180,7 +192,7 @@ class FileSystemService {
       logWithContext.warn(`Failed to scan directory ${currentPath}`, {
         path: currentPath,
         error: error instanceof Error ? error.message : String(error),
-        correlationId: 'directory-scan-error'
+        correlationId: 'directory-scan-error',
       });
     }
   }
@@ -223,7 +235,7 @@ class FileSystemService {
   async readFile(filePath: string): Promise<string | null> {
     try {
       const vaultPath = this.ensureVaultPath();
-      
+
       // Use secure path validation - this will throw on traversal attempts
       const fullPath = this.validateAndNormalizePath(filePath, vaultPath);
 
@@ -232,7 +244,7 @@ class FileSystemService {
       logWithContext.warn(`Failed to read file ${filePath}`, {
         filePath,
         error: error instanceof Error ? error.message : String(error),
-        correlationId: 'file-access-error'
+        correlationId: 'file-access-error',
       });
       return null;
     }
@@ -273,13 +285,19 @@ class FileSystemService {
           try {
             // Sanitize and validate the filename from filesystem event
             const sanitizedFilename = event.filename.replace(/\0/g, '');
-            
-            if (sanitizedFilename.includes('..') || sanitizedFilename.includes('~')) {
-              logWithContext.warn('Suspicious filename detected in file watcher', {
-                originalFilename: event.filename,
-                sanitizedFilename,
-                correlationId: 'security-violation'
-              });
+
+            if (
+              sanitizedFilename.includes('..') ||
+              sanitizedFilename.includes('~')
+            ) {
+              logWithContext.warn(
+                'Suspicious filename detected in file watcher',
+                {
+                  originalFilename: event.filename,
+                  sanitizedFilename,
+                  correlationId: 'security-violation',
+                }
+              );
               continue;
             }
 
@@ -294,7 +312,7 @@ class FileSystemService {
                 fullPath,
                 normalizedFilePath,
                 normalizedVault,
-                correlationId: 'security-violation'
+                correlationId: 'security-violation',
               });
               continue;
             }
@@ -310,8 +328,11 @@ class FileSystemService {
           } catch (validationError) {
             logWithContext.error('File watcher path validation failed', {
               filename: event.filename,
-              error: validationError instanceof Error ? validationError.message : String(validationError),
-              correlationId: 'security-violation'
+              error:
+                validationError instanceof Error
+                  ? validationError.message
+                  : String(validationError),
+              correlationId: 'security-violation',
             });
           }
         }
